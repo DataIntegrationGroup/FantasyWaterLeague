@@ -23,17 +23,37 @@ def setup_demo():
     Base.metadata.create_all(bind=engine)
 
     db = next(get_db())
+
+    db.add(assets.Source(slug='usgs_nwis_discharge', name='UGSS-NWIS-Discharge',
+                         base_url='https://waterservices.usgs.gov/nwis/iv/?'
+                                  'parameterCd=00060'
+                                  '&format=json'
+                                  '&period=P7D'
+                                  '&sites='))
+
+    db.add(assets.Source(slug='test',
+                         name='Test',
+                         base_url='https://foo.test.com'))
+    db.commit()
+    db.flush()
+
     for slug, name in (('continuous_groundwater', 'Continuous Groundwater'),
                        ('continuous_rain_gauge', 'Continuous Rain Gauge'),
                        ('stream_gauge', 'Stream Gauge')):
         db.add(assets.AssetType(slug=slug, name=name))
+
     db.commit()
     db.flush()
 
-    for slug, name, atype in (('embudo', 'Embudo', 'stream_gauge'),
-                              ('MG-030', 'MG-030', 'continuous_groundwater'),
-                              ('KNM47Socorro', 'KNM47Socorro', 'continuous_rain_gauge')):
-        db.add(assets.Asset(slug=slug, name=name, atype=atype))
+    for slug, name, atype, source_slug, source_identifier in (
+            ('embudo', 'Embudo', 'stream_gauge', 'usgs_nwis_discharge', '08279000'),
+                              ('MG-030', 'MG-030', 'continuous_groundwater', 'test', 'MG-030'),
+                              ('KNM47Socorro', 'KNM47Socorro', 'continuous_rain_gauge', 'test', 'KNM47Socorro')):
+        db.add(assets.Asset(slug=slug,
+                            name=name,
+                            atype=atype,
+                            source_slug=source_slug,
+                            source_identifier=source_identifier))
 
     db.commit()
     db.flush()

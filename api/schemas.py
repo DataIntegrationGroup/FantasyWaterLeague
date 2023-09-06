@@ -42,4 +42,9 @@ class Player(NamedModel):
     score: float = Field(default=0)
 
 
+class Asset(ORMBaseModel):
+    slug: str
+    atype: str
+    source_slug: str
+
 # ============= EOF =============================================

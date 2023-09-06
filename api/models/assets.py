@@ -15,13 +15,21 @@
 # ===============================================================================
 
 from sqlalchemy import Column, String, ForeignKey
-from sqlalchemy.orm import declared_attr
+from sqlalchemy.orm import declared_attr, relationship
 
 from api.database import Base, Slugged
 
 
 class Asset(Base, Slugged):
     atype = Column(String(32), ForeignKey("assettype.slug"), nullable=False)
+    source_slug = Column(String(32), ForeignKey("source.slug"), nullable=False)
+    source_identifier = Column(String(32), nullable=False)
+
+    source = relationship("Source", backref="assets")
+
+
+class Source(Base, Slugged):
+    base_url = Column(String(128), nullable=False)
 
 
 class AssetType(Base, Slugged):

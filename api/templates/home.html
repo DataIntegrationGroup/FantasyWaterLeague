@@ -36,7 +36,7 @@
       $('#leaderboard').on( 'click', 'tbody td', function () {
         var table = $('#leaderboard').DataTable();
         var data = table.row( this ).data();
-        window.location.href = "/api/{{ version }}/player/" + data.slug;
+        window.location.href = "/player/" + data.slug;
       } );
 
         // $('#projectstable').DataTable({

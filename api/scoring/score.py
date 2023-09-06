@@ -13,7 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
-from models import players
+
+from numpy import array
+from models import players, assets
+import requests
+
+
+def get_asset(db, asset_slug):
+    q = db.query(assets.Asset)
+    q = q.filter(assets.Asset.slug == asset_slug)
+    return q.one()
+
+
+def get_assets(db, roster_slug):
+    q = db.query(players.Roster)
+    q = q.filter(players.Roster.slug == roster_slug)
+    roster = q.one()
+    return [a.asset for a in roster.assets]
 
 
 def get_rosters(db, player_slug):
@@ -39,20 +55,39 @@ def calculate_roster_score(db, roster_slug):
 
     score = 0
     for asset in roster.assets:
-        score += calculate_asset_score(asset)
+        score += calculate_asset_score(asset.asset)
 
     return score
 
 
 def calculate_asset_score(asset):
-    atype = asset.asset.atype
+    atype = asset.atype
+    source = asset.source
+    source_id = asset.source_identifier
 
-    if atype == "stream_gauge":
-        return 1000
-    elif atype == "continuous_groundwater":
-        return 100
-    elif atype == "continuous_rain_gauge":
-        return 10
+    # get data from source
+    data = get_data(source, source_id)
+    return score_data(source, atype, data)
 
 
+def get_data(source, source_id):
+    resp = requests.get(f'{source.base_url}{source_id}')
+
+    return [d for d in resp.json()['value']['timeSeries'][0]['values'][0]['value']]
+    # if atype == "stream_gauge":
+    #     return
+    # elif atype == "continuous_groundwater":
+    #     return 100
+    # elif atype == "continuous_rain_gauge":
+    #     return 10
+
+
+def score_data(source, atype, data):
+    score = 0
+    if source.slug == "usgs_nwis_discharge":
+        vs = array([float(d['value']) for d in data])
+        vs = vs-vs[0]
+        score = max(0, sum(vs))
+
+    return score
 # ============= EOF =============================================
