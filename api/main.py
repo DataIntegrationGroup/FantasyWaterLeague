@@ -23,7 +23,11 @@ from starlette.requests import Request
 
 from api import schemas
 from api.database import get_db
-from api.scoring.score import calculate_roster_score, get_rosters, calculate_player_score
+from api.scoring.score import (
+    calculate_roster_score,
+    get_rosters,
+    calculate_player_score,
+)
 
 app = FastAPI()
 
@@ -43,14 +47,14 @@ async def root(request: Request):
     :return:
     """
 
-    return templates.TemplateResponse('home.html',
-                                      {'request': request,
-                                       'version': 'v1'})
+    return templates.TemplateResponse(
+        "home.html", {"request": request, "version": "v1"}
+    )
 
 
 @app.get("/api/v1/health")
 async def health():
-    return {'status': 'ok'}
+    return {"status": "ok"}
 
 
 @app.get("/api/v1/leaderboard", response_model=List[schemas.Player])
@@ -63,20 +67,19 @@ async def get_leaderboard(db=Depends(get_db)):
 
 def get_players(db):
     from models import players
+
     q = db.query(players.Player)
     return q.all()
 
 
 @app.get("/api/v1/player/{player_slug}")
 async def get_player(player_slug, db=Depends(get_db)):
-    return {'name': player_slug,
-            'score': 1000,
-            'rosters': get_rosters(db, player_slug)
-            }
+    return {"name": player_slug, "score": 1000, "rosters": get_rosters(db, player_slug)}
 
 
 @app.get("/api/v1/roster/{roster_slug}/score")
 async def get_roster_score(roster_slug, db=Depends(get_db)):
-    return {'slug': roster_slug,
-            'score': calculate_roster_score(db, roster_slug),
-            }
+    return {
+        "slug": roster_slug,
+        "score": calculate_roster_score(db, roster_slug),
+    }

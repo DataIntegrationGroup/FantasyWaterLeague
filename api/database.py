@@ -45,7 +45,9 @@ class Slugged:
 
     @declared_attr
     def slug(cls):
-        return Column(String(32), primary_key=True, unique=True, nullable=False, index=True)
+        return Column(
+            String(32), primary_key=True, unique=True, nullable=False, index=True
+        )
 
     @declared_attr
     def name(cls):
@@ -58,4 +60,6 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
 # ============= EOF =============================================

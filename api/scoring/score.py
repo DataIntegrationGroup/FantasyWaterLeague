@@ -15,6 +15,7 @@
 # ===============================================================================
 from models import players
 
+
 def get_rosters(db, player_slug):
     """
     return a list of dicts with keys
@@ -46,11 +47,12 @@ def calculate_roster_score(db, roster_slug):
 def calculate_asset_score(asset):
     atype = asset.asset.atype
 
-    if atype == 'stream_gauge':
+    if atype == "stream_gauge":
         return 1000
-    elif atype == 'continuous_groundwater':
+    elif atype == "continuous_groundwater":
         return 100
-    elif atype == 'continuous_rain_gauge':
+    elif atype == "continuous_rain_gauge":
         return 10
+
 
 # ============= EOF =============================================

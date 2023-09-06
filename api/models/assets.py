@@ -21,10 +21,11 @@ from api.database import Base, Slugged
 
 
 class Asset(Base, Slugged):
-    atype = Column(String(32), ForeignKey('assettype.slug'), nullable=False)
+    atype = Column(String(32), ForeignKey("assettype.slug"), nullable=False)
 
 
 class AssetType(Base, Slugged):
     pass
+
 
 # ============= EOF =============================================
