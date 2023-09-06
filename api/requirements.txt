@@ -1,0 +1,15 @@
+fastapi
+sqlalchemy
+# geoalchemy2[shapely]
+uvicorn
+psycopg
+# scikit-learn
+# pyproj
+jinja2
+# pandas
+# openpyxl
+# uncertainties
+# jsbeautifier
+# plotly
+
+
