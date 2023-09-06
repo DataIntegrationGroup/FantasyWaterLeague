@@ -46,12 +46,12 @@ class Slugged:
     @declared_attr
     def slug(cls):
         return Column(
-            String(32), primary_key=True, unique=True, nullable=False, index=True
+            String(128), primary_key=True, unique=True, nullable=False, index=True
         )
 
     @declared_attr
     def name(cls):
-        return Column(String(32), nullable=False, index=True)
+        return Column(String(128), nullable=False, index=True)
 
 
 def get_db():

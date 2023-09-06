@@ -38,7 +38,7 @@ services:
     depends_on:
       - db
     env_file:
-      - ./api/.env.local
+      - ./api/.env
     healthcheck:
       test: curl --fail http://localhost:4040/api/v1/health || exit 1
       interval: 15s
@@ -47,11 +47,11 @@ services:
       #      timeout: 10s
 
   db:
-    image: postgres
+    image: postgresql/postgresql
     volumes:
       - postgres-data:/var/lib/postgresql
     env_file:
-      - ./api/.env.local
+      - ./api/.env
     environment:
       - POSTGRES_TZ=America/Denver
       # If you need to create multiple database you can add coma separated databases eg gis,data
@@ -61,7 +61,7 @@ services:
 ##        - TZ=America/Denver
 ##        - PGTZ=America/Denver
     ports:
-      - "54321:54321"
+      - "5432:5432"
     restart: on-failure
     healthcheck:
       test: "exit 0"
@@ -77,7 +77,7 @@ services:
 #    depends_on:
 #      - db
     env_file:
-      - ./api/.env.local
+      - ./api/.env
     environment:
       - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
       - SCHEDULE=@daily
@@ -96,5 +96,4 @@ services:
 #      - "5050:80"
 
 volumes:
-  postgres-data:
-  api:
+  postgis-data:
