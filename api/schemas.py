@@ -47,4 +47,5 @@ class Asset(ORMBaseModel):
     atype: str
     source_slug: str
 
+
 # ============= EOF =============================================

@@ -23,8 +23,14 @@ from starlette.requests import Request
 
 from api import schemas
 from api.database import get_db
-from api.scoring.score import calculate_roster_score, get_rosters, calculate_player_score, get_assets, get_asset, \
-    calculate_asset_score
+from api.scoring.score import (
+    calculate_roster_score,
+    get_rosters,
+    calculate_player_score,
+    get_assets,
+    get_asset,
+    calculate_asset_score,
+)
 
 app = FastAPI()
 
@@ -35,7 +41,7 @@ from demo import setup_demo
 
 setup_demo()
 
-version = 'v1'
+version = "v1"
 
 
 @app.get("/")
@@ -46,30 +52,31 @@ async def root(request: Request):
     :return:
     """
 
-    return templates.TemplateResponse('home.html',
-                                      {'request': request,
-                                       'version': version})
+    return templates.TemplateResponse(
+        "home.html", {"request": request, "version": version}
+    )
 
 
 @app.get("/player/{player_slug}")
 async def get_player_detail(request: Request, player_slug):
-    return templates.TemplateResponse('player.html',
-                                      {'request': request,
-                                       'player_slug': player_slug,
-                                       'version': version})
+    return templates.TemplateResponse(
+        "player.html",
+        {"request": request, "player_slug": player_slug, "version": version},
+    )
 
 
 @app.get("/roster/{roster_slug}")
 async def get_roster_detail(request: Request, roster_slug):
-    return templates.TemplateResponse('roster.html',
-                                      {'request': request,
-                                       'roster_slug': roster_slug,
-                                       'version': version})
+    return templates.TemplateResponse(
+        "roster.html",
+        {"request": request, "roster_slug": roster_slug, "version": version},
+    )
 
 
 # ===============================================================================
 # API Endpoints
 # ===============================================================================
+
 
 @app.get("/api/v1/health")
 async def health():
@@ -86,9 +93,7 @@ async def get_leaderboard(db=Depends(get_db)):
 
 @app.get("/api/v1/player/{player_slug}")
 async def get_player(player_slug, db=Depends(get_db)):
-    return {'name': player_slug,
-            'rosters': get_rosters(db, player_slug)
-            }
+    return {"name": player_slug, "rosters": get_rosters(db, player_slug)}
 
 
 @app.get("/api/v1/roster/{roster_slug}", response_model=List[schemas.Asset])
@@ -112,13 +117,14 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
     return {"url": request_url}
 
 
-@app.get('/api/v1/asset/{asset_slug}/score')
+@app.get("/api/v1/asset/{asset_slug}/score")
 async def get_asset_score(asset_slug, db=Depends(get_db)):
     asset = get_asset(db, asset_slug)
-    return {'score': calculate_asset_score(asset)}
+    return {"score": calculate_asset_score(asset)}
 
 
 def get_players(db):
     from models import players
+
     q = db.query(players.Player)
     return q.all()

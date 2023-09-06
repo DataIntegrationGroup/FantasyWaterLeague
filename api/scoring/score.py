@@ -71,9 +71,9 @@ def calculate_asset_score(asset):
 
 
 def get_data(source, source_id):
-    resp = requests.get(f'{source.base_url}{source_id}')
+    resp = requests.get(f"{source.base_url}{source_id}")
 
-    return [d for d in resp.json()['value']['timeSeries'][0]['values'][0]['value']]
+    return [d for d in resp.json()["value"]["timeSeries"][0]["values"][0]["value"]]
     # if atype == "stream_gauge":
     #     return
     # elif atype == "continuous_groundwater":
@@ -85,9 +85,11 @@ def get_data(source, source_id):
 def score_data(source, atype, data):
     score = 0
     if source.slug == "usgs_nwis_discharge":
-        vs = array([float(d['value']) for d in data])
-        vs = vs-vs[0]
+        vs = array([float(d["value"]) for d in data])
+        vs = vs - vs[0]
         score = max(0, sum(vs))
 
     return score
+
+
 # ============= EOF =============================================
