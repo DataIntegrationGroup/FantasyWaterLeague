@@ -27,7 +27,7 @@
             },
             "columns": [
                 {"data": "name"},
-                {"data": "score"},
+                {"data": "score", "render": $.fn.dataTable.render.number( '', '.', 1, '', '')},
                 {"data": "slug",
                 "visible": false}
             ]

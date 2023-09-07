@@ -14,6 +14,7 @@
 # limitations under the License.
 # ===============================================================================
 import os
+import random
 
 import requests
 
@@ -51,12 +52,23 @@ def make_usgs_discharge_sites(db):
 
     for slug, name, source_id in rows:
         db.add(Asset(slug=slug,
-                            name=name,
-                            atype='stream_gauge',
-                            source_slug='usgs_nwis_discharge',
-                            source_identifier=source_id))
+                     name=name,
+                     atype='stream_gauge',
+                     source_slug='usgs_nwis_discharge',
+                     source_identifier=source_id))
         db.commit()
 
+    return rows
+
+
+def make_draft(assets):
+    assets = [a[0] for a in assets]
+    random.shuffle(assets)
+    while 1:
+        try:
+            yield assets.pop()
+        except IndexError:
+            break
 
 
 def setup_demo():
@@ -66,15 +78,15 @@ def setup_demo():
     db = next(get_db())
 
     db.add(Source(slug='usgs_nwis_discharge', name='UGSS-NWIS-Discharge',
-                         base_url='https://waterservices.usgs.gov/nwis/iv/?'
-                                  'parameterCd=00060'
-                                  '&format=json'
-                                  '&period=P7D'
-                                  '&sites='))
+                  base_url='https://waterservices.usgs.gov/nwis/iv/?'
+                           'parameterCd=00060'
+                           '&format=json'
+                           '&period=P7D'
+                           '&sites='))
 
     db.add(Source(slug='test',
-                         name='Test',
-                         base_url='https://foo.test.com'))
+                  name='Test',
+                  base_url='https://foo.test.com'))
     db.commit()
     db.flush()
 
@@ -86,7 +98,7 @@ def setup_demo():
     db.commit()
     db.flush()
 
-    make_usgs_discharge_sites(db)
+    uds = make_usgs_discharge_sites(db)
 
     # for slug, name, atype, source_slug, source_identifier in (
     #         ('embudo', 'Embudo', 'stream_gauge', 'usgs_nwis_discharge', '08279000'),
@@ -104,18 +116,38 @@ def setup_demo():
     db.flush()
 
     for slug, name in (('jake', 'Jake Ross'),
-                       ('joe', 'Joe Blow')):
+                       ('ethan', 'Ethan'),
+                       ('marissa', 'Marissa'),
+                       ('nels', 'Nels'),
+                       ('mattz', 'Mattz'),
+                       ):
         db.add(Player(slug=slug, name=name))
 
     db.commit()
     db.flush()
 
-    roster = Roster(name='main', slug='jake.main', player_slug='jake', active=True)
-    db.add(roster)
-    db.add(RosterAsset(roster_slug='jake.main', asset_slug='embudo_creek_at_dixon'))
-    db.add(RosterAsset(roster_slug='jake.main', asset_slug='rio_grande_del_rancho_near_talpa'))
-
+    players = ('jake', 'ethan', 'marissa', 'nels', 'mattz')
+    for player in players:
+        roster = Roster(name='main', slug=f'{player}.main', player_slug=player, active=True)
+        db.add(roster)
     db.commit()
     db.flush()
+
+    draft = make_draft(uds)
+    c = 0
+    n_per_team = 20
+    while 1:
+        try:
+            for player in players:
+                asset = next(draft)
+                db.add(RosterAsset(roster_slug=f'{player}.main', asset_slug=asset))
+                c += 1
+        except StopIteration:
+            break
+
+        if c == n_per_team * len(players):
+            break
+
+    db.commit()
 
 # ============= EOF =============================================

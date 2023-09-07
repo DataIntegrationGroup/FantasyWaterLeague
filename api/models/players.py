@@ -24,7 +24,7 @@ class Player(Base, Slugged):
 
 
 class Roster(Base, Slugged):
-    player_slug = Column(String(32), ForeignKey("player.slug"), nullable=False)
+    player_slug = Column(String(128), ForeignKey("player.slug"), nullable=False)
     active = Column(Boolean, default=True)
 
     assets = relationship("RosterAsset", backref="rosters")
@@ -33,8 +33,8 @@ class Roster(Base, Slugged):
 class RosterAsset(Base):
     __tablename__ = "rosterasset"
     id = Column(Integer, primary_key=True)
-    roster_slug = Column(String(32), ForeignKey("roster.slug"))
-    asset_slug = Column(String(32), ForeignKey("asset.slug"))
+    roster_slug = Column(String(128), ForeignKey("roster.slug"))
+    asset_slug = Column(String(128), ForeignKey("asset.slug"))
 
     # roster = relationship('Roster', backref='assets')
     asset = relationship("Asset", backref="rosters")
