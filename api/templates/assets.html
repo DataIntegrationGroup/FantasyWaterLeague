@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Assets</h1>
+<table class="display compact" id="assets">
+    <thead>
+    <tr>
+        <th>name</th>
+        <th>atype</th>
+        <th>source_slug</th>
+        <th>source_identifier</th>
+    </tr>
+    </thead>
+</table>
+
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#assets').DataTable({
+            "ajax": {
+                "url": "/api/{{ version }}/assets",
+                "dataSrc": ""
+            },
+            "pageLength": 25,
+            "columns": [
+                {"data": "name"},
+                {"data": "atype"},
+                {"data": "source_slug"},
+                {"data": "source_identifier"},
+                {"data": "slug",
+                    "visible": false}
+            ]
+        });
+
+        $('#assets').on( 'click', 'tbody td', function () {
+            var table = $('#assets').DataTable();
+            var data = table.row( this ).data();
+            window.location.href = "/asset/" + data.slug;
+        } );
+
+    });
+
+
+</script>
+
+{% endblock %}

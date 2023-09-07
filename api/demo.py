@@ -18,7 +18,8 @@ import os
 import requests
 
 from api.database import Base, engine, get_db
-from models import assets, players
+from api.models.assets import Asset, Source, AssetType
+from api.models.players import Player, Roster, RosterAsset
 
 
 def make_usgs_discharge_sites(db):
@@ -33,7 +34,7 @@ def make_usgs_discharge_sites(db):
         print('fetching')
         rows = []
         resp = requests.get(
-            'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00060&siteStatus=all')
+            'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00060&siteStatus=active')
         data = resp.json()['value']['timeSeries']
         for tsi in data:
             sitename = tsi['sourceInfo']['siteName']
@@ -49,7 +50,7 @@ def make_usgs_discharge_sites(db):
                 wfile.write(f'{slug},{name},{source_id}\n')
 
     for slug, name, source_id in rows:
-        db.add(assets.Asset(slug=slug,
+        db.add(Asset(slug=slug,
                             name=name,
                             atype='stream_gauge',
                             source_slug='usgs_nwis_discharge',
@@ -64,14 +65,14 @@ def setup_demo():
 
     db = next(get_db())
 
-    db.add(assets.Source(slug='usgs_nwis_discharge', name='UGSS-NWIS-Discharge',
+    db.add(Source(slug='usgs_nwis_discharge', name='UGSS-NWIS-Discharge',
                          base_url='https://waterservices.usgs.gov/nwis/iv/?'
                                   'parameterCd=00060'
                                   '&format=json'
                                   '&period=P7D'
                                   '&sites='))
 
-    db.add(assets.Source(slug='test',
+    db.add(Source(slug='test',
                          name='Test',
                          base_url='https://foo.test.com'))
     db.commit()
@@ -80,7 +81,7 @@ def setup_demo():
     for slug, name in (('continuous_groundwater', 'Continuous Groundwater'),
                        ('continuous_rain_gauge', 'Continuous Rain Gauge'),
                        ('stream_gauge', 'Stream Gauge')):
-        db.add(assets.AssetType(slug=slug, name=name))
+        db.add(AssetType(slug=slug, name=name))
 
     db.commit()
     db.flush()
@@ -93,7 +94,7 @@ def setup_demo():
     #         ('casias_creek', 'CASIAS CREEK NEAR COSTILLA', 'stream_gauge', 'usgs_nwis_discharge', '08253000'),
     #                           ('MG-030', 'MG-030', 'continuous_groundwater', 'test', 'MG-030'),
     #                           ('KNM47Socorro', 'KNM47Socorro', 'continuous_rain_gauge', 'test', 'KNM47Socorro')):
-    #     db.add(assets.Asset(slug=slug,
+    #     db.add(Asset(slug=slug,
     #                         name=name,
     #                         atype=atype,
     #                         source_slug=source_slug,
@@ -104,15 +105,15 @@ def setup_demo():
 
     for slug, name in (('jake', 'Jake Ross'),
                        ('joe', 'Joe Blow')):
-        db.add(players.Player(slug=slug, name=name))
+        db.add(Player(slug=slug, name=name))
 
     db.commit()
     db.flush()
 
-    roster = players.Roster(name='main', slug='jake.main', player_slug='jake', active=True)
+    roster = Roster(name='main', slug='jake.main', player_slug='jake', active=True)
     db.add(roster)
-    db.add(players.RosterAsset(roster_slug='jake.main', asset_slug='embudo_creek_at_dixon'))
-    db.add(players.RosterAsset(roster_slug='jake.main', asset_slug='rio_grande_del_rancho_near_talpa'))
+    db.add(RosterAsset(roster_slug='jake.main', asset_slug='embudo_creek_at_dixon'))
+    db.add(RosterAsset(roster_slug='jake.main', asset_slug='rio_grande_del_rancho_near_talpa'))
 
     db.commit()
     db.flush()

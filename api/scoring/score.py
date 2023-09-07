@@ -15,19 +15,20 @@
 # ===============================================================================
 
 from numpy import array
-from models import players, assets
+from api.models.players import Roster
+from api.models.assets import Asset
 import requests
 
 
 def get_asset(db, asset_slug):
-    q = db.query(assets.Asset)
-    q = q.filter(assets.Asset.slug == asset_slug)
+    q = db.query(Asset)
+    q = q.filter(Asset.slug == asset_slug)
     return q.one()
 
 
 def get_assets(db, roster_slug):
-    q = db.query(players.Roster)
-    q = q.filter(players.Roster.slug == roster_slug)
+    q = db.query(Roster)
+    q = q.filter(Roster.slug == roster_slug)
     roster = q.one()
     return [a.asset for a in roster.assets]
 
@@ -38,9 +39,9 @@ def get_rosters(db, player_slug):
     slug
     type
     """
-    q = db.query(players.Roster)
-    q = q.filter(players.Roster.player_slug == player_slug)
-    q = q.filter(players.Roster.active.is_(True))
+    q = db.query(Roster)
+    q = q.filter(Roster.player_slug == player_slug)
+    q = q.filter(Roster.active.is_(True))
     return q.all()
 
 
@@ -49,8 +50,8 @@ def calculate_player_score(db, player_slug):
 
 
 def calculate_roster_score(db, roster_slug):
-    q = db.query(players.Roster)
-    q = q.filter(players.Roster.slug == roster_slug)
+    q = db.query(Roster)
+    q = q.filter(Roster.slug == roster_slug)
     roster = q.one()
 
     score = 0
@@ -85,9 +86,10 @@ def get_data(source, source_id):
 def score_data(source, atype, data):
     score = 0
     if source.slug == "usgs_nwis_discharge":
-        vs = array([float(d["value"]) for d in data])
-        vs = vs - vs[0]
-        score = max(0, sum(vs))
+        if data:
+            vs = array([float(d["value"]) for d in data])
+            vs = vs - vs[0]
+            score = max(0, sum(vs))
 
     return score
 
