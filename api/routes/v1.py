@@ -20,8 +20,14 @@ from fastapi import APIRouter, Depends
 from api import schemas
 from api import models
 from api.database import get_db
-from api.scoring.score import calculate_player_score, get_rosters, get_assets, calculate_roster_score, get_asset, \
-    calculate_asset_score
+from api.scoring.score import (
+    calculate_player_score,
+    get_rosters,
+    get_assets,
+    calculate_roster_score,
+    get_asset,
+    calculate_asset_score,
+)
 
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
 
@@ -82,5 +88,6 @@ def get_players(db):
 
     q = db.query(players.Player)
     return q.all()
+
 
 # ============= EOF =============================================

@@ -19,7 +19,7 @@ from fastapi import APIRouter
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 
-router = APIRouter(prefix='')
+router = APIRouter(prefix="")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(Path(BASE_DIR, "templates")))
@@ -70,5 +70,6 @@ async def get_asset_detail(request: Request, asset_slug):
         "asset.html",
         {"request": request, "asset_slug": asset_slug, "version": version},
     )
+
 
 # ============= EOF =============================================
