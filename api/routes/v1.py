@@ -26,7 +26,8 @@ from api.scoring.score import (
     get_assets,
     calculate_roster_score,
     get_asset,
-    calculate_asset_score, get_players,
+    calculate_asset_score,
+    get_players,
 )
 
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
@@ -38,6 +39,8 @@ async def health():
 
 
 SCORES = {}
+
+
 @router.get("/leaderboard", response_model=List[schemas.Player])
 async def get_leaderboard(db=Depends(get_db)):
     players = get_players(db)
@@ -87,8 +90,6 @@ async def get_asset_score(asset_slug, db=Depends(get_db)):
 async def get_all_assets(db=Depends(get_db)):
     q = db.query(models.assets.Asset)
     return q.all()
-
-
 
 
 # ============= EOF =============================================

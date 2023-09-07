@@ -21,6 +21,7 @@ from api.models.players import Roster, Player
 from api.models.assets import Asset
 import requests
 
+
 def get_players(db):
     q = db.query(Player)
     return q.all()
@@ -52,8 +53,7 @@ def get_rosters(db, player_slug):
 
 
 def calculate_player_score(db, player_slug):
-
-    return calculate_roster_score(db, f'{player_slug}.main')
+    return calculate_roster_score(db, f"{player_slug}.main")
 
 
 def calculate_roster_score(db, roster_slug):

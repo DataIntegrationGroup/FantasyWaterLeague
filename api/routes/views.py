@@ -26,6 +26,7 @@ templates = Jinja2Templates(directory=str(Path(BASE_DIR, "templates")))
 
 version = "v1"
 
+
 @router.get("/")
 async def root(request: Request):
     """
