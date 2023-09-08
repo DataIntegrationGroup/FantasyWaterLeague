@@ -77,4 +77,6 @@ def update_asset(db, asset_slug, payload):
     asset = retrieve_asset(db, asset_slug)
     asset.score = payload.score
     db.commit()
+
+
 # ============= EOF =============================================

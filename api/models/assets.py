@@ -15,7 +15,16 @@
 # ===============================================================================
 from datetime import datetime
 
-from sqlalchemy import Column, String, ForeignKey, Float, TIMESTAMP, text, DateTime, func
+from sqlalchemy import (
+    Column,
+    String,
+    ForeignKey,
+    Float,
+    TIMESTAMP,
+    text,
+    DateTime,
+    func,
+)
 from sqlalchemy.orm import declared_attr, relationship
 from geoalchemy2.shape import to_shape
 from geoalchemy2 import Geometry
@@ -33,7 +42,9 @@ class Asset(Base, Slugged):
     source = relationship("Source", backref="assets")
 
     score = Column(Float, default=0)
-    score_timestamp = Column(TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())
+    score_timestamp = Column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp()
+    )
 
     @property
     def source_url(self):

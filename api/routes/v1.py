@@ -27,7 +27,9 @@ from api.crud import (
     retrieve_asset,
     retrieve_players,
     retrieve_roster_assets,
-    retrieve_roster_asset, update_roster_asset, update_asset,
+    retrieve_roster_asset,
+    update_roster_asset,
+    update_asset,
 )
 
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
@@ -115,7 +117,9 @@ class ScorePayload(BaseModel):
 
 
 @router.put("/roster/{roster_slug}/{asset_slug}")
-async def put_roster_asset(roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)):
+async def put_roster_asset(
+    roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
+):
     update_roster_asset(db, roster_slug, asset_slug, payload)
     return {"slug": asset_slug, "active": payload.active}
 
@@ -124,5 +128,6 @@ async def put_roster_asset(roster_slug, asset_slug, payload: AssetPayload, db=De
 async def put_asset_score(asset_slug, payload: ScorePayload, db=Depends(get_db)):
     update_asset(db, asset_slug, payload)
     return {"slug": asset_slug, "score": payload.score}
+
 
 # ============= EOF =============================================
