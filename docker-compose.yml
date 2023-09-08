@@ -18,7 +18,17 @@ services:
 #      - ./frontend:/frontend
 #    depends_on:
 #      - api
-
+  scorer:
+    build:
+      context: ./scorer
+      dockerfile: ./Dockerfile
+    command: bash -c "
+      python -m main
+      "
+    depends_on:
+      - api
+    env_file:
+      - ./api/.env
 
   api:
     build:

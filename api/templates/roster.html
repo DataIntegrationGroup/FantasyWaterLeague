@@ -12,6 +12,59 @@
         border: 1px solid black;
         border-radius: 10px;
     }
+
+    table.dataTable {
+        border: 1px solid black;
+        border-radius: 7px;
+    }
+
+    table.dataTable tbody tr:hover {
+        background-color: #eee;
+    }
+    table.dataTable td {
+        font-size: 10pt;
+    }
+
+    .rowbutton {
+             appearance: none;
+             /*background-color: #2ea44f;*/
+             border: 1px solid rgba(27, 31, 35, .15);
+             border-radius: 6px;
+             box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
+             box-sizing: border-box;
+             color: #fff;
+             cursor: pointer;
+             display: inline-block;
+             font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+             font-size: 14px;
+             font-weight: 600;
+             line-height: 20px;
+             margin: 1px;
+             padding: 6px 16px;
+             position: relative;
+             text-align: center;
+             text-decoration: none;
+             user-select: none;
+             -webkit-user-select: none;
+             touch-action: manipulation;
+             vertical-align: middle;
+             white-space: nowrap;
+         }
+
+    .rowbutton:focus:not(:focus-visible):not(.focus-visible) {
+        box-shadow: none;
+        outline: none;
+    }
+
+    .rowbutton:hover {
+        background-color: #2c974b;
+    }
+
+    .rowbutton:focus {
+        box-shadow: rgba(46, 164, 79, .4) 0 0 0 3px;
+        outline: none;
+    }
+
 </style>
 {% endblock %}
 
@@ -22,9 +75,10 @@
     <table class="display compact" id="assets">
         <thead>
             <tr>
-                <th>slug</th>
-                <th>atype</th>
-                <th>source_slug</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Source</th>
+                <th>Action</th>
             </tr>
         </thead>
     </table>
@@ -32,6 +86,7 @@
 <div class="row">
     <div class="col">
         <h3>Score</h3>
+        <button id="calculate_score">Calculate Score</button>
         <div id="score"></div>
     </div>
 </div>
@@ -45,30 +100,84 @@
 
 <script>
     $(document).ready(function () {
-            $('#assets').DataTable({
+
+        // make graph
+        Plotly.newPlot('graph', [], {});
+
+        // handle calculate score button
+        $('#calculate_score').click(function () {
+            fetch('/api/{{version}}/roster/{{ roster_slug }}/score').then(
+                response => response.json()
+            ).then(data => {
+                $('#score').html('Points: '+data.score)
+            })
+        })
+
+        // make asset table
+        $('#assets').DataTable({
                 "ajax": {
                     "url": "/api/{{ version }}/roster/{{ roster_slug }}",
                     "dataSrc": ""
+                },
+                "pageLength": 25,
+                "createdRow": (row, data, dataIndex, cells) => {
+                    $(row).css('background-color', data.active ? '#64b976': '#b07d6e')
                 },
                 "columns": [
                     {"data": "slug"},
                     {"data": "atype"},
                     {"data": "source_slug"},
-
+                    {"data": null,
+                        "defaultContent":
+                            "<button style='background: #2c974b' class=rowbutton id=make_active>Active</button>"+
+                            "<button style='background: #c24850' class=rowbutton id=make_inactive>Inactive</button>"+
+                        "<button style='background: #6b82d9' class=rowbutton id=view_graph>Graph</button>"}
                 ]
             });
-            Plotly.newPlot('graph', [], {});
 
-
-            $('#assets').on( 'click', 'tbody td', function () {
-                var table = $('#assets').DataTable();
-                var selected_asset = table.row( this ).data();
-
-                fetch('/api/{{version}}/asset/'+selected_asset.slug+'/score').then(
+            function toggle_active(table, selected_asset, state){
+                console.log(selected_asset);
+                fetch('/api/{{version}}/roster/{{ roster_slug }}/'+selected_asset.slug,
+                    { method: 'PUT',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({'active': state})
+                    }
+                ).then(
                     response => response.json()
                 ).then(data => {
-                    $('#score').html('Points: '+data.score)
+                    console.log(data)
+                    table.ajax.reload()
                 })
+            }
+
+            $('#assets').on('click', '#make_active', function () {
+                console.log('asdfasfadsfsd buasdf')
+                var table = $('#assets').DataTable();
+                var selected_asset = table.row($(this).parents('tr')).data();
+                toggle_active(table, selected_asset, true)
+            });
+
+            $('#assets').on('click', '#make_inactive', function () {
+                console.log('asdfasfadsfsd buasdf')
+                var table = $('#assets').DataTable();
+                var selected_asset = table.row($(this).parents('tr')).data();
+                toggle_active(table, selected_asset, false)
+            });
+
+
+            $('#assets').on( 'click', '#view_graph', function (e) {
+                // var table = $('#assets').DataTable();
+                // var selected_asset = table.row(e.target.closest('tr')).data();
+                var table = $('#assets').DataTable();
+                var selected_asset = table.row($(this).parents('tr')).data();
+
+                // fetch('/api/{{version}}/asset/'+selected_asset.slug+'/score').then(
+                //     response => response.json()
+                // ).then(data => {
+                //     $('#score').html('Points: '+data.score)
+                // })
 
                 //graph the data for this asset
                 fetch('/api/{{version}}/asset/'+selected_asset.slug+'/data_url').then(

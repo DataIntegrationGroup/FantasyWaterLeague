@@ -46,6 +46,9 @@ class Asset(ORMBaseModel):
     slug: str
     atype: str
     source_slug: str
+    source_identifier: str
+    source_url: str
+    active: bool
 
 
 # ============= EOF =============================================

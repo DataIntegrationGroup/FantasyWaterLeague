@@ -36,6 +36,8 @@ class RosterAsset(Base):
     roster_slug = Column(String(128), ForeignKey("roster.slug"))
     asset_slug = Column(String(128), ForeignKey("asset.slug"))
 
+    active = Column(Boolean, default=False)
+
     # roster = relationship('Roster', backref='assets')
     asset = relationship("Asset", backref="rosters")
 

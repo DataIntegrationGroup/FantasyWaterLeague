@@ -25,10 +25,13 @@ from api.models.players import Player, Roster, RosterAsset
 
 def make_usgs_discharge_sites(db):
     if os.path.isfile('usgs_discharge_sites.csv'):
-        print('usinga asdfasdf')
+        print('using cached usgs_discharge_sites.csv')
         with open('usgs_discharge_sites.csv', 'r') as rfile:
             rows = []
-            for line in rfile:
+            for i, line in enumerate(rfile):
+                if not i:
+                    continue
+
                 slug, name, source_id = line.strip().split(',')
                 rows.append((slug, name, source_id))
     else:

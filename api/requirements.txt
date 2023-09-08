@@ -1,6 +1,6 @@
 fastapi
 sqlalchemy
-# geoalchemy2[shapely]
+geoalchemy2[shapely]
 uvicorn
 psycopg
 # scikit-learn
