@@ -9,6 +9,8 @@
         <th>atype</th>
         <th>source_slug</th>
         <th>source_identifier</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
     </tr>
     </thead>
 </table>
@@ -26,10 +28,12 @@
             },
             "pageLength": 25,
             "columns": [
-                {"data": "name"},
+                {"data": "slug"},
                 {"data": "atype"},
                 {"data": "source_slug"},
                 {"data": "source_identifier"},
+                {"data": "latitude"},
+                {"data": "longitude"},
                 {"data": "slug",
                     "visible": false}
             ]

@@ -20,7 +20,7 @@ from api.database import Base, Slugged
 
 
 class Player(Base, Slugged):
-    pass
+    team_name = Column(String(128), nullable=False)
 
 
 class Roster(Base, Slugged):

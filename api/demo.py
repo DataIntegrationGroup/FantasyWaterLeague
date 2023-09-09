@@ -23,22 +23,36 @@ from api.models.assets import Asset, Source, AssetType
 from api.models.players import Player, Roster, RosterAsset
 
 
+def make_gw_sites(db):
+    url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=72019&siteStatus=active' \
+           '&modifiedSince=P2D'
+    return make_usgs_sites(db, "continuous_groundwater",
+                           'usgs_nwis_depthtowater', url)
+
+
 def make_usgs_discharge_sites(db):
-    if os.path.isfile('usgs_discharge_sites.csv'):
-        print('using cached usgs_discharge_sites.csv')
-        with open('usgs_discharge_sites.csv', 'r') as rfile:
+    url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00060&siteStatus=active'
+    return make_usgs_sites(db, 'stream_gauge',
+                           'usgs_nwis_discharge',
+                           url)
+
+
+def make_usgs_sites(db, atype, source_slug, url):
+    cpath = f'{source_slug}.csv'
+    if os.path.isfile(cpath):
+        print(f'using cached {cpath}')
+        with open(cpath, 'r') as rfile:
             rows = []
             for i, line in enumerate(rfile):
                 if not i:
                     continue
 
-                slug, name, source_id = line.strip().split(',')
-                rows.append((slug, name, source_id))
+                slug, name, source_id, lon, lat = line.strip().split(',')
+                rows.append((slug, name, source_id, lon, lat))
     else:
         print('fetching')
         rows = []
-        resp = requests.get(
-            'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00060&siteStatus=active')
+        resp = requests.get(url)
         data = resp.json()['value']['timeSeries']
         for tsi in data:
             sitename = tsi['sourceInfo']['siteName']
@@ -46,19 +60,22 @@ def make_usgs_discharge_sites(db):
 
             name = sitename.split(',')[0].strip()
             slug = name.replace(' ', '_').lower()
-            rows.append((slug, name, source_id))
+            geo = tsi['sourceInfo']['geoLocation']['geogLocation']
+            lat, lon = (geo['latitude'], geo['longitude'])
+            rows.append((slug, name, source_id, lon, lat))
 
-        with open('usgs_discharge_sites.csv', 'w') as wfile:
-            wfile.write('slug,name,source_identifier\n')
-            for slug, name, source_id in rows:
-                wfile.write(f'{slug},{name},{source_id}\n')
+        with open(cpath, 'w') as wfile:
+            wfile.write('slug,name,source_identifier,lon,lat\n')
+            for slug, name, source_id, lon, lat in rows:
+                wfile.write(f'{slug},{name},{source_id},{lon},{lat}\n')
 
-    for slug, name, source_id in rows:
+    for slug, name, source_id, lon, lat in rows:
         db.add(Asset(slug=slug,
                      name=name,
-                     atype='stream_gauge',
-                     source_slug='usgs_nwis_discharge',
-                     source_identifier=source_id))
+                     atype=atype,
+                     source_slug=source_slug,
+                     source_identifier=source_id,
+                     location=f'POINT({lon} {lat})'))
         db.commit()
 
     return rows
@@ -75,6 +92,9 @@ def make_draft(assets):
 
 
 def setup_demo():
+    if os.environ.get('SETUP_DEMO', '0') == '0':
+        return
+
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
@@ -86,7 +106,12 @@ def setup_demo():
                            '&format=json'
                            '&period=P7D'
                            '&sites='))
-
+    db.add(Source(slug='usgs_nwis_depthtowater', name='UGSS-NWIS-DepthToWater',
+                  base_url='https://waterservices.usgs.gov/nwis/iv/?'
+                           'parameterCd=72019'
+                           '&format=json'
+                           '&period=P7D'
+                           '&sites='))
     db.add(Source(slug='test',
                   name='Test',
                   base_url='https://foo.test.com'))
@@ -102,7 +127,8 @@ def setup_demo():
     db.flush()
 
     uds = make_usgs_discharge_sites(db)
-
+    uds.extend(make_gw_sites(db))
+    # uds.extend(make_weather_sites(db))
     # for slug, name, atype, source_slug, source_identifier in (
     #         ('embudo', 'Embudo', 'stream_gauge', 'usgs_nwis_discharge', '08279000'),
     #         ('costilla_creek', 'COSTILLA CREEK ABOVE COSTILLA DAM', 'stream_gauge', 'usgs_nwis_discharge', '08252500'),
@@ -118,13 +144,13 @@ def setup_demo():
     db.commit()
     db.flush()
 
-    for slug, name in (('jake', 'Jake Ross'),
-                       ('ethan', 'Ethan'),
-                       ('marissa', 'Marissa'),
-                       ('nels', 'Nels'),
-                       ('mattz', 'Mattz'),
-                       ):
-        db.add(Player(slug=slug, name=name))
+    for slug, name, team in (('jake', 'Jake Ross', 'Leroy Flyers'),
+                             ('ethan', 'Ethan', 'Melody Lane Packers'),
+                             ('marissa', 'Marissa', 'Bevilacqua'),
+                             ('nels', 'Nels', 'Shedland Builders'),
+                             ('mattz', 'Mattz', 'PartyBoy Dancers'),
+                             ):
+        db.add(Player(slug=slug, name=name, team_name=team))
 
     db.commit()
     db.flush()

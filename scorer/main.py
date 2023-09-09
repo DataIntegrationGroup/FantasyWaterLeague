@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
+import os
 import time
 
 import requests
@@ -53,8 +54,12 @@ def score_data(source, atype, data):
     if source == "usgs_nwis_discharge":
         if data:
             vs = array([float(d["value"]) for d in data])
-            vs = (vs - vs[0]) / vs[0]
-            score = max(0, sum(vs))
+            nvs = vs - vs[0]
+            if vs[0]:
+                nvs = nvs / vs[0]
+            nvs = nvs[nvs > 0]
+
+            score = max(0, sum(nvs))
 
     return score
 
@@ -83,6 +88,10 @@ def calculate_scores():
 
 
 if __name__ == "__main__":
+    if os.environ.get('CALCULATE_SCORES', '0') == '0':
+        print('**** You must set the environment variable CALCULATE_SCORES=1 to run the scorer scheduler ****')
+        exit(0)
+
     print("starting scorer schelduler")
     calculate_scores()
     sched.start()

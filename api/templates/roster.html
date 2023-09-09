@@ -2,6 +2,8 @@
 
 {% block head %}
 {{ super() }}
+    {% include "map_head.html" %}
+
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 
@@ -70,36 +72,51 @@
 
 
 {% block content %}
-<div class="row">
-    <h1>Roster</h1>
-    <table class="display compact" id="assets">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Source</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-    </table>
-</div>
-<div class="row">
-    <div class="col">
-        <h3>Score</h3>
-        <button id="calculate_score">Calculate Score</button>
-        <div id="score"></div>
+    <div class="row">
+        <h1>Roster</h1>
+        <div class="col-lg-8">
+            <table class="display compact" id="assets">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Source</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="col-lg-4">
+            {% include "map_include.html" %}
+        </div>
     </div>
-</div>
+
+    <div class="row">
+        <div class="col">
+            <h3>Score</h3>
+            <button id="calculate_score">Calculate Score</button>
+            <div id="score"></div>
+        </div>
+    </div>
 
 <div class="row">
     <div class="col">
         <h3>Graph</h3>
+        <div id="score_graph"></div>
         <div id="graph"></div>
     </div>
 </div>
 
 <script>
+
     $(document).ready(function () {
+        const tokenurl = window.location.origin+'/mapboxtoken'
+        fetch(tokenurl)
+            .then(response => response.json())
+            .then(data => {
+                mapboxgl.accessToken = data.token;
+                initMap([-106.5, 34.5], 6, '/api/v1/roster/{{ roster_slug }}/geojson');
+            });
 
         // make graph
         Plotly.newPlot('graph', [], {});
@@ -189,14 +206,34 @@
 
                         var values = data["value"]['timeSeries'][0]['values'][0]['value']
 
+                        var oy =values.map(v=>v['value'])
+                        var y = values.map(v=>v['value'])
+                        var x = values.map(v=>v['dateTime'])
+
+                        y = y.map(v=>{
+                            if (y[0]){
+                                return (v-y[0])/y[0]
+                            } else {
+                                return v
+                            }
+
+                        })
                         var trace1 = {
-                            x: values.map(v=>v['dateTime']),
-                            y: values.map(v=>v['value']),
+                            x: x,
+                            y: oy,
                             mode: 'lines',
                             name: 'lines'
                         };
-
-                        Plotly.react('graph', [trace1], {'title': selected_asset.source_slug});
+                        var trace2 = {
+                            x: x,
+                            y: y,
+                            mode: 'lines',
+                            name: 'lines'
+                        };
+                        Plotly.react('graph',
+                            [trace1], {'title': selected_asset.source_slug});
+                        Plotly.react('score_graph',
+                            [trace2], {'title': 'Score'});
                     })
                 })
 

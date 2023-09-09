@@ -20,7 +20,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from api import schemas
-from api import models
+from api.models.assets import Asset
 from api.database import get_db
 from api.crud import (
     retrieve_rosters,
@@ -69,10 +69,27 @@ async def get_player(player_slug, db=Depends(get_db)):
     return {"name": player_slug, "rosters": retrieve_rosters(db, player_slug)}
 
 
-@router.get("/roster/{roster_slug}", response_model=List[schemas.Asset])
+@router.get("/roster/{roster_slug}", response_model=List[schemas.ActiveAsset])
 async def get_roster(roster_slug, db=Depends(get_db)):
     return retrieve_roster_assets(db, roster_slug)
 
+@router.get("/roster/{roster_slug}/geojson")
+async def get_roster_geojson(roster_slug, db=Depends(get_db)):
+    assets = retrieve_roster_assets(db, roster_slug)
+    features = []
+    for a in assets:
+        features.append({
+            "type": "Feature",
+            "properties": {
+                "name": a.name,
+                "score": a.score,
+            },
+            "geometry": a.geometry,
+        })
+    return {
+        "type": "FeatureCollection",
+        "features": features,
+    }
 
 @router.get("/roster/{roster_slug}/score")
 async def get_roster_score(roster_slug, db=Depends(get_db)):
@@ -101,9 +118,9 @@ async def get_asset_score(asset_slug, db=Depends(get_db)):
     return {"score": asset.score}
 
 
-@router.get("/assets")
+@router.get("/assets", response_model=List[schemas.Asset])
 async def get_all_assets(db=Depends(get_db)):
-    q = db.query(models.assets.Asset)
+    q = db.query(Asset)
     return q.all()
 
 

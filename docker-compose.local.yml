@@ -24,6 +24,7 @@ services:
       context: ./scorer
       dockerfile: ./Dockerfile
     command: bash -c "
+      while !</dev/tcp/db/5432; do sleep 1; done;
       sleep 10;
       python -m main
       "
@@ -65,7 +66,8 @@ services:
       - postgres-data:/var/lib/postgresql
     env_file:
       - ./api/.env.local
-#    environment:
+    environment:
+      - POSTGRES_MULTIPLE_EXTENSIONS=postgis,hstore,postgis_topology,postgis_raster,pgrouting
 #      - POSTGRES_TZ=America/Denver
       # If you need to create multiple database you can add coma separated databases eg gis,data
 #      #      - ALLOW_IP_RANGE=0.0.0.0/0

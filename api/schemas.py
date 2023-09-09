@@ -43,11 +43,17 @@ class Player(NamedModel):
 
 
 class Asset(ORMBaseModel):
+    name: str
     slug: str
     atype: str
     source_slug: str
     source_identifier: str
     source_url: str
+    latitude: float
+    longitude: float
+
+
+class ActiveAsset(Asset):
     active: bool
 
 

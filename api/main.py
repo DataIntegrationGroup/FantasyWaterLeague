@@ -15,10 +15,12 @@
 # ===============================================================================
 
 from fastapi import FastAPI, Depends
+from starlette.staticfiles import StaticFiles
 
 from api.routes import v1, views
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 from demo import setup_demo
 
@@ -27,6 +29,12 @@ setup_demo()
 # ===============================================================================
 # API Endpoints
 # ===============================================================================
+
+@app.get("/mapboxtoken")
+def mapboxtoken():
+    return {
+        "token": "pk.eyJ1IjoiamFrZXJvc3N3ZGkiLCJhIjoiY2s3M3ZneGl4MGhkMDNrcjlocmNuNWg4bCJ9.4r1DRDQ_ja0fV2nnmlVT0A"
+    }
 
 app.include_router(v1.router)
 app.include_router(views.router)
