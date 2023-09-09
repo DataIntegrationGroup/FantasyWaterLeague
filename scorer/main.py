@@ -88,8 +88,10 @@ def calculate_scores():
 
 
 if __name__ == "__main__":
-    if os.environ.get('CALCULATE_SCORES', '0') == '0':
-        print('**** You must set the environment variable CALCULATE_SCORES=1 to run the scorer scheduler ****')
+    if os.environ.get("CALCULATE_SCORES", "0") == "0":
+        print(
+            "**** You must set the environment variable CALCULATE_SCORES=1 to run the scorer scheduler ****"
+        )
         exit(0)
 
     print("starting scorer schelduler")

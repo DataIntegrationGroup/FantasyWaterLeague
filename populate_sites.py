@@ -13,5 +13,6 @@ def main():
         print(sitename, tsi["sourceInfo"]["siteCode"][0]["value"])
         print(tsi["sourceInfo"]["geoLocation"]["geogLocation"]["latitude"])
 
+
 if __name__ == "__main__":
     main()

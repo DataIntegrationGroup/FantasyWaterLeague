@@ -73,23 +73,27 @@ async def get_player(player_slug, db=Depends(get_db)):
 async def get_roster(roster_slug, db=Depends(get_db)):
     return retrieve_roster_assets(db, roster_slug)
 
+
 @router.get("/roster/{roster_slug}/geojson")
 async def get_roster_geojson(roster_slug, db=Depends(get_db)):
     assets = retrieve_roster_assets(db, roster_slug)
     features = []
     for a in assets:
-        features.append({
-            "type": "Feature",
-            "properties": {
-                "name": a.name,
-                "score": a.score,
-            },
-            "geometry": a.geometry,
-        })
+        features.append(
+            {
+                "type": "Feature",
+                "properties": {
+                    "name": a.name,
+                    "score": a.score,
+                },
+                "geometry": a.geometry,
+            }
+        )
     return {
         "type": "FeatureCollection",
         "features": features,
     }
+
 
 @router.get("/roster/{roster_slug}/score")
 async def get_roster_score(roster_slug, db=Depends(get_db)):
