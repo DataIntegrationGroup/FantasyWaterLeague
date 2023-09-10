@@ -36,6 +36,12 @@ def make_usgs_discharge_sites(db):
                            'usgs_nwis_discharge',
                            url)
 
+def make_usgs_gageheight_sites(db):
+    url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00065&siteStatus=active'
+    return make_usgs_sites(db, 'stream_gauge',
+                           'usgs_nwis_gageheight',
+                           url)
+
 
 def make_usgs_sites(db, atype, source_slug, url):
     cpath = f'{source_slug}.csv'
@@ -100,9 +106,9 @@ def setup_demo():
 
     db = next(get_db())
 
-    db.add(Source(slug='usgs_nwis_discharge', name='UGSS-NWIS-Discharge',
+    db.add(Source(slug='usgs_nwis_gageheight', name='UGSS-NWIS-GageHeight',
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'
-                           'parameterCd=00060'
+                           'parameterCd=00065'
                            '&format=json'
                            '&period=P7D'
                            '&sites='))
@@ -126,7 +132,8 @@ def setup_demo():
     db.commit()
     db.flush()
 
-    uds = make_usgs_discharge_sites(db)
+    # uds = make_usgs_discharge_sites(db)
+    uds = make_usgs_gageheight_sites(db)
     uds.extend(make_gw_sites(db))
     # uds.extend(make_weather_sites(db))
     # for slug, name, atype, source_slug, source_identifier in (

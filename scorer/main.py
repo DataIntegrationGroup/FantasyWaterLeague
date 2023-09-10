@@ -51,17 +51,32 @@ def get_data(url):
 
 def score_data(source, atype, data):
     score = 0
-    if source == "usgs_nwis_discharge":
-        if data:
-            vs = array([float(d["value"]) for d in data])
-            nvs = vs - vs[0]
-            if vs[0]:
-                nvs = nvs / vs[0]
-            nvs = nvs[nvs > 0]
-
-            score = max(0, sum(nvs))
+    if data:
+        if atype == 'stream_gauge':
+            score = score_stream_gauge(data)
+        elif atype == 'continuous_groundwater':
+            score = score_continuous_groundwater(data)
+        elif atype == 'continuous_rain_gauge':
+            score = score_continuous_rain_gauge(data)
 
     return score
+
+
+def score_timeseries(data):
+    vs = array([float(d["value"]) for d in data])
+    return max(vs) - vs[0]
+
+
+def score_stream_gauge(data):
+    return score_timeseries(data)
+
+
+def score_continuous_groundwater(data):
+    return 20 * score_timeseries(data)
+
+
+def score_continuous_rain_gauge(data):
+    return 10 * score_timeseries(data)
 
 
 sched = BlockingScheduler()

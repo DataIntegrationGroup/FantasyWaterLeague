@@ -31,6 +31,7 @@ from api.crud import (
     update_roster_asset,
     update_asset,
 )
+from api.rules import validate_team, validate_lineup
 
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
 
@@ -58,8 +59,17 @@ async def get_leaderboard(db=Depends(get_db)):
     return players
 
 
+# validation
+@router.get("/roster/{roster_slug}/validate")
+async def get_validate_team(roster_slug, db=Depends(get_db)):
+    assets = retrieve_roster_assets(db, roster_slug)
+    vteam = validate_team(assets)
+    vlineup =  validate_lineup(assets)
+    return {'team': vteam, 'lineup': vlineup}
+
+
 @router.get("/players", response_model=List[schemas.Player])
-async def rplayers(db=Depends(get_db)):
+async def get_players(db=Depends(get_db)):
     players = retrieve_players(db)
     return players
 
@@ -139,7 +149,7 @@ class ScorePayload(BaseModel):
 
 @router.put("/roster/{roster_slug}/{asset_slug}")
 async def put_roster_asset(
-    roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
+        roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
 ):
     update_roster_asset(db, roster_slug, asset_slug, payload)
     return {"slug": asset_slug, "active": payload.active}
@@ -149,6 +159,5 @@ async def put_roster_asset(
 async def put_asset_score(asset_slug, payload: ScorePayload, db=Depends(get_db)):
     update_asset(db, asset_slug, payload)
     return {"slug": asset_slug, "score": payload.score}
-
 
 # ============= EOF =============================================

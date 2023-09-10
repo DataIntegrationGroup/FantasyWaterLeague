@@ -38,7 +38,7 @@
              cursor: pointer;
              display: inline-block;
              font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
-             font-size: 14px;
+             font-size: 10px;
              font-weight: 600;
              line-height: 20px;
              margin: 1px;
@@ -73,7 +73,18 @@
 
 {% block content %}
     <div class="row">
-        <h1>Roster</h1>
+        <div class="col">
+            <h3>Team</h3>
+            <div id="valid_team">Valid Team: </div>
+            <div id="valid_lineup">Valid Lineup: </div>
+        </div>
+        <div class="col">
+            <h3>Score</h3>
+            <button id="calculate_score">Calculate Score</button>
+            <div id="score"></div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-lg-8">
             <table class="display compact" id="assets">
                 <thead>
@@ -90,26 +101,30 @@
             {% include "map_include.html" %}
         </div>
     </div>
-
     <div class="row">
         <div class="col">
-            <h3>Score</h3>
-            <button id="calculate_score">Calculate Score</button>
-            <div id="score"></div>
+            <h3>Graph</h3>
+            <div id="score_graph"></div>
+            <div id="graph"></div>
         </div>
     </div>
 
-<div class="row">
-    <div class="col">
-        <h3>Graph</h3>
-        <div id="score_graph"></div>
-        <div id="graph"></div>
-    </div>
-</div>
-
 <script>
 
+    function do_validation(){
+        fetch('/api/{{version}}/roster/{{ roster_slug }}/validate').then(
+            response => response.json()
+        ).then(data => {
+            $('#valid_team').html('Valid Team: '+data.team)
+            $('#valid_lineup').html('Valid Lineup: '+data.lineup)
+        })
+    }
+
+
     $(document).ready(function () {
+
+        do_validation()
+
         const tokenurl = window.location.origin+'/mapboxtoken'
         fetch(tokenurl)
             .then(response => response.json())
@@ -136,6 +151,8 @@
                     "url": "/api/{{ version }}/roster/{{ roster_slug }}",
                     "dataSrc": ""
                 },
+                "info": false,
+                "paging": false,
                 "pageLength": 25,
                 "createdRow": (row, data, dataIndex, cells) => {
                     $(row).css('background-color', data.active ? '#64b976': '#b07d6e')
@@ -152,6 +169,7 @@
                 ]
             });
 
+
             function toggle_active(table, selected_asset, state){
                 console.log(selected_asset);
                 fetch('/api/{{version}}/roster/{{ roster_slug }}/'+selected_asset.slug,
@@ -166,6 +184,8 @@
                 ).then(data => {
                     console.log(data)
                     table.ajax.reload()
+
+                    do_validation()
                 })
             }
 

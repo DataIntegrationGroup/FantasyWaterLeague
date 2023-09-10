@@ -15,6 +15,7 @@
 # ===============================================================================
 
 from fastapi import FastAPI, Depends
+from fastapi_users import fastapi_users
 from starlette.staticfiles import StaticFiles
 
 from api.routes import v1, views
@@ -30,13 +31,42 @@ setup_demo()
 # API Endpoints
 # ===============================================================================
 
+# app.include_router(
+#     fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
+# )
+# app.include_router(
+#     fastapi_users.get_register_router(UserRead, UserCreate),
+#     prefix="/auth",
+#     tags=["auth"],
+# )
+# app.include_router(
+#     fastapi_users.get_reset_password_router(),
+#     prefix="/auth",
+#     tags=["auth"],
+# )
+# app.include_router(
+#     fastapi_users.get_verify_router(UserRead),
+#     prefix="/auth",
+#     tags=["auth"],
+# )
+# app.include_router(
+#     fastapi_users.get_users_router(UserRead, UserUpdate),
+#     prefix="/users",
+#     tags=["users"],
+# )
+#
+#
+# @app.get("/authenticated-route")
+# async def authenticated_route(user: User = Depends(current_active_user)):
+#     return {"message": f"Hello {user.email}!"}
+
+
 
 @app.get("/mapboxtoken")
 def mapboxtoken():
     return {
         "token": "pk.eyJ1IjoiamFrZXJvc3N3ZGkiLCJhIjoiY2s3M3ZneGl4MGhkMDNrcjlocmNuNWg4bCJ9.4r1DRDQ_ja0fV2nnmlVT0A"
     }
-
 
 app.include_router(v1.router)
 app.include_router(views.router)
