@@ -31,16 +31,20 @@ def validate_lineup(assets):
     lineup = [a for a in assets if a.active]
     return len(lineup) == N_ASSETS_PER_LINEUP
 
+
 def validate_groundwater(assets):
-    gws = [a for a in assets if a.atype == 'continuous_groundwater']
+    gws = [a for a in assets if a.atype == "continuous_groundwater"]
     return len(gws) == N_GROUNDWATER_ASSETS
 
+
 def validate_stream_gauge(assets):
-    sgs = [a for a in assets if a.atype == 'stream_gauge']
+    sgs = [a for a in assets if a.atype == "stream_gauge"]
     return len(sgs) == N_STREAM_GAUGE_ASSETS
 
+
 def validate_rain_gauge(assets):
-    rgs = [a for a in assets if a.atype == 'continuous_rain_gauge']
+    rgs = [a for a in assets if a.atype == "continuous_rain_gauge"]
     return len(rgs) == N_RAIN_GAUGE_ASSETS
+
 
 # ============= EOF =============================================

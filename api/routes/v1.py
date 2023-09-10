@@ -64,8 +64,8 @@ async def get_leaderboard(db=Depends(get_db)):
 async def get_validate_team(roster_slug, db=Depends(get_db)):
     assets = retrieve_roster_assets(db, roster_slug)
     vteam = validate_team(assets)
-    vlineup =  validate_lineup(assets)
-    return {'team': vteam, 'lineup': vlineup}
+    vlineup = validate_lineup(assets)
+    return {"team": vteam, "lineup": vlineup}
 
 
 @router.get("/players", response_model=List[schemas.Player])
@@ -149,7 +149,7 @@ class ScorePayload(BaseModel):
 
 @router.put("/roster/{roster_slug}/{asset_slug}")
 async def put_roster_asset(
-        roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
+    roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
 ):
     update_roster_asset(db, roster_slug, asset_slug, payload)
     return {"slug": asset_slug, "active": payload.active}
@@ -159,5 +159,6 @@ async def put_roster_asset(
 async def put_asset_score(asset_slug, payload: ScorePayload, db=Depends(get_db)):
     update_asset(db, asset_slug, payload)
     return {"slug": asset_slug, "score": payload.score}
+
 
 # ============= EOF =============================================

@@ -52,11 +52,11 @@ def get_data(url):
 def score_data(source, atype, data):
     score = 0
     if data:
-        if atype == 'stream_gauge':
+        if atype == "stream_gauge":
             score = score_stream_gauge(data)
-        elif atype == 'continuous_groundwater':
+        elif atype == "continuous_groundwater":
             score = score_continuous_groundwater(data)
-        elif atype == 'continuous_rain_gauge':
+        elif atype == "continuous_rain_gauge":
             score = score_continuous_rain_gauge(data)
 
     return score
