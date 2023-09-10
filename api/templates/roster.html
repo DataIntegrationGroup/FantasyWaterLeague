@@ -104,7 +104,6 @@
     <div class="row">
         <div class="col">
             <h3>Graph</h3>
-            <div id="score_graph"></div>
             <div id="graph"></div>
         </div>
     </div>
@@ -226,25 +225,10 @@
 
                         var values = data["value"]['timeSeries'][0]['values'][0]['value']
 
-                        var oy =values.map(v=>v['value'])
                         var y = values.map(v=>v['value'])
                         var x = values.map(v=>v['dateTime'])
 
-                        y = y.map(v=>{
-                            if (y[0]){
-                                return (v-y[0])/y[0]
-                            } else {
-                                return v
-                            }
-
-                        })
                         var trace1 = {
-                            x: x,
-                            y: oy,
-                            mode: 'lines',
-                            name: 'lines'
-                        };
-                        var trace2 = {
                             x: x,
                             y: y,
                             mode: 'lines',
@@ -252,8 +236,7 @@
                         };
                         Plotly.react('graph',
                             [trace1], {'title': selected_asset.source_slug});
-                        Plotly.react('score_graph',
-                            [trace2], {'title': 'Score'});
+
                     })
                 })
 

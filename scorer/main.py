@@ -59,7 +59,7 @@ def score_data(source, atype, data):
         elif atype == "continuous_rain_gauge":
             score = score_continuous_rain_gauge(data)
 
-    return score
+    return max(0, score)
 
 
 def score_timeseries(data):
@@ -72,7 +72,9 @@ def score_stream_gauge(data):
 
 
 def score_continuous_groundwater(data):
-    return 20 * score_timeseries(data)
+    vs = array([float(d["value"]) for d in data])
+    score = vs[0] - min(vs)
+    return 20 * score
 
 
 def score_continuous_rain_gauge(data):
