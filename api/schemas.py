@@ -50,7 +50,7 @@ class Asset(ORMBaseModel):
     atype: str
     source_slug: str
     source_identifier: str
-    source_url: str
+    # scoring_url: str
     latitude: float
     longitude: float
 

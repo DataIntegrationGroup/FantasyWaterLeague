@@ -38,10 +38,11 @@ def calculate_asset_score(asset):
     atype = asset["atype"]
     source = asset["source_slug"]
     # source_id = asset['source_identifier']
-
-    # get data from source
-    data = get_data(asset["source_url"])
-    return score_data(source, atype, data)
+    u = get_json(f"{HOST}/api/v1/asset/{asset['slug']}/data_url")
+    if u:
+        # get data from source
+        data = get_data(u["scoring_url"])
+        return score_data(source, atype, data)
 
 
 def get_data(url):

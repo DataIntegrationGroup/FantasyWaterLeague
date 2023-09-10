@@ -15,11 +15,13 @@
 # ===============================================================================
 import os
 import random
+from datetime import datetime, timedelta
 
 import requests
 
 from api.database import Base, engine, get_db
 from api.models.assets import Asset, Source, AssetType
+from api.models.game import Game
 from api.models.players import Player, Roster, RosterAsset
 
 
@@ -106,18 +108,21 @@ def setup_demo():
 
     db = next(get_db())
 
+    # set game start to 2 weeks ago
+    db.add(Game(slug='test',
+                name='Test',
+                start=datetime.now() - timedelta(days=14),
+                active=True))
+
+
     db.add(Source(slug='usgs_nwis_gageheight', name='UGSS-NWIS-GageHeight',
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'
                            'parameterCd=00065'
-                           '&format=json'
-                           '&period=P7D'
-                           '&sites='))
+                           '&format=json'))
     db.add(Source(slug='usgs_nwis_depthtowater', name='UGSS-NWIS-DepthToWater',
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'
                            'parameterCd=72019'
-                           '&format=json'
-                           '&period=P7D'
-                           '&sites='))
+                           '&format=json'))
     db.add(Source(slug='test',
                   name='Test',
                   base_url='https://foo.test.com'))

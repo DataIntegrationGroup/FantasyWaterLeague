@@ -17,6 +17,7 @@
 from numpy import array
 
 from api.database import get_db
+from api.models.game import Game
 from api.models.players import Roster, Player, RosterAsset
 from api.models.assets import Asset
 import requests
@@ -31,6 +32,12 @@ def retrieve_asset(db, asset_slug):
     q = db.query(Asset)
     q = q.filter(Asset.slug == asset_slug)
     return q.one()
+
+def retrieve_game_start(db):
+    q = db.query(Game)
+    q = q.filter(Game.active == True)
+    s = q.one()
+    return s.start
 
 
 def retrieve_roster_asset(db, roster_slug, asset_slug):

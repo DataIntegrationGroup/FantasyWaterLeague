@@ -46,9 +46,11 @@ class Asset(Base, Slugged):
         TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp()
     )
 
-    @property
-    def source_url(self):
-        return f"{self.source.base_url}{self.source_identifier}"
+    # @property
+    # def scoring_url(self):
+    #     url = f'{self.source.base_url}&site={self.source_identifier}'
+    #
+    #     return f"{self.source.base_url}{self.source_identifier}"
 
     @property
     def geometry(self):

@@ -24,7 +24,7 @@
         background-color: #eee;
     }
     table.dataTable td {
-        font-size: 10pt;
+        font-size: 8pt;
     }
 
     .rowbutton {
@@ -40,7 +40,7 @@
              font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
              font-size: 10px;
              font-weight: 600;
-             line-height: 20px;
+             line-height: 10px;
              margin: 1px;
              padding: 6px 16px;
              position: relative;
@@ -118,6 +118,23 @@
             $('#valid_lineup').html('Valid Lineup: '+data.lineup)
         })
     }
+    function indexOfMaximumValue(my_array) {
+        if (my_array.length === 0) {
+            return -1;
+        }
+        else{
+            var maximumValue = my_array[0];
+            var maxIndex = 0;
+
+            for (var i = 1; i < my_array.length; i++) {
+                if (my_array[i] > maximumValue) {
+                    maxIndex = i;
+                    maximumValue = my_array[i];
+                }
+            }
+            return maxIndex;
+        }
+    }
 
 
     $(document).ready(function () {
@@ -129,7 +146,16 @@
             .then(response => response.json())
             .then(data => {
                 mapboxgl.accessToken = data.token;
-                initMap([-106.5, 34.5], 6, '/api/v1/roster/{{ roster_slug }}/geojson');
+                const map = initMap([-106.5, 34.5], 6, '/api/v1/roster/{{ roster_slug }}/geojson');
+
+                $('#assets').on('click', '#view_map', function () {
+                    console.log('asdfasfadsfsd afasdfafas')
+                    var table = $('#assets').DataTable();
+                    var selected_asset = table.row($(this).parents('tr')).data();
+                    map.jumpTo({center: [selected_asset.longitude, selected_asset.latitude], zoom: 13});
+                });
+
+
             });
 
         // make graph
@@ -137,10 +163,16 @@
 
         // handle calculate score button
         $('#calculate_score').click(function () {
-            fetch('/api/{{version}}/roster/{{ roster_slug }}/score').then(
+            fetch('/api/{{version}}/roster/{{ roster_slug }}/validate').then(
                 response => response.json()
             ).then(data => {
-                $('#score').html('Points: '+data.score)
+                if (data.lineup){
+                    fetch('/api/{{version}}/roster/{{ roster_slug }}/score').then(
+                        response => response.json()
+                    ).then(data => {
+                        $('#score').html('Points: '+data.score)
+                    })
+                }
             })
         })
 
@@ -153,6 +185,7 @@
                 "info": false,
                 "paging": false,
                 "pageLength": 25,
+                "searching": false,
                 "createdRow": (row, data, dataIndex, cells) => {
                     $(row).css('background-color', data.active ? '#64b976': '#b07d6e')
                 },
@@ -164,7 +197,9 @@
                         "defaultContent":
                             "<button style='background: #2c974b' class=rowbutton id=make_active>Active</button>"+
                             "<button style='background: #c24850' class=rowbutton id=make_inactive>Inactive</button>"+
-                        "<button style='background: #6b82d9' class=rowbutton id=view_graph>Graph</button>"}
+                            "<button style='background: #6b82d9' class=rowbutton id=view_graph>Graph</button>"+
+                            "<button style='background: #0b82d9' class=rowbutton id=view_map>Map</button>"
+                    }
                 ]
             });
 
@@ -189,37 +224,27 @@
             }
 
             $('#assets').on('click', '#make_active', function () {
-                console.log('asdfasfadsfsd buasdf')
                 var table = $('#assets').DataTable();
                 var selected_asset = table.row($(this).parents('tr')).data();
                 toggle_active(table, selected_asset, true)
             });
 
             $('#assets').on('click', '#make_inactive', function () {
-                console.log('asdfasfadsfsd buasdf')
                 var table = $('#assets').DataTable();
                 var selected_asset = table.row($(this).parents('tr')).data();
                 toggle_active(table, selected_asset, false)
             });
-
-
             $('#assets').on( 'click', '#view_graph', function (e) {
-                // var table = $('#assets').DataTable();
-                // var selected_asset = table.row(e.target.closest('tr')).data();
+
                 var table = $('#assets').DataTable();
                 var selected_asset = table.row($(this).parents('tr')).data();
 
-                // fetch('/api/{{version}}/asset/'+selected_asset.slug+'/score').then(
-                //     response => response.json()
-                // ).then(data => {
-                //     $('#score').html('Points: '+data.score)
-                // })
 
                 //graph the data for this asset
                 fetch('/api/{{version}}/asset/'+selected_asset.slug+'/data_url').then(
                     response => response.json()
                 ).then(data=>{
-                    fetch(data.url).then(
+                    fetch(data.prev_url).then(
                         response => response.json()
                     ).then(data =>{
 
@@ -232,10 +257,27 @@
                             x: x,
                             y: y,
                             mode: 'lines',
-                            name: 'lines'
+                            name: 'timeseries'
+                        };
+
+                        var trace2 = {
+                            x: [x[0], x[x.length-1]],
+                            y: [y[0], y[0]],
+                            mode: 'lines',
+                            name: 'baseline'
+                        };
+
+                        var xmax = indexOfMaximumValue(y)
+                        console.log(xmax, x[xmax], Math.max(...y))
+                        var trace3 = {
+                            x: [x[xmax], x[xmax]],
+                            y: [Math.max(...y), Math.min(...y)],
+                            mode: 'lines',
+                            name: 'max'
                         };
                         Plotly.react('graph',
-                            [trace1], {'title': selected_asset.source_slug});
+                            [trace1,trace2,trace3], {'title': selected_asset.name + ' -- ' +
+                                    selected_asset.source_slug});
 
                     })
                 })
