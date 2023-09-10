@@ -29,7 +29,8 @@ from api.crud import (
     retrieve_roster_assets,
     retrieve_roster_asset,
     update_roster_asset,
-    update_asset, retrieve_game_start,
+    update_asset,
+    retrieve_game_start,
 )
 from api.rules import validate_team, validate_lineup
 
@@ -124,17 +125,18 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
     asset = retrieve_asset(db, asset_slug)
     source_id = asset.source_identifier
     request_url = f"{asset.source.base_url}&site={source_id}&period=P7D"
-    prev_url = (f'{asset.source.base_url}'
-                f'&site={source_id}'
-                f'&startDT={(game_start-timedelta(days=7)).isoformat()}'
-                f'&endDT={game_start.isoformat()}')
-    scoring_url = (f"{asset.source.base_url}"
-                   f"&site={source_id}"
-                   f"&startDT={game_start.isoformat()}")
-    return {"url": request_url,
-            "prev_url": prev_url,
-            "scoring_url": scoring_url
-            }
+    prev_url = (
+        f"{asset.source.base_url}"
+        f"&site={source_id}"
+        f"&startDT={(game_start-timedelta(days=7)).isoformat()}"
+        f"&endDT={game_start.isoformat()}"
+    )
+    scoring_url = (
+        f"{asset.source.base_url}"
+        f"&site={source_id}"
+        f"&startDT={game_start.isoformat()}"
+    )
+    return {"url": request_url, "prev_url": prev_url, "scoring_url": scoring_url}
 
 
 @router.get("/asset/{asset_slug}/score")

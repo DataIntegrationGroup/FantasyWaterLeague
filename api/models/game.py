@@ -22,4 +22,5 @@ class Game(Base, Slugged):
     start = Column(DateTime, nullable=False)
     active = Column(Boolean, default=False)
 
+
 # ============= EOF =============================================

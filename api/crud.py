@@ -33,6 +33,7 @@ def retrieve_asset(db, asset_slug):
     q = q.filter(Asset.slug == asset_slug)
     return q.one()
 
+
 def retrieve_game_start(db):
     q = db.query(Game)
     q = q.filter(Game.active == True)
