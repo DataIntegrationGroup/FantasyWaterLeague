@@ -1,12 +1,14 @@
-fastapi
+flask
+gunicorn
+# fastapi
 # fastapi-users[sqlalchemy]
 # sqlalchemy
 # geoalchemy2[shapely]
-uvicorn
+# uvicorn
 # psycopg
 # scikit-learn
 # pyproj
-jinja2
+# jinja2
 # requests
 # numpy
 # python-jose[cryptography]

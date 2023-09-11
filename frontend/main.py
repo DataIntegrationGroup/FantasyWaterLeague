@@ -13,14 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
-from fastapi import FastAPI
-from starlette.staticfiles import StaticFiles
+# from fastapi import FastAPI
+# from starlette.staticfiles import StaticFiles
 
-app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app = FastAPI()
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
-from frontend.routes import views
+# from frontend.routes import views
+# app.include_router(views.router)
+from flask import Flask, render_template
 
-app.include_router(views.router)
+app = Flask(__name__)
+
+
+@app.get("/")
+def index():
+    return render_template("home.html", version="v1", base_url="http://localhost:4040")
+
 
 # ============= EOF =============================================

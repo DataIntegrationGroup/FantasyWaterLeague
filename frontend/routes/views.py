@@ -15,11 +15,11 @@
 # ===============================================================================
 from pathlib import Path
 
-from fastapi import APIRouter, Depends
-from starlette.requests import Request
-from starlette.templating import Jinja2Templates
-
-router = APIRouter(prefix="")
+# from fastapi import APIRouter, Depends
+# from starlette.requests import Request
+# from starlette.templating import Jinja2Templates
+#
+# router = APIRouter(prefix="")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(Path(BASE_DIR, "templates")))

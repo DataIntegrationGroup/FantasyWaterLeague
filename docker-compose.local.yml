@@ -23,10 +23,9 @@ services:
       context: ./frontend
       dockerfile: ./Dockerfile
     command: bash -c "
-      uvicorn frontend.main:app
-      --host 0.0.0.0
-      --port 8080
-      --reload
+      gunicorn frontend.main:app
+      -b 0.0.0.0:8080
+      -w 4
       "
     ports:
       - "8080:8080"
