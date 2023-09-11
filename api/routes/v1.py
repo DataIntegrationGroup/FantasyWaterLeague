@@ -32,7 +32,13 @@ from api.crud import (
     update_asset,
     retrieve_game_start,
 )
-from api.rules import validate_team, validate_lineup, validate_groundwater, validate_stream_gauge, validate_rain_gauge
+from api.rules import (
+    validate_team,
+    validate_lineup,
+    validate_groundwater,
+    validate_stream_gauge,
+    validate_rain_gauge,
+)
 
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
 
@@ -67,25 +73,26 @@ async def get_validate_team(roster_slug, db=Depends(get_db)):
     vteam, nteam = validate_team(assets)
     vlineup, nlineup, rlineup = validate_lineup(assets)
 
-    vgroundwater , ngw, rgw = validate_groundwater(assets)
+    vgroundwater, ngw, rgw = validate_groundwater(assets)
     vstreamgauge, nsg, rsg = validate_stream_gauge(assets)
     vrain, nr, rrg = validate_rain_gauge(assets)
 
-    return {"team": vteam,
-            "nteam": nteam,
-            "lineup": vlineup,
-            'nlineup': nlineup,
-            'rlineup': rlineup,
-            'groundwater': vgroundwater,
-            'ngroundwater': ngw,
-            'rgroundwater': rgw,
-            'streamgauge': vstreamgauge,
-            'nstreamgauge': nsg,
-            'rstreamgauge': rsg,
-            'rain': vrain,
-            'nrain': nr,
-            'rrain': rrg,
-            }
+    return {
+        "team": vteam,
+        "nteam": nteam,
+        "lineup": vlineup,
+        "nlineup": nlineup,
+        "rlineup": rlineup,
+        "groundwater": vgroundwater,
+        "ngroundwater": ngw,
+        "rgroundwater": rgw,
+        "streamgauge": vstreamgauge,
+        "nstreamgauge": nsg,
+        "rstreamgauge": rsg,
+        "rain": vrain,
+        "nrain": nr,
+        "rrain": rrg,
+    }
 
 
 @router.get("/players", response_model=List[schemas.Player])
