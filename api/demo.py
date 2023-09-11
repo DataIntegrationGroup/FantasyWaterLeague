@@ -23,6 +23,7 @@ from api.database import Base, engine, get_db
 from api.models.assets import Asset, Source, AssetType
 from api.models.game import Game
 from api.models.players import Player, Roster, RosterAsset
+from api.rules import N_ASSETS_PER_TEAM, N_GROUNDWATER_ASSETS, N_STREAM_GAUGE_ASSETS
 
 
 def make_gw_sites(db):
@@ -138,8 +139,8 @@ def setup_demo():
     db.flush()
 
     # uds = make_usgs_discharge_sites(db)
-    uds = make_usgs_gageheight_sites(db)
-    uds.extend(make_gw_sites(db))
+    sgs = make_usgs_gageheight_sites(db)
+    gws = make_gw_sites(db)
     # uds.extend(make_weather_sites(db))
     # for slug, name, atype, source_slug, source_identifier in (
     #         ('embudo', 'Embudo', 'stream_gauge', 'usgs_nwis_discharge', '08279000'),
@@ -174,20 +175,23 @@ def setup_demo():
     db.commit()
     db.flush()
 
-    draft = make_draft(uds)
-    c = 0
-    n_per_team = 20
-    while 1:
-        try:
-            for player in players:
-                asset = next(draft)
-                db.add(RosterAsset(roster_slug=f'{player}.main', asset_slug=asset))
-                c += 1
-        except StopIteration:
-            break
 
-        if c == n_per_team * len(players):
-            break
+    for n, assets in ((5, gws),
+                      (15, sgs)):
+        draft = make_draft(assets)
+        c = 0
+
+        while 1:
+            try:
+                for player in players:
+                    asset = next(draft)
+                    db.add(RosterAsset(roster_slug=f'{player}.main', asset_slug=asset))
+                    c += 1
+            except StopIteration:
+                break
+
+            if c == n * len(players):
+                break
 
     db.commit()
 

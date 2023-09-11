@@ -24,27 +24,32 @@ N_RAIN_GAUGE_ASSETS = 3
 
 
 def validate_team(assets):
-    return len(assets) == N_ASSETS_PER_TEAM
+    n = len(assets)
+    return n == N_ASSETS_PER_TEAM, n
 
 
 def validate_lineup(assets):
     lineup = [a for a in assets if a.active]
-    return len(lineup) == N_ASSETS_PER_LINEUP
+    n = len(lineup)
+    return n == N_ASSETS_PER_LINEUP, n, N_ASSETS_PER_LINEUP
 
 
 def validate_groundwater(assets):
     gws = [a for a in assets if a.atype == "continuous_groundwater"]
-    return len(gws) == N_GROUNDWATER_ASSETS
+    n = len(gws)
+    return n == N_GROUNDWATER_ASSETS, n, N_GROUNDWATER_ASSETS
 
 
 def validate_stream_gauge(assets):
     sgs = [a for a in assets if a.atype == "stream_gauge"]
-    return len(sgs) == N_STREAM_GAUGE_ASSETS
+    n = len(sgs)
+    return n == N_STREAM_GAUGE_ASSETS, n, N_STREAM_GAUGE_ASSETS
 
 
 def validate_rain_gauge(assets):
     rgs = [a for a in assets if a.atype == "continuous_rain_gauge"]
-    return len(rgs) == N_RAIN_GAUGE_ASSETS
+    n = len(rgs)
+    return n == N_RAIN_GAUGE_ASSETS, n, N_RAIN_GAUGE_ASSETS
 
 
 # ============= EOF =============================================

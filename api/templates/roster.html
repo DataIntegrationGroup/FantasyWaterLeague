@@ -69,7 +69,7 @@
 
     .graph_overlay {
         position: absolute;
-        visibility: hidden;
+        display: none;
         top: 10%;
         left: 10%;
         width: 50%;
@@ -89,7 +89,6 @@
     <div class="row">
         <div class="col">
             <h3>Team</h3>
-            <div id="valid_team">Valid Team: </div>
             <div id="valid_lineup">Valid Lineup: </div>
         </div>
         <div class="col">
@@ -99,7 +98,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-7">
             <table class="display compact" id="assets">
                 <thead>
                 <tr>
@@ -111,7 +110,7 @@
                 </thead>
             </table>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-5">
             {% include "map_include.html" %}
         </div>
     </div>
@@ -128,8 +127,8 @@
         fetch('/api/{{version}}/roster/{{ roster_slug }}/validate').then(
             response => response.json()
         ).then(data => {
-            $('#valid_team').html('Valid Team: '+data.team)
-            $('#valid_lineup').html('Valid Lineup: '+data.lineup)
+            {#$('#valid_team').html('Valid Team: '+data.team + ' -- '+data.nteam)#}
+            $('#valid_lineup').html('Valid Lineup: '+data.lineup+ ' -- '+data.nlineup+'/'+data.rlineup)
         })
     }
     function indexOfMaximumValue(my_array) {
@@ -162,11 +161,45 @@
                 mapboxgl.accessToken = data.token;
                 const map = initMap([-106.5, 34.5], 6, '/api/v1/roster/{{ roster_slug }}/geojson');
 
+
                 $('#assets').on('click', '#view_map', function () {
                     console.log('asdfasfadsfsd afasdfafas')
                     var table = $('#assets').DataTable();
                     var selected_asset = table.row($(this).parents('tr')).data();
-                    map.jumpTo({center: [selected_asset.longitude, selected_asset.latitude], zoom: 13});
+                    {#map.jumpTo({center: [selected_asset.longitude, selected_asset.latitude], zoom: 5});#}
+
+
+                    {#marker1.setLngLat([selected_asset.longitude, selected_asset.latitude])#}
+                    {#marker1.addTo(map);#}
+                    try {
+                        map.removeLayer('selected')
+                        map.removeSource('selected')
+                    } catch (e) {
+                        console.log(e)
+                    }
+
+                    {#console.log(marker1)#}
+                    map.addSource('selected', {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [selected_asset.longitude, selected_asset.latitude]
+                            }
+                        }
+                    });
+                    map.addLayer({
+                        'id': 'selected',
+                        'type': 'circle',
+                        'source': 'selected',
+                        'paint': {
+                            'circle-radius': 6,
+                            'circle-color': '#e8083e'
+                        }
+                    })
+
+
                 });
 
 
@@ -250,7 +283,7 @@
             });
 
             $('.graph_overlay').click(function () {
-                $(this).css('visibility', 'hidden')
+                $(this).css('display', 'none')
             })
 
             $('#assets').on( 'click', '#view_graph', function (e) {
@@ -297,7 +330,7 @@
                         Plotly.react('graph',
                             [trace1,trace2,trace3], {'title': selected_asset.name + ' -- ' +
                                     selected_asset.source_slug});
-                        $(".graph_overlay").css('visibility', 'visible');
+                        $(".graph_overlay").css('display', 'block');
 
                     })
                 })
