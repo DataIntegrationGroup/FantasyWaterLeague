@@ -24,11 +24,9 @@ def gw():
     # resp = requests.get(
     #     "https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&siteStatus=all&siteType=gw&parameterCd=72019"
     # )
-    base = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm'
-    url = f'{base}&siteTypeCd=GW&parameterCd=72019&period=P7D&modifiedSince=P1D'
-    resp = requests.get(
-        url
-    )
+    base = "https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm"
+    url = f"{base}&siteTypeCd=GW&parameterCd=72019&period=P7D&modifiedSince=P1D"
+    resp = requests.get(url)
     data = resp.json()["value"]["timeSeries"]
     sites = []
     print(len(data))
@@ -41,13 +39,15 @@ def gw():
         print(sitename, siteid)
         # break
         resp = requests.get(
-            f"https://waterservices.usgs.gov/nwis/iv/?format=json&site={siteid}&period=P7D&parameterCd=72019")
+            f"https://waterservices.usgs.gov/nwis/iv/?format=json&site={siteid}&period=P7D&parameterCd=72019"
+        )
 
         data = resp.json()["value"]["timeSeries"][0]["values"][0]["value"]
         if data:
             print(len(data), data)
             sites.append((sitename, siteid))
     print(len(sites))
+
 
 if __name__ == "__main__":
     # streamgauges()

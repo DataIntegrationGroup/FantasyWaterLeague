@@ -25,7 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(Path(BASE_DIR, "templates")))
 
 VERSION = "v1"
-BASE_URL = 'http://localhost:4040'
+BASE_URL = "http://localhost:4040"
+
 
 @router.get("/")
 async def root(request: Request):
@@ -48,7 +49,12 @@ def login(request: Request):
 async def get_player_detail(request: Request, player_slug):
     return templates.TemplateResponse(
         "player.html",
-        {"request": request, "player_slug": player_slug, "version": VERSION, "base_url": BASE_URL},
+        {
+            "request": request,
+            "player_slug": player_slug,
+            "version": VERSION,
+            "base_url": BASE_URL,
+        },
     )
 
 
@@ -56,7 +62,12 @@ async def get_player_detail(request: Request, player_slug):
 async def get_roster_detail(request: Request, roster_slug):
     return templates.TemplateResponse(
         "roster.html",
-        {"request": request, "roster_slug": roster_slug, "version": VERSION, "base_url": BASE_URL},
+        {
+            "request": request,
+            "roster_slug": roster_slug,
+            "version": VERSION,
+            "base_url": BASE_URL,
+        },
     )
 
 
@@ -72,7 +83,13 @@ async def get_assets(request: Request):
 async def get_asset_detail(request: Request, asset_slug):
     return templates.TemplateResponse(
         "asset.html",
-        {"request": request, "asset_slug": asset_slug, "version": VERSION, "base_url": BASE_URL},
+        {
+            "request": request,
+            "asset_slug": asset_slug,
+            "version": VERSION,
+            "base_url": BASE_URL,
+        },
     )
+
 
 # ============= EOF =============================================

@@ -20,6 +20,7 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 from frontend.routes import views
+
 app.include_router(views.router)
 
 # ============= EOF =============================================

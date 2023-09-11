@@ -28,6 +28,7 @@ from fastapi_users.db import SQLAlchemyUserDatabase
 from api.models.users import User, get_user_db
 from api.settings import settings
 
+
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = settings.SECRET_KEY
     verification_token_secret = settings.SECRET_KEY
@@ -54,7 +55,10 @@ bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
 
 def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(secret=settings.SECRET_KEY, lifetime_seconds=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+    return JWTStrategy(
+        secret=settings.SECRET_KEY,
+        lifetime_seconds=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+    )
 
 
 auth_backend = AuthenticationBackend(

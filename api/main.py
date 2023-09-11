@@ -27,8 +27,8 @@ app = FastAPI()
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
 origins = [
-    'http://localhost:8080',
-    ]
+    "http://localhost:8080",
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -82,6 +82,7 @@ def mapboxtoken():
 
 
 app.include_router(v1.router)
+
 
 @app.on_event("startup")
 async def startup():

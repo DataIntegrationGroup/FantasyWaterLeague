@@ -42,4 +42,5 @@ class LoginForm:
             return True
         return False
 
+
 # ============= EOF =============================================

@@ -19,7 +19,6 @@ import os
 class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES = 30  # in mins
 
-
     # PROJECT_NAME: str = "Job Board"
     # PROJECT_VERSION: str = "1.0.0"
     #

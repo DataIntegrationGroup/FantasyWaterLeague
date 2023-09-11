@@ -43,4 +43,5 @@ class RosterAsset(Base):
     # roster = relationship('Roster', backref='assets')
     asset = relationship("Asset", backref="rosters")
 
+
 # ============= EOF =============================================
