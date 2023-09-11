@@ -67,11 +67,25 @@
         outline: none;
     }
 
+    .graph_overlay {
+        position: absolute;
+        visibility: hidden;
+        top: 10%;
+        left: 10%;
+        width: 50%;
+        height: 50%;
+        /*background-color: rgba(0, 0, 0, 0.5);*/
+        z-index: 1000;
+    }
 </style>
 {% endblock %}
 
 
 {% block content %}
+    <div class="graph_overlay">
+        <div id="graph"></div>
+    </div>
+
     <div class="row">
         <div class="col">
             <h3>Team</h3>
@@ -101,12 +115,12 @@
             {% include "map_include.html" %}
         </div>
     </div>
-    <div class="row">
-        <div class="col">
-            <h3>Graph</h3>
-            <div id="graph"></div>
-        </div>
-    </div>
+{#    <div class="row">#}
+{#        <div class="col" style="visibility: ">#}
+{#            <h3>Graph</h3>#}
+{#            <div id="graph" style="visibility: hidden"></div>#}
+{#        </div>#}
+{#    </div>#}
 
 <script>
 
@@ -234,6 +248,11 @@
                 var selected_asset = table.row($(this).parents('tr')).data();
                 toggle_active(table, selected_asset, false)
             });
+
+            $('.graph_overlay').click(function () {
+                $(this).css('visibility', 'hidden')
+            })
+
             $('#assets').on( 'click', '#view_graph', function (e) {
 
                 var table = $('#assets').DataTable();
@@ -278,6 +297,7 @@
                         Plotly.react('graph',
                             [trace1,trace2,trace3], {'title': selected_asset.name + ' -- ' +
                                     selected_asset.source_slug});
+                        $(".graph_overlay").css('visibility', 'visible');
 
                     })
                 })
