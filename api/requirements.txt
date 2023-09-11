@@ -9,6 +9,7 @@ psycopg
 jinja2
 requests
 numpy
+python-jose[cryptography]
 # pandas
 # openpyxl
 # uncertainties

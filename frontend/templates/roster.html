@@ -124,7 +124,7 @@
 <script>
 
     function do_validation(){
-        fetch('/api/{{version}}/roster/{{ roster_slug }}/validate').then(
+        fetch('{{base_url}}/api/{{version}}/roster/{{ roster_slug }}/validate').then(
             response => response.json()
         ).then(data => {
             {#$('#valid_team').html('Valid Team: '+data.team + ' -- '+data.nteam)#}
@@ -154,23 +154,19 @@
 
         do_validation()
 
-        const tokenurl = window.location.origin+'/mapboxtoken'
+        const tokenurl = '{{base_url}}/mapboxtoken'
         fetch(tokenurl)
             .then(response => response.json())
             .then(data => {
                 mapboxgl.accessToken = data.token;
-                const map = initMap([-106.5, 34.5], 6, '/api/v1/roster/{{ roster_slug }}/geojson');
+                const map = initMap([-106.5, 34.5], 6, '{{base_url}}/api/v1/roster/{{ roster_slug }}/geojson');
 
 
                 $('#assets').on('click', '#view_map', function () {
                     console.log('asdfasfadsfsd afasdfafas')
                     var table = $('#assets').DataTable();
                     var selected_asset = table.row($(this).parents('tr')).data();
-                    {#map.jumpTo({center: [selected_asset.longitude, selected_asset.latitude], zoom: 5});#}
 
-
-                    {#marker1.setLngLat([selected_asset.longitude, selected_asset.latitude])#}
-                    {#marker1.addTo(map);#}
                     try {
                         map.removeLayer('selected')
                         map.removeSource('selected')
@@ -178,7 +174,6 @@
                         console.log(e)
                     }
 
-                    {#console.log(marker1)#}
                     map.addSource('selected', {
                         'type': 'geojson',
                         'data': {
@@ -210,11 +205,11 @@
 
         // handle calculate score button
         $('#calculate_score').click(function () {
-            fetch('/api/{{version}}/roster/{{ roster_slug }}/validate').then(
+            fetch('{{base_url}}/api/{{version}}/roster/{{ roster_slug }}/validate').then(
                 response => response.json()
             ).then(data => {
                 if (data.lineup){
-                    fetch('/api/{{version}}/roster/{{ roster_slug }}/score').then(
+                    fetch('{{base_url}}/api/{{version}}/roster/{{ roster_slug }}/score').then(
                         response => response.json()
                     ).then(data => {
                         $('#score').html('Points: '+data.score)
@@ -226,7 +221,7 @@
         // make asset table
         $('#assets').DataTable({
                 "ajax": {
-                    "url": "/api/{{ version }}/roster/{{ roster_slug }}",
+                    "url": "{{base_url}}/api/{{ version }}/roster/{{ roster_slug }}",
                     "dataSrc": ""
                 },
                 "info": false,
@@ -253,7 +248,7 @@
 
             function toggle_active(table, selected_asset, state){
                 console.log(selected_asset);
-                fetch('/api/{{version}}/roster/{{ roster_slug }}/'+selected_asset.slug,
+                fetch('{{base_url}}/api/{{version}}/roster/{{ roster_slug }}/'+selected_asset.slug,
                     { method: 'PUT',
                         headers: {
                             "Content-Type": "application/json",
@@ -293,7 +288,7 @@
 
 
                 //graph the data for this asset
-                fetch('/api/{{version}}/asset/'+selected_asset.slug+'/data_url').then(
+                fetch('{{base_url}}/api/{{version}}/asset/'+selected_asset.slug+'/data_url').then(
                     response => response.json()
                 ).then(data=>{
                     fetch(data.prev_url).then(
@@ -323,7 +318,7 @@
                         console.log(xmax, x[xmax], Math.max(...y))
                         var trace3 = {
                             x: [x[xmax], x[xmax]],
-                            y: [Math.max(...y), Math.min(...y)],
+                            y: [Math.max(...y), y[0]],
                             mode: 'lines',
                             name: 'max'
                         };

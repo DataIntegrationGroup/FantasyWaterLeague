@@ -20,7 +20,7 @@
 
         $('#rosters').DataTable({
             "ajax": {
-                "url": "/api/{{ version }}/player/{{ player_slug }}",
+                "url": "{{base_url}}/api/{{ version }}/player/{{ player_slug }}",
                 "dataSrc": "rosters"
             },
             "columns": [

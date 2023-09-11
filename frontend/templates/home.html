@@ -22,7 +22,7 @@
 
       $('#leaderboard').DataTable({
             "ajax": {
-                "url": "/api/{{ version }}/leaderboard",
+                "url": "{{base_url}}/api/{{ version }}/leaderboard",
                 "dataSrc": ""
             },
             "columns": [

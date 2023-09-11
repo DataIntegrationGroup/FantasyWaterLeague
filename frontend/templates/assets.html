@@ -23,7 +23,7 @@
 
         $('#assets').DataTable({
             "ajax": {
-                "url": "/api/{{ version }}/assets",
+                "url": "{{base_url}}/api/{{ version }}/assets",
                 "dataSrc": ""
             },
             "pageLength": 25,

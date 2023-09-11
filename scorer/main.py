@@ -46,6 +46,7 @@ def calculate_asset_score(asset):
 
 
 def get_data(url):
+    print('------- get data', url)
     resp = requests.get(url)
     return [d for d in resp.json()["value"]["timeSeries"][0]["values"][0]["value"]]
 

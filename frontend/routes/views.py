@@ -15,7 +15,7 @@
 # ===============================================================================
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 
@@ -24,8 +24,8 @@ router = APIRouter(prefix="")
 BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(Path(BASE_DIR, "templates")))
 
-version = "v1"
-
+VERSION = "v1"
+BASE_URL = 'http://localhost:4040'
 
 @router.get("/")
 async def root(request: Request):
@@ -35,15 +35,20 @@ async def root(request: Request):
     :return:
     """
     return templates.TemplateResponse(
-        "home.html", {"request": request, "version": version}
+        "home.html", {"request": request, "version": VERSION, "base_url": BASE_URL}
     )
+
+
+@router.get("/login/")
+def login(request: Request):
+    return templates.TemplateResponse("auth/login.html", {"request": request})
 
 
 @router.get("/player/{player_slug}")
 async def get_player_detail(request: Request, player_slug):
     return templates.TemplateResponse(
         "player.html",
-        {"request": request, "player_slug": player_slug, "version": version},
+        {"request": request, "player_slug": player_slug, "version": VERSION, "base_url": BASE_URL},
     )
 
 
@@ -51,7 +56,7 @@ async def get_player_detail(request: Request, player_slug):
 async def get_roster_detail(request: Request, roster_slug):
     return templates.TemplateResponse(
         "roster.html",
-        {"request": request, "roster_slug": roster_slug, "version": version},
+        {"request": request, "roster_slug": roster_slug, "version": VERSION, "base_url": BASE_URL},
     )
 
 
@@ -59,7 +64,7 @@ async def get_roster_detail(request: Request, roster_slug):
 async def get_assets(request: Request):
     return templates.TemplateResponse(
         "assets.html",
-        {"request": request, "version": version},
+        {"request": request, "version": VERSION, "base_url": BASE_URL},
     )
 
 
@@ -67,8 +72,7 @@ async def get_assets(request: Request):
 async def get_asset_detail(request: Request, asset_slug):
     return templates.TemplateResponse(
         "asset.html",
-        {"request": request, "asset_slug": asset_slug, "version": version},
+        {"request": request, "asset_slug": asset_slug, "version": VERSION, "base_url": BASE_URL},
     )
-
 
 # ============= EOF =============================================

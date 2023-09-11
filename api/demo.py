@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
+import contextlib
 import os
 import random
 from datetime import datetime, timedelta
@@ -23,12 +24,15 @@ from api.database import Base, engine, get_db
 from api.models.assets import Asset, Source, AssetType
 from api.models.game import Game
 from api.models.players import Player, Roster, RosterAsset
+from api.models.users import User, get_user_db, get_async_session
 from api.rules import N_ASSETS_PER_TEAM, N_GROUNDWATER_ASSETS, N_STREAM_GAUGE_ASSETS
+from api.schemas import UserCreate
+from api.users import get_user_manager
 
 
 def make_gw_sites(db):
     url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=72019&siteStatus=active' \
-           '&modifiedSince=P2D'
+          '&modifiedSince=P2D'
     return make_usgs_sites(db, "continuous_groundwater",
                            'usgs_nwis_depthtowater', url)
 
@@ -38,6 +42,7 @@ def make_usgs_discharge_sites(db):
     return make_usgs_sites(db, 'stream_gauge',
                            'usgs_nwis_discharge',
                            url)
+
 
 def make_usgs_gageheight_sites(db):
     url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00065&siteStatus=active'
@@ -100,7 +105,7 @@ def make_draft(assets):
             break
 
 
-def setup_demo():
+async def setup_demo():
     if os.environ.get('SETUP_DEMO', '0') == '0':
         return
 
@@ -109,12 +114,11 @@ def setup_demo():
 
     db = next(get_db())
 
-    # set game start to 2 weeks ago
+    # set game start to 1 week ago
     db.add(Game(slug='test',
                 name='Test',
-                start=datetime.now() - timedelta(days=14),
+                start=datetime.now() - timedelta(days=7),
                 active=True))
-
 
     db.add(Source(slug='usgs_nwis_gageheight', name='UGSS-NWIS-GageHeight',
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'
@@ -157,24 +161,37 @@ def setup_demo():
     db.commit()
     db.flush()
 
+    get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
+    get_async_session_context = contextlib.asynccontextmanager(get_async_session)
+    get_user_db_context = contextlib.asynccontextmanager(get_user_db)
+
     for slug, name, team in (('jake', 'Jake Ross', 'Leroy Flyers'),
-                             ('ethan', 'Ethan', 'Melody Lane Packers'),
+                             # ('ethan', 'Ethan', 'Melody Lane Packers'),
                              ('marissa', 'Marissa', 'Bevilacqua'),
-                             ('nels', 'Nels', 'Shedland Builders'),
-                             ('mattz', 'Mattz', 'PartyBoy Dancers'),
+            # ('nels', 'Nels', 'Shedland Builders'),
+            # ('mattz', 'Mattz', 'PartyBoy Dancers'),
                              ):
-        db.add(Player(slug=slug, name=name, team_name=team))
+        async with get_async_session_context() as session:
+            async with get_user_db_context(session) as user_db:
+                async with get_user_manager_context(user_db) as user_manager:
+                    user = await user_manager.create(UserCreate(
+                        email=f'{slug}@foo.com',
+                        password='foobar1234',
+                        is_superuser=False
+                    ))
+
+            db.add(Player(slug=slug, name=name, team_name=team, user_id=user.id))
 
     db.commit()
     db.flush()
 
-    players = ('jake', 'ethan', 'marissa', 'nels', 'mattz')
+    # players = ('jake', 'ethan', 'marissa', 'nels', 'mattz')
+    players = ('jake', 'marissa')
     for player in players:
         roster = Roster(name='main', slug=f'{player}.main', player_slug=player, active=True)
         db.add(roster)
     db.commit()
     db.flush()
-
 
     for n, assets in ((5, gws),
                       (15, sgs)):

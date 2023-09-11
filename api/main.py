@@ -15,49 +15,62 @@
 # ===============================================================================
 
 from fastapi import FastAPI, Depends
-from fastapi_users import fastapi_users
+from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from api.routes import v1, views
+from api.models.players import Player
+from api.routes import v1
+from api.schemas import UserRead, UserCreate, UserUpdate
+from api.users import auth_backend, current_active_user, fastapi_users
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
+
+origins = [
+    'http://localhost:8080',
+    ]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 from demo import setup_demo
-
-setup_demo()
 
 # ===============================================================================
 # API Endpoints
 # ===============================================================================
 
-# app.include_router(
-#     fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
-# )
-# app.include_router(
-#     fastapi_users.get_register_router(UserRead, UserCreate),
-#     prefix="/auth",
-#     tags=["auth"],
-# )
-# app.include_router(
-#     fastapi_users.get_reset_password_router(),
-#     prefix="/auth",
-#     tags=["auth"],
-# )
-# app.include_router(
-#     fastapi_users.get_verify_router(UserRead),
-#     prefix="/auth",
-#     tags=["auth"],
-# )
-# app.include_router(
-#     fastapi_users.get_users_router(UserRead, UserUpdate),
-#     prefix="/users",
-#     tags=["users"],
-# )
-#
-#
+app.include_router(
+    fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
+)
+app.include_router(
+    fastapi_users.get_register_router(UserRead, UserCreate),
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(
+    fastapi_users.get_reset_password_router(),
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(
+    fastapi_users.get_verify_router(UserRead),
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(
+    fastapi_users.get_users_router(UserRead, UserUpdate),
+    prefix="/users",
+    tags=["users"],
+)
+
+
 # @app.get("/authenticated-route")
-# async def authenticated_route(user: User = Depends(current_active_user)):
+# async def authenticated_route(user: Player = Depends(current_active_user)):
 #     return {"message": f"Hello {user.email}!"}
 
 
@@ -69,4 +82,7 @@ def mapboxtoken():
 
 
 app.include_router(v1.router)
-app.include_router(views.router)
+
+@app.on_event("startup")
+async def startup():
+    await setup_demo()

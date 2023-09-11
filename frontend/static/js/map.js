@@ -3,7 +3,7 @@ function initMap(center, zoom, dataurl){
     const map = new mapboxgl.Map({
         container: 'map', // container ID
         // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
-        style: 'mapbox://styles/mapbox/satellite-streets-v12', // style URL
+        style: 'mapbox://styles/mapbox/light-v11', // style URL
         center: center, // starting position [lng, lat]
     zoom: zoom, // starting zoom
 });

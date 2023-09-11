@@ -18,6 +18,25 @@ services:
 #      - ./frontend:/frontend
 #    depends_on:
 #      - api
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    command: bash -c "
+      uvicorn frontend.main:app
+      --host 0.0.0.0
+      --port 8080
+      --reload
+      "
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/frontend
+    depends_on:
+      - api
+#    env_file:
+#      - ./api/.env.local
+
 
   scorer:
     build:
