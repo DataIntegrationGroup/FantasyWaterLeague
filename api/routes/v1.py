@@ -30,7 +30,8 @@ from api.crud import (
     retrieve_roster_asset,
     update_roster_asset,
     update_asset,
-    retrieve_game_start, retrieve_player_by_user,
+    retrieve_game_start,
+    retrieve_player_by_user,
 )
 from api.rules import (
     validate_team,
@@ -72,11 +73,11 @@ async def get_leaderboard(db=Depends(get_db)):
 
     return players
 
-@router.get('/user/{username}')
+
+@router.get("/user/{username}")
 async def get_user(username, db=Depends(get_db)):
     user = retrieve_player_by_user(db, username)
     return user
-
 
 
 # validation
