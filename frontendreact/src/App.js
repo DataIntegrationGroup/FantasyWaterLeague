@@ -27,7 +27,7 @@ function App() {
 
         <BrowserRouter>
           <Routes>
-            <Route path="/dashboard" element={<Dashboard />}/>
+            <Route path="/dashboard" element={<Dashboard playername={slug}/>}/>
             <Route path="/preferences" element={<Preferences />}/>
           </Routes>
         </BrowserRouter>

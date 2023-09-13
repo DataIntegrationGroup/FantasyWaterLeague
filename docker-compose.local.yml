@@ -35,14 +35,14 @@ services:
 #      - api
 ##    env_file:
 ##      - ./api/.env.local
-  frontend:
-    build:
-      context: ./frontendreact
-      dockerfile: ./Dockerfile
-    volumes:
-     - ./frontendreact:/frontend
-    ports:
-      - 3000:3000
+#  frontend:
+#    build:
+#      context: ./frontendreact
+#      dockerfile: ./Dockerfile
+#    volumes:
+#     - ./frontendreact:/frontend
+#    ports:
+#      - 3000:3000
 
   scorer:
     build:

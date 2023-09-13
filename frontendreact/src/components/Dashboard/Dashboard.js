@@ -158,7 +158,7 @@ function toggleActive(slug, state, updateTable){
 }
 
 
-export default function Dashboard() {
+export default function Dashboard({playername}) {
     const [roster_data, setRosterData] = React.useState([])
     const [tableUpdate, setTableUpdate] = React.useState(false)
 
@@ -301,7 +301,7 @@ export default function Dashboard() {
                 </div>
                 <div className={'col-lg-6'} style={{'padding': '10px'}}>
                     <div className={'pane'}>
-                        <Scoreboard />
+                        <Scoreboard roster_slug={playername+'.main'}/>
                     </div>
                 </div>
             </div>
