@@ -92,3 +92,11 @@
     padding: 2px;
     font-size: 8pt;
 }
+
+.pane {
+    background: #89e0e7;
+    border: 3px solid rgba(27, 31, 35, .15);
+    border-radius: 6px;
+    padding: 10px;
+    margin: 5px;
+}

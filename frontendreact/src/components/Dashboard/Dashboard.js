@@ -8,6 +8,8 @@ import './Dashboard.css'
 import {settings} from "../../settings";
 import styled from "styled-components";
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
+import Leaderboard from "./Leaderboard";
+import Scoreboard from "./Scoreboard";
 
 function indexOfMaximumValue(my_array) {
     if (my_array.length === 0) {
@@ -157,7 +159,6 @@ function toggleActive(slug, state, updateTable){
 
 
 export default function Dashboard() {
-    const [data, setData] = React.useState([])
     const [roster_data, setRosterData] = React.useState([])
     const [tableUpdate, setTableUpdate] = React.useState(false)
 
@@ -170,14 +171,7 @@ export default function Dashboard() {
     const [plotData, setPlotData] = useState(null)
     const [selectedAsset, setSelectedAsset] = useState(null)
 
-    const columns = [{accessorKey: 'name',
-        header: 'Name',
-        cell: info => info.getValue()},
-        {accessorKey: 'score',
-            header: 'Score',
-            cell: info => info.getValue()
-        },
-    ]
+
     const roster_columns = [{accessorKey: 'name',
         header: 'Name',
         cell: info => info.getValue(),
@@ -208,10 +202,7 @@ export default function Dashboard() {
         },
     ]
 
-    const table = useReactTable({ data: data, columns: columns ,
-    getCoreRowModel: getCoreRowModel(),
 
-    })
     const roster_table = useReactTable({ data: roster_data,
         columns: roster_columns ,
         meta: {
@@ -221,12 +212,6 @@ export default function Dashboard() {
         },
         getCoreRowModel: getCoreRowModel()})
 
-    const fetchTableData =  () => {
-
-        fetch(settings.BASE_API_URL+'/leaderboard')
-            .then(response => response.json())
-            .then(data=> setData(data))
-    }
     const fetchRosterData = () => {
         fetch(settings.BASE_API_URL+'/roster/jake.main')
             .then(response => response.json())
@@ -301,7 +286,6 @@ export default function Dashboard() {
     }
     useEffect(() => {
         setUpMap()
-        fetchTableData()
         fetchRosterData()
 
     }, [])
@@ -309,47 +293,26 @@ export default function Dashboard() {
 
     return(
         <div className='container-fluid'>
-            <h2>Dashboard</h2>
+            <div className='row'>
+                <div className={'col-lg-6'} style={{'padding': '10px'}}>
+                    <div className={'pane'}>
+                        <Leaderboard />
+                    </div>
+                </div>
+                <div className={'col-lg-6'} style={{'padding': '10px'}}>
+                    <div className={'pane'}>
+                        <Scoreboard />
+                    </div>
+                </div>
+            </div>
             <div className='row'>
                 <div className='col-6'>
-                    <div>
+                    <div className={'pane'}>
                         <div ref={mapContainer} className="map-container" />
                     </div>
                 </div>
-                <div className='col-6'>
-                    <div>
-                        <table>
-                            <thead>
-                            {table.getHeaderGroups().map(headerGroup => (
-                                <tr key={headerGroup.id}>
-                                    {headerGroup.headers.map(header => (
-                                        <th key={header.id}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                        </th>
-                                    ))}
-                                </tr>
-                            ))}
-                            </thead>
-                            <tbody>
-                            {table.getRowModel().rows.map(row => (
-                                <tr key={row.id}
-                                >
-                                    {row.getVisibleCells().map(cell => (
-                                        <td key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div>
+                <div className='col-6 '>
+                    <div className={'pane'}>
                         <div id={'graphContainer'}>
 
                                 <button id={'graphbutton'} onClick={(event) =>
