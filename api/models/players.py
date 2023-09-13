@@ -24,6 +24,8 @@ class Player(Base, Slugged):
 
     user_id = Column(UUID, ForeignKey("user.id"), nullable=False)
 
+    user = relationship("User", backref="player", uselist=False)
+
 
 class Roster(Base, Slugged):
     player_slug = Column(String(128), ForeignKey("player.slug"), nullable=False)

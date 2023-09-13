@@ -22,6 +22,15 @@ from api.models.players import Roster, Player, RosterAsset
 from api.models.assets import Asset
 import requests
 
+from api.models.users import User
+
+
+def retrieve_player_by_user(db, username):
+    q = db.query(Player)
+    q = q.join(User)
+    q = q.filter(User.email == username)
+    return q.one()
+
 
 def retrieve_players(db):
     q = db.query(Player)
@@ -59,7 +68,7 @@ def retrieve_roster_assets(db, roster_slug):
         aa.active = a.active
         ret.append(aa)
 
-    return ret
+    return sorted(ret, key=lambda x: x.slug)
 
 
 def retrieve_rosters(db, player_slug):

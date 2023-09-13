@@ -18,24 +18,31 @@ services:
 #      - ./frontend:/frontend
 #    depends_on:
 #      - api
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: ./Dockerfile
-    command: bash -c "
-      gunicorn frontend.main:app
-      -b 0.0.0.0:8080
-      -w 4
-      "
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./frontend:/frontend
-    depends_on:
-      - api
-#    env_file:
-#      - ./api/.env.local
-
+#  frontend:
+#    build:
+#      context: ./frontend
+#      dockerfile: ./Dockerfile
+#    command: bash -c "
+#      gunicorn frontend.main:app
+#      -b 0.0.0.0:8080
+#      -w 4
+#      "
+#    ports:
+#      - "8080:8080"
+#    volumes:
+#      - ./frontend:/frontend
+#    depends_on:
+#      - api
+##    env_file:
+##      - ./api/.env.local
+#  frontend:
+#    build:
+#      context: ./frontendreact
+#      dockerfile: ./Dockerfile
+#    volumes:
+#     - ./frontendreact:/frontend
+#    ports:
+#      - 3000:3000
 
   scorer:
     build:

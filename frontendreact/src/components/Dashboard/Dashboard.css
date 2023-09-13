@@ -1,0 +1,94 @@
+
+.map-container {
+    height: 80vh;
+}
+
+
+.rowbutton {
+    appearance: none;
+    /*background-color: #2ea44f;*/
+    border: 1px solid rgba(27, 31, 35, .15);
+    border-radius: 6px;
+    box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 10px;
+    margin: 1px;
+    padding: 6px 16px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.rowbutton:focus:not(:focus-visible):not(.focus-visible) {
+    box-shadow: none;
+    outline: none;
+}
+
+.rowbutton:hover {
+    background-color: #2c974b;
+}
+
+.rowbutton:focus {
+    box-shadow: rgba(46, 164, 79, .4) 0 0 0 3px;
+    outline: none;
+}
+
+#graphbutton {
+    position: absolute;
+    top: 1%;
+    left: 1%;
+    z-index: 1000;
+    appearance: none;
+    /*background-color: #2ea44f;*/
+
+    border: 1px solid rgba(27, 31, 35, .15);
+    border-radius: 6px;
+    box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
+    box-sizing: border-box;
+    color: #312929;
+    cursor: pointer;
+    display: inline-block;
+    font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 10px;
+    margin: 1px;
+    padding: 6px 16px;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+#graphContainer {
+    position: absolute;
+    display: none;
+    top: 10%;
+    left: 20%;
+    /*width: 50%;*/
+    /*height: 640px;*/
+    /*width: 840px;*/
+    z-index: 1000;
+    padding: 20px;
+    border: 3px solid rgba(27, 31, 35, .15);
+    border-radius: 6px;
+    background: white;
+}
+
+.display-table tr td {
+    padding: 2px;
+    font-size: 8pt;
+}

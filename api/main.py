@@ -21,13 +21,14 @@ from starlette.staticfiles import StaticFiles
 from api.models.players import Player
 from api.routes import v1
 from api.schemas import UserRead, UserCreate, UserUpdate
-from api.users import auth_backend, current_active_user, fastapi_users
+from api.users import current_active_user, fastapi_users, bearer_auth_backend, cookie_auth_backend
 
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
 origins = [
     "http://localhost:8080",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -45,8 +46,12 @@ from demo import setup_demo
 # ===============================================================================
 
 app.include_router(
-    fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
+    fastapi_users.get_auth_router(bearer_auth_backend), prefix="/auth/jwt", tags=["auth"]
 )
+app.include_router(
+    fastapi_users.get_auth_router(cookie_auth_backend), prefix="/auth/cookie", tags=["auth"]
+)
+
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
     prefix="/auth",
@@ -74,11 +79,6 @@ app.include_router(
 #     return {"message": f"Hello {user.email}!"}
 
 
-@app.get("/mapboxtoken")
-def mapboxtoken():
-    return {
-        "token": "pk.eyJ1IjoiamFrZXJvc3N3ZGkiLCJhIjoiY2s3M3ZneGl4MGhkMDNrcjlocmNuNWg4bCJ9.4r1DRDQ_ja0fV2nnmlVT0A"
-    }
 
 
 app.include_router(v1.router)

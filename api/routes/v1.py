@@ -30,7 +30,7 @@ from api.crud import (
     retrieve_roster_asset,
     update_roster_asset,
     update_asset,
-    retrieve_game_start,
+    retrieve_game_start, retrieve_player_by_user,
 )
 from api.rules import (
     validate_team,
@@ -44,6 +44,13 @@ router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
 
 
 # GET ===============================================================================
+@router.get("/mapboxtoken")
+def mapboxtoken():
+    return {
+        "token": "pk.eyJ1IjoiamFrZXJvc3N3ZGkiLCJhIjoiY2s3M3ZneGl4MGhkMDNrcjlocmNuNWg4bCJ9.4r1DRDQ_ja0fV2nnmlVT0A"
+    }
+
+
 @router.get("/health")
 async def health():
     return {"status": "ok"}
@@ -64,6 +71,12 @@ async def get_leaderboard(db=Depends(get_db)):
         # player.score = retrieve_player_score(db, player.slug)
 
     return players
+
+@router.get('/user/{username}')
+async def get_user(username, db=Depends(get_db)):
+    user = retrieve_player_by_user(db, username)
+    return user
+
 
 
 # validation
@@ -122,6 +135,7 @@ async def get_roster_geojson(roster_slug, db=Depends(get_db)):
                 "properties": {
                     "name": a.name,
                     "score": a.score,
+                    "atype": a.atype,
                 },
                 "geometry": a.geometry,
             }
