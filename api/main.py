@@ -94,7 +94,7 @@ app.include_router(v1.router)
 
 @app.on_event("startup")
 def startup():
-    print('starting up')
+    print("starting up")
     if os.environ.get("SETUP_DEMO", "0") == "0":
         return
 
@@ -103,4 +103,4 @@ def startup():
     setup_db()
     setup_demo()
 
-    print('startup complete')
+    print("startup complete")
