@@ -9,25 +9,25 @@ import useToken from "./components/App/useToken";
 import useSlug from "./components/App/useSlug";
 import Dashboard from "./components/Dashboard/Dashboard";
 import AppNavbar from "./components/Navbar/Navbar";
+import useAuth from "./components/App/useAuth";
 
 
 function App() {
 
-    const {token, setToken} = useToken();
-    const {slug, setSlug} = useSlug();
+    const {auth, setAuth} = useAuth({});
 
-    if(!token) {
-        return <Login setToken={setToken}  setSlug={setSlug}/>
+    if(!auth?.token) {
+        return <Login setAuth={setAuth}/>
     }
 
     return (
       <div className="wrapper">
 
-        <AppNavbar/>
+        <AppNavbar setToken={setAuth}/>
 
         <BrowserRouter>
           <Routes>
-            <Route path="/dashboard" element={<Dashboard playername={slug}/>}/>
+            <Route path="/dashboard" element={<Dashboard playername={auth.slug}/>}/>
             <Route path="/preferences" element={<Preferences />}/>
           </Routes>
         </BrowserRouter>

@@ -11,7 +11,7 @@ export default function useSlug() {
 
     const saveSlug= (userSlug) => {
         sessionStorage.setItem('user', JSON.stringify(userSlug));
-        console.log('data', userSlug)
+        console.log('user slug data', userSlug)
         setSlug(userSlug.data);
     };
     return {setSlug: saveSlug, slug }

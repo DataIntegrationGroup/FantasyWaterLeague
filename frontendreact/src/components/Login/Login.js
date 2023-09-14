@@ -25,7 +25,7 @@ async function loginUser(credentials) {
 }
 
 
-export default function Login({ setToken, setSlug }) {
+export default function Login({ setAuth }) {
     const [username, setUserName] = useState();
     const [password, setPassword] = useState();
 
@@ -35,12 +35,13 @@ export default function Login({ setToken, setSlug }) {
             username,
             password
         });
-        setToken(token);
 
         fetch('http://localhost:4040/api/v1/user/'+username, )
             .then(data => data.json())
             .then(data => {
-                setSlug(data)
+
+                setAuth(data, token);
+
             })
     }
 

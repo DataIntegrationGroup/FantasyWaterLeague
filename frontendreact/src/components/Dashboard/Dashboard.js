@@ -116,12 +116,12 @@ function MapButton({map, row}){
 }
 
 function ActiveRowButton({props, updateTable,
-                             setValidLineup,
+                             setLineup,
                              setScore, roster_slug}){
     const handleClick = () => {
         toggleActive(roster_slug, props.original.slug, true,
             updateTable,
-            setValidLineup,
+            setLineup,
             setScore)
     }
     return <button
@@ -130,12 +130,12 @@ function ActiveRowButton({props, updateTable,
         onClick={handleClick}>Active</button>
 }
 function InactiveRowButton({props, updateTable,
-                               setValidLineup,
+                               setLineup,
                                setScore, roster_slug}){
     const handleClick = () => {
         toggleActive(roster_slug, props.original.slug, false,
             updateTable,
-            setValidLineup,
+            setLineup,
             setScore)
     }
     return <button
@@ -145,12 +145,12 @@ function InactiveRowButton({props, updateTable,
 }
 
 
-const updateScore = (roster_slug, setValidLineup, setScore,) => {
+const updateScore = (roster_slug, setLineup, setScore,) => {
     fetch(settings.BASE_API_URL+'/roster/'+ roster_slug +'/validate')
         .then(response=>response.json())
         .then(data=>{
             let is_valid = data.lineup
-            setValidLineup(is_valid)
+            setLineup(data)
             if (is_valid){
                 fetch(settings.BASE_API_URL+'/roster/'+ roster_slug +'/score').then(
                     response => response.json()
@@ -161,7 +161,7 @@ const updateScore = (roster_slug, setValidLineup, setScore,) => {
         })
 }
 
-function toggleActive(roster_slug, slug, state, updateTable, setValidLineup, setScore){
+function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore){
 
     fetch(settings.BASE_API_URL+'/roster/'+roster_slug+'/'+slug,
         { method: 'PUT',
@@ -175,7 +175,7 @@ function toggleActive(roster_slug, slug, state, updateTable, setValidLineup, set
     ).then(resp=>{
             console.log('success', resp)
             updateTable()
-            updateScore(roster_slug, setValidLineup, setScore)
+            updateScore(roster_slug, setLineup, setScore)
         }
     )
 }
@@ -185,7 +185,7 @@ export default function Dashboard({playername}) {
     const [roster_data, setRosterData] = React.useState([])
 
     const [score, setScore] = useState(0);
-    const [validLineup, setValidLineup] = useState(false)
+    const [lineup, setLineup] = useState(false)
 
     const mapContainer = useRef(null);
     const map = useRef(null);
@@ -220,12 +220,12 @@ export default function Dashboard({playername}) {
             cell: ({cell}) => (<div><ActiveRowButton props={cell.row}
                                                      roster_slug={playername+'.main'}
                                                      updateTable={fetchRosterData}
-                                                     setValidLineup={setValidLineup}
+                                                     setLineup={setLineup}
                                                      setScore={setScore}>Active</ActiveRowButton>
                                     <InactiveRowButton props={cell.row}
                                                        roster_slug={playername+'.main'}
                                                        updateTable={fetchRosterData}
-                                                       setValidLineup={setValidLineup}
+                                                       setLineup={setLineup}
                                                        setScore={setScore}>Inactive</InactiveRowButton>
                                     <GraphButton row={cell.row}
                                                  setSelectedAsset={setSelectedAsset}
@@ -247,11 +247,19 @@ export default function Dashboard({playername}) {
         getCoreRowModel: getCoreRowModel()})
 
     const fetchRosterData = () => {
-        fetch(settings.BASE_API_URL+'/roster/jake.main')
-            .then(response => response.json())
-            .then(data=> setRosterData(data))
+        if (playername !== undefined){
+            console.log('fetching roster data for', playername)
+            fetch(settings.BASE_API_URL+'/roster/'+playername+'.main')
+                .then(response => response.json())
+                .then(data=> setRosterData(data))
+        }
+
     }
     const setUpMap = () => {
+        if (playername === undefined){
+            return;
+        }
+
         fetch(settings.BASE_API_URL+'/mapboxtoken')
             .then(response => response.json())
             .then(data=> {
@@ -271,7 +279,7 @@ export default function Dashboard({playername}) {
                 //     .then(data=> {
                 //         console.log('geojson', data)
                 map.current.on('load', function () {
-                    fetch(settings.BASE_API_URL+'/roster/jake.main/geojson')
+                    fetch(settings.BASE_API_URL+'/roster/'+playername+'.main/geojson')
                         .then(response => response.json())
                         .then(data=> {
                             console.log('geojson', data)
@@ -318,9 +326,9 @@ export default function Dashboard({playername}) {
     useEffect(() => {
         setUpMap()
         fetchRosterData()
+        updateScore(playername+'.main', setLineup, setScore)
 
     }, [])
-
 
     return(
         <div className='container-fluid'>
@@ -333,7 +341,7 @@ export default function Dashboard({playername}) {
                 <div className={'col-lg-6'} style={{'padding': '10px'}}>
                     <div className={'pane'}>
                         <Scoreboard roster_slug={playername+'.main'}
-                                    validLineup={validLineup}
+                                    lineup={lineup}
                                     score={score}/>
                     </div>
                 </div>

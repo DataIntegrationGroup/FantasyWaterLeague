@@ -19,8 +19,8 @@ N_ASSETS_PER_TEAM = 20
 N_ASSETS_PER_LINEUP = 12
 
 N_GROUNDWATER_ASSETS = 3
-N_STREAM_GAUGE_ASSETS = 6
-N_RAIN_GAUGE_ASSETS = 3
+N_STREAM_GAUGE_ASSETS = 9
+N_RAIN_GAUGE_ASSETS = 0
 
 
 def validate_team(assets):
@@ -28,8 +28,7 @@ def validate_team(assets):
     return n == N_ASSETS_PER_TEAM, n
 
 
-def validate_lineup(assets):
-    lineup = [a for a in assets if a.active]
+def validate_lineup(lineup):
     n = len(lineup)
     return n == N_ASSETS_PER_LINEUP, n, N_ASSETS_PER_LINEUP
 

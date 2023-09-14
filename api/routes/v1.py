@@ -85,6 +85,8 @@ async def get_user(username, db=Depends(get_db)):
 async def get_validate_team(roster_slug, db=Depends(get_db)):
     assets = retrieve_roster_assets(db, roster_slug)
     vteam, nteam = validate_team(assets)
+
+    assets = [a for a in assets if a.active]
     vlineup, nlineup, rlineup = validate_lineup(assets)
 
     vgroundwater, ngw, rgw = validate_groundwater(assets)
@@ -94,7 +96,7 @@ async def get_validate_team(roster_slug, db=Depends(get_db)):
     return {
         "team": vteam,
         "nteam": nteam,
-        "lineup": vlineup,
+        "lineup": vlineup and vgroundwater and vstreamgauge and vrain,
         "nlineup": nlineup,
         "rlineup": rlineup,
         "groundwater": vgroundwater,
@@ -158,6 +160,13 @@ async def get_roster_score(roster_slug, db=Depends(get_db)):
         "slug": roster_slug,
         "score": score,
     }
+
+
+@router.get("/game")
+async def get_game(db=Depends(get_db)):
+    game_start = retrieve_game_start(db)
+    return {"start": game_start.isoformat(),
+            "end": (game_start + timedelta(days=7)).isoformat()}
 
 
 @router.get("/asset/{asset_slug}/data_url")

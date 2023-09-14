@@ -1,7 +1,10 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {settings} from "../../settings";
+import {getJson} from "../../util";
 
-export default function Scoreboard({roster_slug, score, validLineup}){
+export default function Scoreboard({roster_slug, score, lineup}){
+    const [gameData, setGameData] = useState({})
+
 // const [validLineup, setValidLineup] = useState(false)
     // const validateLineup = async () => {
     //     return await fetch(settings.BASE_API_URL+'/roster/'+ roster_slug +'/validate').then(
@@ -27,15 +30,45 @@ export default function Scoreboard({roster_slug, score, validLineup}){
     //     })
     //
     // }
+
+    const getGameStart = () => {
+        getJson(settings.BASE_API_URL+'/game').then(data => {
+                setGameData(data)
+
+        })
+
+    }
     useEffect(() => {
-        // getScore()
+        getGameStart()
 
     }, []);
 
     return (
         <div>
             <h4>Scoreboard: {roster_slug}</h4>
-            <p>Valid Lineup: {validLineup ? "True" : "False"}</p>
+            <table className={'table-bordered display-table'} style={{width: '100%'}}>
+                <thead>
+                    <tr><th>Game Start</th><th>Game End</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>{gameData.start}</td><td>{gameData.end}</td></tr>
+                </tbody>
+            </table>
+
+            <div className={'spacer'}></div>
+
+            <table className={'table-bordered display-table'} style={{width: '100%'}}>
+                <thead>
+                    <tr><th>StreamGauge</th><th>Groundwater</th><th>Valid</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{lineup.nstreamgauge}/{lineup.rstreamgauge}</td>
+                        <td>{lineup.ngroundwater}/{lineup.rgroundwater}</td>
+                        <td>{lineup.lineup ? "True" : "False"}</td>
+                    </tr>
+                </tbody>
+            </table>
             <p>Score: {score}</p>
             <button  className="btn btn-primary">Calculate Score</button>
         </div>

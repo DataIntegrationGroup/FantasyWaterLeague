@@ -10,7 +10,17 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 
-function AppNavbar() {
+function AppNavbar({setToken}) {
+
+    const handleLogout = () => {
+
+        sessionStorage.removeItem('token')
+        sessionStorage.removeItem('user')
+        setToken(null)
+
+    }
+
+
     return (
         <Navbar expand="lg" className="bg-body-tertiary">
             <Container>
@@ -39,7 +49,7 @@ function AppNavbar() {
                 <Row>
 
                     <Col xs="auto">
-                        <Button type="submit">Logout</Button>
+                        <Button type="submit" onClick={handleLogout}>Logout</Button>
                     </Col>
                 </Row>
             </Form>
