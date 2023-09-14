@@ -65,14 +65,11 @@ function GraphButton({row, setSelectedAsset, setPlotData}){
                         mode: 'lines',
                         name: 'max'
                     };
-                    // Plotly.react('graph',
-                    //     [trace1,trace2,trace3], {'title': selected_asset.name + ' -- ' +
-                    //             selected_asset.source_slug});
+
                     setPlotData([trace1,trace2,trace3])
                     setSelectedAsset(row.original.name)
                     console.log('selected', row.original.name)
                     document.getElementById('graphContainer').style.display = 'block'
-                    // $(".graph_overlay").css('display', 'block');
             })
     })}
 
@@ -111,8 +108,6 @@ function MapButton({map, row}){
                 'circle-stroke-width': 3,
             }
         })
-
-
     }
     return <button
         className='rowbutton'
@@ -120,18 +115,28 @@ function MapButton({map, row}){
         onClick={handleClick}>Map</button>
 }
 
-function ActiveRowButton({props, updateTable}){
+function ActiveRowButton({props, updateTable,
+                             setValidLineup,
+                             setScore, roster_slug}){
     const handleClick = () => {
-        toggleActive(props.original.slug, true, updateTable)
+        toggleActive(roster_slug, props.original.slug, true,
+            updateTable,
+            setValidLineup,
+            setScore)
     }
     return <button
         className='rowbutton'
         style={{background: '#2c974b'}}
         onClick={handleClick}>Active</button>
 }
-function InactiveRowButton({props, updateTable}){
+function InactiveRowButton({props, updateTable,
+                               setValidLineup,
+                               setScore, roster_slug}){
     const handleClick = () => {
-        toggleActive(props.original.slug, false, updateTable)
+        toggleActive(roster_slug, props.original.slug, false,
+            updateTable,
+            setValidLineup,
+            setScore)
     }
     return <button
         className='rowbutton'
@@ -139,9 +144,26 @@ function InactiveRowButton({props, updateTable}){
         onClick={handleClick}>Inactive</button>
 }
 
-function toggleActive(slug, state, updateTable){
 
-    fetch(settings.BASE_API_URL+'/roster/jake.main/'+slug,
+const updateScore = (roster_slug, setValidLineup, setScore,) => {
+    fetch(settings.BASE_API_URL+'/roster/'+ roster_slug +'/validate')
+        .then(response=>response.json())
+        .then(data=>{
+            let is_valid = data.lineup
+            setValidLineup(is_valid)
+            if (is_valid){
+                fetch(settings.BASE_API_URL+'/roster/'+ roster_slug +'/score').then(
+                    response => response.json()
+                ).then(data => {
+                    setScore(data.score)
+                })
+            }
+        })
+}
+
+function toggleActive(roster_slug, slug, state, updateTable, setValidLineup, setScore){
+
+    fetch(settings.BASE_API_URL+'/roster/'+roster_slug+'/'+slug,
         { method: 'PUT',
             headers: {
                 "Content-Type": "application/json",
@@ -153,6 +175,7 @@ function toggleActive(slug, state, updateTable){
     ).then(resp=>{
             console.log('success', resp)
             updateTable()
+            updateScore(roster_slug, setValidLineup, setScore)
         }
     )
 }
@@ -160,7 +183,9 @@ function toggleActive(slug, state, updateTable){
 
 export default function Dashboard({playername}) {
     const [roster_data, setRosterData] = React.useState([])
-    const [tableUpdate, setTableUpdate] = React.useState(false)
+
+    const [score, setScore] = useState(0);
+    const [validLineup, setValidLineup] = useState(false)
 
     const mapContainer = useRef(null);
     const map = useRef(null);
@@ -170,6 +195,7 @@ export default function Dashboard({playername}) {
 
     const [plotData, setPlotData] = useState(null)
     const [selectedAsset, setSelectedAsset] = useState(null)
+
 
 
     const roster_columns = [{accessorKey: 'name',
@@ -191,8 +217,16 @@ export default function Dashboard({playername}) {
             meta: {
                 width: 400
             },
-            cell: ({cell}) => (<div><ActiveRowButton props={cell.row} updateTable={fetchRosterData}>Active</ActiveRowButton>
-                                    <InactiveRowButton props={cell.row} updateTable={fetchRosterData}>Inactive</InactiveRowButton>
+            cell: ({cell}) => (<div><ActiveRowButton props={cell.row}
+                                                     roster_slug={playername+'.main'}
+                                                     updateTable={fetchRosterData}
+                                                     setValidLineup={setValidLineup}
+                                                     setScore={setScore}>Active</ActiveRowButton>
+                                    <InactiveRowButton props={cell.row}
+                                                       roster_slug={playername+'.main'}
+                                                       updateTable={fetchRosterData}
+                                                       setValidLineup={setValidLineup}
+                                                       setScore={setScore}>Inactive</InactiveRowButton>
                                     <GraphButton row={cell.row}
                                                  setSelectedAsset={setSelectedAsset}
                                                  setPlotData={setPlotData}>Graph</GraphButton>
@@ -237,12 +271,9 @@ export default function Dashboard({playername}) {
                 //     .then(data=> {
                 //         console.log('geojson', data)
                 map.current.on('load', function () {
-
-
                     fetch(settings.BASE_API_URL+'/roster/jake.main/geojson')
                         .then(response => response.json())
                         .then(data=> {
-
                             console.log('geojson', data)
                             let streamgauges = {'type': 'FeatureCollection',
                                             'features': data['features'].filter(d=>d.properties.atype==='stream_gauge')}
@@ -301,7 +332,9 @@ export default function Dashboard({playername}) {
                 </div>
                 <div className={'col-lg-6'} style={{'padding': '10px'}}>
                     <div className={'pane'}>
-                        <Scoreboard roster_slug={playername+'.main'}/>
+                        <Scoreboard roster_slug={playername+'.main'}
+                                    validLineup={validLineup}
+                                    score={score}/>
                     </div>
                 </div>
             </div>
