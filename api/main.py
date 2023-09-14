@@ -93,13 +93,13 @@ app.include_router(v1.router)
 
 
 @app.on_event("startup")
-def startup():
+async def startup():
     print("starting up")
     if os.environ.get("SETUP_DEMO", "0") == "0":
         print("skipping demo setup")
         return
 
     print("setup db")
-    setup_demo()
+    await setup_demo()
 
     print("startup complete")
