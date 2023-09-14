@@ -165,8 +165,10 @@ async def get_roster_score(roster_slug, db=Depends(get_db)):
 @router.get("/game")
 async def get_game(db=Depends(get_db)):
     game_start = retrieve_game_start(db)
-    return {"start": game_start.isoformat(),
-            "end": (game_start + timedelta(days=7)).isoformat()}
+    return {
+        "start": game_start.isoformat(),
+        "end": (game_start + timedelta(days=7)).isoformat(),
+    }
 
 
 @router.get("/asset/{asset_slug}/data_url")
