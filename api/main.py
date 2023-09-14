@@ -96,15 +96,15 @@ app.include_router(v1.router)
 def startup():
     print("starting up")
     if os.environ.get("SETUP_DEMO", "0") == "0":
-        print('skipping demo setup')
+        print("skipping demo setup")
         return
 
     from api.database import setup_db
 
-    print('setting up db')
+    print("setting up db")
     setup_db()
 
-    print('setup db')
+    print("setup db")
     setup_demo()
 
     print("startup complete")
