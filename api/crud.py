@@ -19,7 +19,7 @@ from numpy import array
 from api.database import get_db
 from api.models.game import Game
 from api.models.players import Roster, Player, RosterAsset
-from api.models.assets import Asset
+from api.models.assets import Asset, Score
 import requests
 
 from api.models.users import User
@@ -43,11 +43,12 @@ def retrieve_asset(db, asset_slug):
     return q.one()
 
 
-def retrieve_game_start(db):
+def retrieve_game(db):
     q = db.query(Game)
-    q = q.filter(Game.active == True)
-    s = q.one()
-    return s.start
+    q = q.order_by(Game.start.desc())
+    # q = q.filter(Game.active == True)
+    g = q.first()
+    return g
 
 
 def retrieve_roster_asset(db, roster_slug, asset_slug):
@@ -91,8 +92,7 @@ def update_roster_asset(db, roster_slug, asset_slug, payload):
 
 
 def update_asset(db, asset_slug, payload):
-    asset = retrieve_asset(db, asset_slug)
-    asset.score = payload.score
+    db.add(Score(asset_slug=asset_slug, score=payload.score, game_slug=payload.game_slug))
     db.commit()
 
 

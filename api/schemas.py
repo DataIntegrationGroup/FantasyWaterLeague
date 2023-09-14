@@ -53,6 +53,8 @@ class Asset(ORMBaseModel):
     # scoring_url: str
     latitude: float
     longitude: float
+    score: float
+    prev_score: float
 
 
 class ActiveAsset(Asset):

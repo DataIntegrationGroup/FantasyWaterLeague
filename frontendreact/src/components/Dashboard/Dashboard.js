@@ -10,6 +10,7 @@ import styled from "styled-components";
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import Leaderboard from "./Leaderboard";
 import Scoreboard from "./Scoreboard";
+import {getJson} from "../../util";
 
 function indexOfMaximumValue(my_array) {
     if (my_array.length === 0) {
@@ -117,8 +118,12 @@ function MapButton({map, row}){
 
 function ActiveRowButton({props, updateTable,
                              setLineup,
-                             setScore, roster_slug}){
+                             setScore, roster_slug, gameData}){
     const handleClick = () => {
+        if (gameData.active){
+            alert('Game has already started. You cannot change your lineup.')
+            return
+        }
         toggleActive(roster_slug, props.original.slug, true,
             updateTable,
             setLineup,
@@ -131,8 +136,12 @@ function ActiveRowButton({props, updateTable,
 }
 function InactiveRowButton({props, updateTable,
                                setLineup,
-                               setScore, roster_slug}){
+                               setScore, roster_slug, gameData}){
     const handleClick = () => {
+        if (gameData.active){
+            alert('Game has already started. You cannot change your lineup.')
+            return
+        }
         toggleActive(roster_slug, props.original.slug, false,
             updateTable,
             setLineup,
@@ -162,7 +171,6 @@ const updateScore = (roster_slug, setLineup, setScore,) => {
 }
 
 function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore){
-
     fetch(settings.BASE_API_URL+'/roster/'+roster_slug+'/'+slug,
         { method: 'PUT',
             headers: {
@@ -180,12 +188,12 @@ function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore
     )
 }
 
-
 export default function Dashboard({playername}) {
     const [roster_data, setRosterData] = React.useState([])
 
     const [score, setScore] = useState(0);
     const [lineup, setLineup] = useState(false)
+    const [gameData, setGameData] = useState({})
 
     const mapContainer = useRef(null);
     const map = useRef(null);
@@ -196,8 +204,6 @@ export default function Dashboard({playername}) {
     const [plotData, setPlotData] = useState(null)
     const [selectedAsset, setSelectedAsset] = useState(null)
 
-
-
     const roster_columns = [{accessorKey: 'name',
         header: 'Name',
         cell: info => info.getValue(),
@@ -207,11 +213,21 @@ export default function Dashboard({playername}) {
         },
         {accessorKey: 'atype',
             header: 'Type',},
-        // {accessorKey: 'active',
-        //     header: 'Active',
-        //     cell: info => info.getValue() ? 'True':'False',
-        //     disableSortBy: true
-        // },
+        {accessorKey: 'prev_score',
+            header: 'Prev Score',
+            cell: info => info.getValue().toFixed(2),
+        },
+        {accessorKey: 'score',
+            header: 'score',
+            cell: info =>(info.row.original.active&&lineup.lineup&&gameData.active) ? info.getValue().toFixed(2) : '',
+            // {
+            //     console.log('score', info)
+            //     return info.getValue()
+            // }
+
+
+                // (info.row.original.active) ? info.getValue() : '',
+        },
         {accessorKey: '',
             header: 'Action',
             meta: {
@@ -221,11 +237,13 @@ export default function Dashboard({playername}) {
                                                      roster_slug={playername+'.main'}
                                                      updateTable={fetchRosterData}
                                                      setLineup={setLineup}
+                                                     gameData={gameData}
                                                      setScore={setScore}>Active</ActiveRowButton>
                                     <InactiveRowButton props={cell.row}
                                                        roster_slug={playername+'.main'}
                                                        updateTable={fetchRosterData}
                                                        setLineup={setLineup}
+                                                        gameData={gameData}
                                                        setScore={setScore}>Inactive</InactiveRowButton>
                                     <GraphButton row={cell.row}
                                                  setSelectedAsset={setSelectedAsset}
@@ -254,6 +272,19 @@ export default function Dashboard({playername}) {
                 .then(data=> setRosterData(data))
         }
 
+    }
+    const setUpGame = () =>{
+        // fetch(settings.BASE_API_URL+'/game')
+        //     .then(response => response.json())
+        //     .then(data=> {
+        //         console.log('game', data)
+        //         setScore(data.score)
+        //         setLineup(data.lineup)
+        //     })
+        getJson(settings.BASE_API_URL+'/game').then(data =>{
+            console.log('game', data)
+            setGameData(data)
+        })
     }
     const setUpMap = () => {
         if (playername === undefined){
@@ -324,6 +355,10 @@ export default function Dashboard({playername}) {
             })
     }
     useEffect(() => {
+
+        // get if the game is active
+        setUpGame()
+
         setUpMap()
         fetchRosterData()
         updateScore(playername+'.main', setLineup, setScore)
@@ -342,7 +377,9 @@ export default function Dashboard({playername}) {
                     <div className={'pane'}>
                         <Scoreboard roster_slug={playername+'.main'}
                                     lineup={lineup}
-                                    score={score}/>
+                                    score={score}
+                                    gameData={gameData}
+                        />
                     </div>
                 </div>
             </div>

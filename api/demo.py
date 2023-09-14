@@ -106,19 +106,24 @@ def make_draft(assets):
 
 
 async def setup_demo():
-    if os.environ.get('SETUP_DEMO', '0') == '0':
-        return
+    # if os.environ.get('SETUP_DEMO', '0') == '0':
+    #     return
 
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    # Base.metadata.drop_all(bind=engine)
+    # Base.metadata.create_all(bind=engine)
 
     db = next(get_db())
 
-    # set game start to 1 week ago
-    db.add(Game(slug='test',
-                name='Test',
-                start=datetime.now() - timedelta(days=7),
-                active=True))
+    now = datetime.now()
+    db.add(Game(slug='game1',
+                name='Game 1',
+                start=now - timedelta(days=now.weekday()),
+                active=False))
+
+    db.add(Game(slug='game0',
+                name='Game 0',
+                start=now - timedelta(days=now.weekday()+7),
+                active=False))
 
     db.add(Source(slug='usgs_nwis_gageheight', name='UGSS-NWIS-GageHeight',
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'

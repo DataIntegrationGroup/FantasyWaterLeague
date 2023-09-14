@@ -30,7 +30,7 @@ from api.crud import (
     retrieve_roster_asset,
     update_roster_asset,
     update_asset,
-    retrieve_game_start,
+    retrieve_game,
     retrieve_player_by_user,
 )
 from api.rules import (
@@ -164,29 +164,30 @@ async def get_roster_score(roster_slug, db=Depends(get_db)):
 
 @router.get("/game")
 async def get_game(db=Depends(get_db)):
-    game_start = retrieve_game_start(db)
+    game = retrieve_game(db)
     return {
-        "start": game_start.isoformat(),
-        "end": (game_start + timedelta(days=7)).isoformat(),
+        "start": game.start.isoformat(),
+        "end": (game.start + timedelta(days=7)).isoformat(),
+        "active": game.active
     }
 
 
 @router.get("/asset/{asset_slug}/data_url")
 async def get_asset_data(asset_slug, db=Depends(get_db)):
-    game_start = retrieve_game_start(db)
+    game = retrieve_game(db)
     asset = retrieve_asset(db, asset_slug)
     source_id = asset.source_identifier
     request_url = f"{asset.source.base_url}&site={source_id}&period=P7D"
     prev_url = (
         f"{asset.source.base_url}"
         f"&site={source_id}"
-        f"&startDT={(game_start-timedelta(days=7)).isoformat()}"
-        f"&endDT={game_start.isoformat()}"
+        f"&startDT={(game.start-timedelta(days=7)).isoformat()}"
+        f"&endDT={game.start.isoformat()}"
     )
     scoring_url = (
         f"{asset.source.base_url}"
         f"&site={source_id}"
-        f"&startDT={game_start.isoformat()}"
+        f"&startDT={game.start.isoformat()}"
     )
     return {"url": request_url, "prev_url": prev_url, "scoring_url": scoring_url}
 
@@ -210,6 +211,7 @@ class AssetPayload(BaseModel):
 
 class ScorePayload(BaseModel):
     score: float
+    game_slug: str
 
 
 @router.put("/roster/{roster_slug}/{asset_slug}")
@@ -223,7 +225,7 @@ async def put_roster_asset(
 @router.put("/asset/{asset_slug}/score")
 async def put_asset_score(asset_slug, payload: ScorePayload, db=Depends(get_db)):
     update_asset(db, asset_slug, payload)
-    return {"slug": asset_slug, "score": payload.score}
+    return {"slug": asset_slug, "score": payload.score, "game_slug": payload.game_slug}
 
 
 # ============= EOF =============================================

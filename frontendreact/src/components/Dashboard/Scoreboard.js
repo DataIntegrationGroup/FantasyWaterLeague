@@ -2,8 +2,7 @@ import React, {useEffect, useState} from "react";
 import {settings} from "../../settings";
 import {getJson} from "../../util";
 
-export default function Scoreboard({roster_slug, score, lineup}){
-    const [gameData, setGameData] = useState({})
+export default function Scoreboard({gameData, roster_slug, score, lineup}){
 
 // const [validLineup, setValidLineup] = useState(false)
     // const validateLineup = async () => {
@@ -31,15 +30,15 @@ export default function Scoreboard({roster_slug, score, lineup}){
     //
     // }
 
-    const getGameStart = () => {
-        getJson(settings.BASE_API_URL+'/game').then(data => {
-                setGameData(data)
-
-        })
-
-    }
+    // const getGameStart = () => {
+    //     getJson(settings.BASE_API_URL+'/game').then(data => {
+    //             setGameData(data)
+    //
+    //     })
+    //
+    // }
     useEffect(() => {
-        getGameStart()
+        // getGameStart()
 
     }, []);
 

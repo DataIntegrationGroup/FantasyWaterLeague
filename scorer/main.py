@@ -30,18 +30,19 @@ def get_json(url):
         return resp.json()
 
 
-def update_score(asset_slug, score):
-    requests.put(f"{HOST}/api/v1/asset/{asset_slug}/score", json={"score": score})
+def update_score(asset_slug, score, game):
+    requests.put(f"{HOST}/api/v1/asset/{asset_slug}/score",
+                 json={"score": score, "game_slug": game})
 
 
-def calculate_asset_score(asset):
+def calculate_asset_score(asset, url='scoring_url'):
     atype = asset["atype"]
     source = asset["source_slug"]
     # source_id = asset['source_identifier']
     u = get_json(f"{HOST}/api/v1/asset/{asset['slug']}/data_url")
     if u:
         # get data from source
-        data = get_data(u["scoring_url"])
+        data = get_data(u[url])
         return score_data(source, atype, data)
 
 
@@ -100,7 +101,26 @@ def calculate_scores():
                 print("Exception calculating score for", asset["slug"])
                 continue
 
-            update_score(asset["slug"], score)
+            update_score(asset["slug"], score, 'game1')
+
+    et = time.time() - st
+    print(f"scoring complete {et:0.3f}s")
+
+
+def calculate_previous_scores():
+    data = get_json(f"{HOST}/api/v1/players")
+    print("starting scoring")
+    st = time.time()
+    for player in data:
+        data = get_json(f'{HOST}/api/v1/roster/{player["slug"]}.main')
+        for asset in data:
+            try:
+                score = calculate_asset_score(asset, url='prev_url')
+            except Exception as e:
+                print("Exception calculating score for", asset["slug"])
+                continue
+
+            update_score(asset["slug"], score, 'game0')
 
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")
@@ -113,6 +133,7 @@ if __name__ == "__main__":
         )
         exit(0)
 
+    calculate_previous_scores()
     print("starting scorer schelduler")
     calculate_scores()
     sched.start()
