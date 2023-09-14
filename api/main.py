@@ -100,4 +100,4 @@ async def startup():
     from api.database import setup_db
 
     setup_db()
-    await setup_demo()
+    setup_demo()

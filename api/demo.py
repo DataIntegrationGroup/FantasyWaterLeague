@@ -105,7 +105,7 @@ def make_draft(assets):
             break
 
 
-async def setup_demo():
+def setup_demo():
     # if os.environ.get('SETUP_DEMO', '0') == '0':
     #     return
 
@@ -176,10 +176,10 @@ async def setup_demo():
             # ('nels', 'Nels', 'Shedland Builders'),
             # ('mattz', 'Mattz', 'PartyBoy Dancers'),
                              ):
-        async with get_async_session_context() as session:
-            async with get_user_db_context(session) as user_db:
-                async with get_user_manager_context(user_db) as user_manager:
-                    user = await user_manager.create(UserCreate(
+        with get_async_session_context() as session:
+            with get_user_db_context(session) as user_db:
+                with get_user_manager_context(user_db) as user_manager:
+                    user = user_manager.create(UserCreate(
                         email=f'{slug}@foo.com',
                         password='foobar1234',
                         is_superuser=False
