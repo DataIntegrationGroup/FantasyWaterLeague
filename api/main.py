@@ -94,7 +94,7 @@ app.include_router(v1.router)
 
 @app.on_event("startup")
 async def startup():
-    if os.environ.get('SETUP_DEMO', '0') == '0':
+    if os.environ.get("SETUP_DEMO", "0") == "0":
         return
 
     from api.database import setup_db
