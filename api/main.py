@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
+import os
 
 from fastapi import FastAPI, Depends
 from starlette.middleware.cors import CORSMiddleware
@@ -93,6 +94,9 @@ app.include_router(v1.router)
 
 @app.on_event("startup")
 async def startup():
+    if os.environ.get('SETUP_DEMO', '0') == '0':
+        return
+
     from api.database import setup_db
 
     setup_db()
