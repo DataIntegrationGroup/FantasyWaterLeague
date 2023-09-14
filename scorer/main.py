@@ -31,11 +31,13 @@ def get_json(url):
 
 
 def update_score(asset_slug, score, game):
-    requests.put(f"{HOST}/api/v1/asset/{asset_slug}/score",
-                 json={"score": score, "game_slug": game})
+    requests.put(
+        f"{HOST}/api/v1/asset/{asset_slug}/score",
+        json={"score": score, "game_slug": game},
+    )
 
 
-def calculate_asset_score(asset, url='scoring_url'):
+def calculate_asset_score(asset, url="scoring_url"):
     atype = asset["atype"]
     source = asset["source_slug"]
     # source_id = asset['source_identifier']
@@ -101,7 +103,7 @@ def calculate_scores():
                 print("Exception calculating score for", asset["slug"])
                 continue
 
-            update_score(asset["slug"], score, 'game1')
+            update_score(asset["slug"], score, "game1")
 
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")
@@ -115,12 +117,12 @@ def calculate_previous_scores():
         data = get_json(f'{HOST}/api/v1/roster/{player["slug"]}.main')
         for asset in data:
             try:
-                score = calculate_asset_score(asset, url='prev_url')
+                score = calculate_asset_score(asset, url="prev_url")
             except Exception as e:
                 print("Exception calculating score for", asset["slug"])
                 continue
 
-            update_score(asset["slug"], score, 'game0')
+            update_score(asset["slug"], score, "game0")
 
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")

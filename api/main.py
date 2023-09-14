@@ -94,5 +94,6 @@ app.include_router(v1.router)
 @app.on_event("startup")
 async def startup():
     from api.database import setup_db
+
     setup_db()
     await setup_demo()

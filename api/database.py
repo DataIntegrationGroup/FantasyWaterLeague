@@ -62,10 +62,9 @@ def get_db():
         db.close()
 
 
-
-
 def setup_db():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+
 
 # ============= EOF =============================================

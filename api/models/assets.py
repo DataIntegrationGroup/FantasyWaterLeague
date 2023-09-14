@@ -23,7 +23,8 @@ from sqlalchemy import (
     TIMESTAMP,
     text,
     DateTime,
-    func, Integer,
+    func,
+    Integer,
 )
 from sqlalchemy.orm import declared_attr, relationship
 from geoalchemy2.shape import to_shape
@@ -55,7 +56,7 @@ class Asset(Base, Slugged):
     def score(self):
         sc = 0
         if self.scores:
-         sc = self.scores[-1].score
+            sc = self.scores[-1].score
         return sc
 
     @property
@@ -96,5 +97,6 @@ class Source(Base, Slugged):
 
 class AssetType(Base, Slugged):
     pass
+
 
 # ============= EOF =============================================

@@ -92,7 +92,9 @@ def update_roster_asset(db, roster_slug, asset_slug, payload):
 
 
 def update_asset(db, asset_slug, payload):
-    db.add(Score(asset_slug=asset_slug, score=payload.score, game_slug=payload.game_slug))
+    db.add(
+        Score(asset_slug=asset_slug, score=payload.score, game_slug=payload.game_slug)
+    )
     db.commit()
 
 

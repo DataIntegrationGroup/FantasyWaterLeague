@@ -168,7 +168,7 @@ async def get_game(db=Depends(get_db)):
     return {
         "start": game.start.isoformat(),
         "end": (game.start + timedelta(days=7)).isoformat(),
-        "active": game.active
+        "active": game.active,
     }
 
 
