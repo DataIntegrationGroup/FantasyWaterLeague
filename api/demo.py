@@ -111,7 +111,7 @@ async def setup_demo():
 
     # Base.metadata.drop_all(bind=engine)
     # Base.metadata.create_all(bind=engine)
-
+    print('setting up demo')
     db = next(get_db())
 
     now = datetime.now()
@@ -216,5 +216,7 @@ async def setup_demo():
                 break
 
     db.commit()
+
+    print('demo complete')
 
 # ============= EOF =============================================
