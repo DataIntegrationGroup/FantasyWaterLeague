@@ -31,7 +31,7 @@ SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{user}:{password}@{host}/{datab
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
-    # connect_args={"timeout": 1}
+    connect_args={"timeout": 1}
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
