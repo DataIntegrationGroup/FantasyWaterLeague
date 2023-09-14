@@ -99,7 +99,6 @@ def startup():
         print("skipping demo setup")
         return
 
-
     print("setup db")
     setup_demo()
 
