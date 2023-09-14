@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from "axios";
 import './Login.css';
+import {settings} from "../../settings";
 
 async function loginUser(credentials) {
     const formData = new FormData()
     formData.set('username', credentials.username)
     formData.set('password', credentials.password)
 
-    return axios.post('http://localhost:4040/auth/jwt/login', formData, {
+    return axios.post(settings.AUTH_URL+'/login', formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
 
