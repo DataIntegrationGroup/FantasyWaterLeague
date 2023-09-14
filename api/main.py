@@ -99,10 +99,6 @@ def startup():
         print("skipping demo setup")
         return
 
-    from api.database import setup_db
-
-    print("setting up db")
-    setup_db()
 
     print("setup db")
     setup_demo()

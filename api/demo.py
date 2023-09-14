@@ -108,9 +108,11 @@ def make_draft(assets):
 def setup_demo():
     # if os.environ.get('SETUP_DEMO', '0') == '0':
     #     return
+    print("setting up db")
 
-    # Base.metadata.drop_all(bind=engine)
-    # Base.metadata.create_all(bind=engine)
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+
     print('setting up demo')
     db = next(get_db())
 
