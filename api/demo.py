@@ -209,7 +209,7 @@ async def setup_demo():
             try:
                 for player in players:
                     asset = next(draft)
-                    db.add(RosterAsset(roster_slug=f'{player}.main', asset_slug=asset))
+                    db.add(RosterAsset(roster_slug=f'{player[0]}.main', asset_slug=asset))
                     c += 1
             except StopIteration:
                 break
