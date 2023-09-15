@@ -32,10 +32,7 @@ from api.users import (
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
-origins = [
-    "http://localhost:8080",
-    "http://localhost:3000",
-]
+origins = ['*']
 
 app.add_middleware(
     CORSMiddleware,
@@ -90,6 +87,7 @@ app.include_router(
 
 
 app.include_router(v1.router)
+app.include_router(v1.auth_router)
 
 
 @app.on_event("startup")

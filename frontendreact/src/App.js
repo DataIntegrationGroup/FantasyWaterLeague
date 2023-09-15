@@ -27,7 +27,7 @@ function App() {
 
         <BrowserRouter>
           <Routes>
-            <Route path="/dashboard" element={<Dashboard playername={auth.slug}/>}/>
+            <Route path="/dashboard" element={<Dashboard auth={auth}/>}/>
             <Route path="/preferences" element={<Preferences />}/>
           </Routes>
         </BrowserRouter>

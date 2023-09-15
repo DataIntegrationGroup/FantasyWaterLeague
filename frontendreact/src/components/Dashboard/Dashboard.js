@@ -29,50 +29,72 @@ function indexOfMaximumValue(my_array) {
         return maxIndex;
     }
 }
-function GraphButton({row, setSelectedAsset, setPlotData}){
+function GraphButton({row, setSelectedAsset, setPlotData, auth}){
+
+    const getGraphs = (data, tag, linestyle) => {
+
+        const values = data["value"]['timeSeries'][0]['values'][0]['value']
+        const y = values.map(v=>v['value'])
+        const x = values.map(v=>v['dateTime'])
+
+        const timeseries = {
+            x: x,
+            y: y,
+            mode: 'lines',
+            name: tag+'Time Series',
+            line: {color: '#0b82d9',
+                    dash: linestyle,}
+        };
+
+        const baseline = {
+            x: [x[0], x[x.length-1]],
+            y: [y[0], y[0]],
+            mode: 'lines',
+            name: tag+'Baseline',
+            line: {color: '#d9d90b'}
+        };
+
+        var xmax = indexOfMaximumValue(y)
+        const scorebar = {
+            x: [x[xmax], x[xmax]],
+            y: [Math.max(...y), y[0]],
+            mode: 'lines',
+            name: tag+' Score',
+            line: {color: '#d90b0b'}
+        };
+
+        const scorelabel = {x: [x[xmax]], y: [y[xmax]],
+            mode: 'markers+text',
+            name: 'Markers and Text',
+            text: ['Score: '+(y[xmax]-y[0]).toFixed(2)],
+            textposition: 'top',
+            type: 'scatter'}
+        return [timeseries, baseline, scorebar, scorelabel]
+    }
+
     const handleClick = () => {
         console.log('graph', row)
-        fetch(settings.BASE_API_URL+'/asset/'+row.original.slug+'/data_url')
-            .then(response => response.json())
-            .then(data=> {
-                fetch(data.prev_url).then(
-                    response => response.json()
-                ).then(data =>{
+        getJson(settings.BASE_API_URL+'/asset/'+row.original.slug+'/data_url', auth)
+        .then(asset_data=> {
+            getJson(asset_data.prev_url, {})
+            .then(data =>{
+                getJson(asset_data.scoring_url, {})
+                    .then(score_data => {
 
-                    var values = data["value"]['timeSeries'][0]['values'][0]['value']
+                        const [prev_timeseries, prev_baseline,
+                            prev_scorebar,prev_label] = getGraphs(data, 'Prev', 'sold')
+                        const [score_timeseries,score_baseline,
+                            score_scorebar, score_label] = getGraphs(score_data, 'Score', 'dashdot')
 
-                    var y = values.map(v=>v['value'])
-                    var x = values.map(v=>v['dateTime'])
-
-                    var trace1 = {
-                        x: x,
-                        y: y,
-                        mode: 'lines',
-                        name: 'timeseries'
-                    };
-
-                    var trace2 = {
-                        x: [x[0], x[x.length-1]],
-                        y: [y[0], y[0]],
-                        mode: 'lines',
-                        name: 'baseline'
-                    };
-
-                    var xmax = indexOfMaximumValue(y)
-                    console.log(xmax, x[xmax], Math.max(...y))
-                    var trace3 = {
-                        x: [x[xmax], x[xmax]],
-                        y: [Math.max(...y), y[0]],
-                        mode: 'lines',
-                        name: 'max'
-                    };
-
-                    setPlotData([trace1,trace2,trace3])
-                    setSelectedAsset(row.original.name)
-                    console.log('selected', row.original.name)
-                    document.getElementById('graphContainer').style.display = 'block'
+                        console.log('prev', prev_timeseries, prev_baseline, prev_scorebar)
+                        setPlotData([prev_timeseries,prev_baseline, prev_scorebar, prev_label,
+                                     score_timeseries, score_baseline, score_scorebar, score_label])
+                        setSelectedAsset(row.original.name)
+                        console.log('selected', row.original.name)
+                        document.getElementById('graphContainer').style.display = 'block'
+                })
             })
-    })}
+        })}
 
     return <button className='rowbutton'
                    style={{background: '#0b82d9'}}
@@ -188,7 +210,7 @@ function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore
     )
 }
 
-export default function Dashboard({playername}) {
+export default function Dashboard({auth}) {
     const [roster_data, setRosterData] = React.useState([])
 
     const [score, setScore] = useState(0);
@@ -208,7 +230,7 @@ export default function Dashboard({playername}) {
         header: 'Name',
         cell: info => info.getValue(),
         meta: {
-            width: 500
+            width: 300
             }
         },
         {accessorKey: 'atype',
@@ -218,7 +240,7 @@ export default function Dashboard({playername}) {
             cell: info => info.getValue().toFixed(2),
         },
         {accessorKey: 'score',
-            header: 'score',
+            header: 'Score',
             cell: info =>(info.row.original.active&&lineup.lineup&&gameData.active) ? info.getValue().toFixed(2) : '',
             // {
             //     console.log('score', info)
@@ -234,20 +256,21 @@ export default function Dashboard({playername}) {
                 width: 400
             },
             cell: ({cell}) => (<div><ActiveRowButton props={cell.row}
-                                                     roster_slug={playername+'.main'}
+                                                     roster_slug={auth.slug+'.main'}
                                                      updateTable={fetchRosterData}
                                                      setLineup={setLineup}
                                                      gameData={gameData}
                                                      setScore={setScore}>Active</ActiveRowButton>
                                     <InactiveRowButton props={cell.row}
-                                                       roster_slug={playername+'.main'}
+                                                       roster_slug={auth.slug+'.main'}
                                                        updateTable={fetchRosterData}
                                                        setLineup={setLineup}
                                                         gameData={gameData}
                                                        setScore={setScore}>Inactive</InactiveRowButton>
                                     <GraphButton row={cell.row}
                                                  setSelectedAsset={setSelectedAsset}
-                                                 setPlotData={setPlotData}>Graph</GraphButton>
+                                                 setPlotData={setPlotData}
+                                                 auth={auth}>Graph</GraphButton>
                                     <MapButton map={map} row={cell.row}>Map</MapButton>
             </div>
             )
@@ -265,11 +288,13 @@ export default function Dashboard({playername}) {
         getCoreRowModel: getCoreRowModel()})
 
     const fetchRosterData = () => {
-        if (playername !== undefined){
-            console.log('fetching roster data for', playername)
-            fetch(settings.BASE_API_URL+'/roster/'+playername+'.main')
-                .then(response => response.json())
+        if (auth.slug !== undefined){
+            console.log('fetching roster data for', auth.slug)
+            getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main', auth)
                 .then(data=> setRosterData(data))
+            // fetch(settings.BASE_API_URL+'/roster/'+auth.slug+'.main')
+            //     .then(response => response.json())
+            //     .then(data=> setRosterData(data))
         }
 
     }
@@ -281,18 +306,17 @@ export default function Dashboard({playername}) {
         //         setScore(data.score)
         //         setLineup(data.lineup)
         //     })
-        getJson(settings.BASE_API_URL+'/game').then(data =>{
+        getJson(settings.BASE_API_URL+'/game', {}).then(data =>{
             console.log('game', data)
             setGameData(data)
         })
     }
     const setUpMap = () => {
-        if (playername === undefined){
+        if (auth.slug === undefined){
             return;
         }
 
-        fetch(settings.BASE_API_URL+'/mapboxtoken')
-            .then(response => response.json())
+        getJson(settings.BASE_API_URL+'/mapboxtoken', auth)
             .then(data=> {
                 console.log('mapboxfasd token', data)
                 mapboxgl.accessToken = data.token
@@ -301,7 +325,8 @@ export default function Dashboard({playername}) {
                     container: mapContainer.current,
                     style: 'mapbox://styles/mapbox/streets-v12',
                     center: [lng, lat],
-                    zoom: zoom
+                    zoom: zoom,
+                    minZoom: 5
                 });
 
 
@@ -310,7 +335,7 @@ export default function Dashboard({playername}) {
                 //     .then(data=> {
                 //         console.log('geojson', data)
                 map.current.on('load', function () {
-                    fetch(settings.BASE_API_URL+'/roster/'+playername+'.main/geojson')
+                    fetch(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson')
                         .then(response => response.json())
                         .then(data=> {
                             console.log('geojson', data)
@@ -361,21 +386,21 @@ export default function Dashboard({playername}) {
 
         setUpMap()
         fetchRosterData()
-        updateScore(playername+'.main', setLineup, setScore)
+        updateScore(auth.slug+'.main', setLineup, setScore)
 
     }, [])
 
     return(
         <div className='container-fluid'>
             <div className='row'>
-                <div className={'col-lg-6'} style={{'padding': '10px'}}>
+                <div className={'col-6'}>
                     <div className={'pane'}>
                         <Leaderboard />
                     </div>
                 </div>
-                <div className={'col-lg-6'} style={{'padding': '10px'}}>
+                <div className={'col-6'}>
                     <div className={'pane'}>
-                        <Scoreboard roster_slug={playername+'.main'}
+                        <Scoreboard roster_slug={auth.slug+'.main'}
                                     lineup={lineup}
                                     score={score}
                                     gameData={gameData}
@@ -399,7 +424,10 @@ export default function Dashboard({playername}) {
                             <Plot
                                 divId={'graph'}
                                 data={plotData}
-                                layout={{width: '100%', height: '100%', title: {text: selectedAsset} }}
+                                layout={{width: '100%',
+                                    height: '100%',
+                                    title: {text: selectedAsset},
+                                    showlegend: false}}
                             />
                         </div>
 

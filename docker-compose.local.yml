@@ -2,41 +2,6 @@ version: "3.3"
 services:
 #  frontend:
 #    build:
-#      context: ./frontend
-#      dockerfile: ./Dockerfile
-#    #    command: python -m main
-#    command: bash -c "
-#      gunicorn frontend.main:app -b "0.0.0.0:8051" --reload
-#      "
-#
-#    #    environment:
-#    #      DASH_DEBUG: true
-#    #      DASH_HOT_RELOAD: true
-#    ports:
-#      - "8051:8051"
-#    volumes:
-#      - ./frontend:/frontend
-#    depends_on:
-#      - api
-#  frontend:
-#    build:
-#      context: ./frontend
-#      dockerfile: ./Dockerfile
-#    command: bash -c "
-#      gunicorn frontend.main:app
-#      -b 0.0.0.0:8080
-#      -w 4
-#      "
-#    ports:
-#      - "8080:8080"
-#    volumes:
-#      - ./frontend:/frontend
-#    depends_on:
-#      - api
-##    env_file:
-##      - ./api/.env.local
-#  frontend:
-#    build:
 #      context: ./frontendreact
 #      dockerfile: ./Dockerfile
 #    volumes:

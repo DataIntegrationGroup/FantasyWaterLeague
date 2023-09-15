@@ -93,12 +93,20 @@
     font-size: 8pt;
 }
 
+.col-6 {
+    padding: 0px;
+}
+
+.col-lg-6 {
+    padding: 0px;
+}
+
 .pane {
     background: #89e0e7;
     border: 3px solid rgba(27, 31, 35, .15);
     border-radius: 6px;
     padding: 10px;
-    margin: 5px;
+    /*margin: 5px;*/
 }
 
 .spacer {

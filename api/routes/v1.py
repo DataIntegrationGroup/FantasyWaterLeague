@@ -40,12 +40,13 @@ from api.rules import (
     validate_stream_gauge,
     validate_rain_gauge,
 )
+from api.users import current_active_user
 
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
-
+auth_router = APIRouter(prefix=f"/api/v1", tags=["API V1"], dependencies=[Depends(current_active_user)])
 
 # GET ===============================================================================
-@router.get("/mapboxtoken")
+@auth_router.get("/mapboxtoken")
 def mapboxtoken():
     return {
         "token": "pk.eyJ1IjoiamFrZXJvc3N3ZGkiLCJhIjoiY2s3M3ZneGl4MGhkMDNrcjlocmNuNWg4bCJ9.4r1DRDQ_ja0fV2nnmlVT0A"
@@ -117,12 +118,12 @@ async def get_players(db=Depends(get_db)):
     return players
 
 
-@router.get("/player/{player_slug}")
+@auth_router.get("/player/{player_slug}")
 async def get_player(player_slug, db=Depends(get_db)):
     return {"name": player_slug, "rosters": retrieve_rosters(db, player_slug)}
 
 
-@router.get("/roster/{roster_slug}", response_model=List[schemas.ActiveAsset])
+@auth_router.get("/roster/{roster_slug}", response_model=List[schemas.ActiveAsset])
 async def get_roster(roster_slug, db=Depends(get_db)):
     return retrieve_roster_assets(db, roster_slug)
 
@@ -222,7 +223,7 @@ async def put_roster_asset(
     return {"slug": asset_slug, "active": payload.active}
 
 
-@router.put("/asset/{asset_slug}/score")
+@auth_router.put("/asset/{asset_slug}/score")
 async def put_asset_score(asset_slug, payload: ScorePayload, db=Depends(get_db)):
     update_asset(db, asset_slug, payload)
     return {"slug": asset_slug, "score": payload.score, "game_slug": payload.game_slug}

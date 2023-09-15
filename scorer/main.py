@@ -20,20 +20,25 @@ import requests
 from numpy import array
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-HOST = "http://host.docker.internal:4040"
+HOST = "http://api:8080"
 
 
-def get_json(url):
+def get_json(url, access_token=None):
     print("getting", url)
-    resp = requests.get(url)
+    headers = {}
+    if access_token:
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+    resp = requests.get(url, headers=headers)
     if resp.ok:
         return resp.json()
 
 
-def update_score(asset_slug, score, game):
+def update_score(asset_slug, score, game, access_token):
     requests.put(
         f"{HOST}/api/v1/asset/{asset_slug}/score",
         json={"score": score, "game_slug": game},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
 
@@ -91,11 +96,13 @@ sched = BlockingScheduler()
 
 @sched.scheduled_job("cron", hour=15)
 def calculate_scores():
+    access_token = get_access_token()
+
     data = get_json(f"{HOST}/api/v1/players")
     print("starting scoring")
     st = time.time()
     for player in data:
-        data = get_json(f'{HOST}/api/v1/roster/{player["slug"]}.main')
+        data = get_json(f'{HOST}/api/v1/roster/{player["slug"]}.main', access_token)
         for asset in data:
             try:
                 score = calculate_asset_score(asset)
@@ -103,18 +110,28 @@ def calculate_scores():
                 print("Exception calculating score for", asset["slug"])
                 continue
 
-            update_score(asset["slug"], score, "game1")
+            update_score(asset["slug"], score, "game1", access_token)
 
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")
 
 
+def get_access_token():
+    resp = requests.post(f"{HOST}/auth/jwt/login", data={"username": "jake@foo.com",
+                                                         "password": "foobar1234"})
+
+    access_token = resp.json()["access_token"]
+    return access_token
+
+
 def calculate_previous_scores():
-    data = get_json(f"{HOST}/api/v1/players")
+    access_token = get_access_token()
+
+    data = get_json(f"{HOST}/api/v1/players", access_token)
     print("starting scoring")
     st = time.time()
     for player in data:
-        data = get_json(f'{HOST}/api/v1/roster/{player["slug"]}.main')
+        data = get_json(f'{HOST}/api/v1/roster/{player["slug"]}.main', access_token)
         for asset in data:
             try:
                 score = calculate_asset_score(asset, url="prev_url")
@@ -122,7 +139,7 @@ def calculate_previous_scores():
                 print("Exception calculating score for", asset["slug"])
                 continue
 
-            update_score(asset["slug"], score, "game0")
+            update_score(asset["slug"], score, "game0", access_token)
 
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")
