@@ -67,10 +67,10 @@ services:
       alembic upgrade head;
       uvicorn api.main:app
       --host 0.0.0.0
-      --port 4040
+      --port 8080
       "
     ports:
-      - "4040:4040"
+      - "8080:8080"
     volumes:
       - ./api:/api
     depends_on:
@@ -78,7 +78,7 @@ services:
     env_file:
       - ./api/.env.local
     healthcheck:
-      test: curl --fail http://localhost:4040/api/v1/health || exit 1
+      test: curl --fail http://localhost:8080/api/v1/health || exit 1
       interval: 15s
       #      retries: 5
       #      start_period: 20s
