@@ -20,7 +20,6 @@ function AppNavbar({setToken}) {
 
     }
 
-
     return (
         <Navbar expand="lg" className="bg-body-tertiary">
             <Container>
@@ -45,11 +44,11 @@ function AppNavbar({setToken}) {
                 </Navbar.Collapse>
             </Container>
 
-            <Form inline>
+            <Nav.Link href="admin">Admin</Nav.Link>
+            <Form inline="true">
                 <Row>
                     <Col xs="auto">
                         <Button type="submit"
-                                style={{'margin-right': '10px'}}
                                 onClick={handleLogout}>Logout</Button>
                     </Col>
                 </Row>

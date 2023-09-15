@@ -1,4 +1,7 @@
-export function getJson(url, auth) {
+import {settings} from "./settings";
+import axios from "axios";
+
+export function getJson(url, auth=null, method='GET', body=null) {
 
     console.log('getJson url:', auth)
     let headers={}
@@ -6,8 +9,11 @@ export function getJson(url, auth) {
         headers['Authorization'] = `Bearer ` + auth['token']?.access_token
     }
     console.log('getJson url:', headers)
-    return fetch(url, {headers: headers}).then(response => response.json())
+    return fetch(url, {method: method,
+                           headers: headers,
+                           body: body}).then(response => response.json())
 }
+
 
 
 export function indexOfMinimumValue(my_array) {

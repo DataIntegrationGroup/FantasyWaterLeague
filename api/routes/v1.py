@@ -46,6 +46,21 @@ router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
 auth_router = APIRouter(
     prefix=f"/api/v1", tags=["API V1"], dependencies=[Depends(current_active_user)]
 )
+admin_router = APIRouter(prefix='/api/v1/admin', tags=['API V1 Admin'], dependencies=[Depends(current_active_user)])
+
+
+class GamePayload(BaseModel):
+    active: str
+
+
+# admin
+@admin_router.patch("/game_status")
+async def post_game_status(payload: GamePayload, db=Depends(get_db)):
+    print(payload)
+    game = retrieve_game(db)
+    game.active = payload.active == 'true'
+    db.commit()
+    return {"status": "ok"}
 
 
 # GET ===============================================================================
@@ -186,7 +201,7 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
     prev_url = (
         f"{asset.source.base_url}"
         f"&site={source_id}"
-        f"&startDT={(game.start-timedelta(days=7)).isoformat()}"
+        f"&startDT={(game.start - timedelta(days=7)).isoformat()}"
         f"&endDT={game.start.isoformat()}"
     )
     scoring_url = (
@@ -221,7 +236,7 @@ class ScorePayload(BaseModel):
 
 @router.put("/roster/{roster_slug}/{asset_slug}")
 async def put_roster_asset(
-    roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
+        roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
 ):
     update_roster_asset(db, roster_slug, asset_slug, payload)
     return {"slug": asset_slug, "active": payload.active}
@@ -231,6 +246,5 @@ async def put_roster_asset(
 async def put_asset_score(asset_slug, payload: ScorePayload, db=Depends(get_db)):
     update_asset(db, asset_slug, payload)
     return {"slug": asset_slug, "score": payload.score, "game_slug": payload.game_slug}
-
 
 # ============= EOF =============================================

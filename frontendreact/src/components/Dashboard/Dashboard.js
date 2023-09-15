@@ -11,6 +11,7 @@ import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-load
 import Leaderboard from "./Leaderboard";
 import Scoreboard from "./Scoreboard";
 import {getJson, indexOfMinimumValue, indexOfMaximumValue} from "../../util";
+import {loginUser, saveAuthentication} from "../Login/Login";
 import streamgauge_image from '../../img/stream_gauge.png'
 import gwell_image from '../../img/gwell.png'
 
@@ -235,7 +236,7 @@ function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore
     )
 }
 
-export default function Dashboard({auth}) {
+export default function Dashboard({auth, setAuth}) {
     const [roster_data, setRosterData] = React.useState([])
 
     const [score, setScore] = useState(0);
@@ -440,9 +441,24 @@ export default function Dashboard({auth}) {
                 });
             })
     }
-    useEffect(() => {
 
-        // get if the game is active
+
+    const refreshAccessToken = () => {
+
+        console.log('refreshing access token', auth)
+
+        loginUser({
+            username: auth.credentials.username,
+            password: auth.credentials.password
+        }).then(token=> {
+            saveAuthentication(setAuth, token,
+                auth.credentials.username,
+                auth.credentials.password)
+        });
+    }
+    useEffect(() => {
+        refreshAccessToken()
+
         setUpGame()
 
         setUpMap()
