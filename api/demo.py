@@ -172,12 +172,14 @@ async def setup_demo():
     get_async_session_context = contextlib.asynccontextmanager(get_async_session)
     get_user_db_context = contextlib.asynccontextmanager(get_user_db)
 
-    for slug, name, team in (('jake', 'Jake Ross', 'Leroy Flyers'),
-                             # ('ethan', 'Ethan', 'Melody Lane Packers'),
-                             ('marissa', 'Marissa', 'Bevilacqua'),
-            # ('nels', 'Nels', 'Shedland Builders'),
-            # ('mattz', 'Mattz', 'PartyBoy Dancers'),
-                             ):
+    players = (('jake', 'Jake Ross', 'Leroy Flyers'),
+               # ('ethan', 'Ethan', 'Melody Lane Packers'),
+               ('marissa', 'Marissa', 'Bevilacqua'),
+               # ('nels', 'Nels', 'Shedland Builders'),
+               # ('mattz', 'Mattz', 'PartyBoy Dancers'),
+               ('rachel', 'Rachel', 'Socorro Managers'),
+               )
+    for slug, name, team in players:
         async with get_async_session_context() as session:
             async with get_user_db_context(session) as user_db:
                 async with get_user_manager_context(user_db) as user_manager:
@@ -192,10 +194,8 @@ async def setup_demo():
     db.commit()
     db.flush()
 
-    # players = ('jake', 'ethan', 'marissa', 'nels', 'mattz')
-    players = ('jake', 'marissa')
-    for player in players:
-        roster = Roster(name='main', slug=f'{player}.main', player_slug=player, active=True)
+    for playerargs in players:
+        roster = Roster(name='main', slug=f'{playerargs[0]}.main', player_slug=playerargs[0], active=True)
         db.add(roster)
     db.commit()
     db.flush()
