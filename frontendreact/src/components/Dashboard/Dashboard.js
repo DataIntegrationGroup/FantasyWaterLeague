@@ -32,10 +32,16 @@ function indexOfMaximumValue(my_array) {
 function GraphButton({row, setSelectedAsset, setPlotData, auth}){
 
     const getGraphs = (data, tag, linestyle) => {
+        let x = [];
+        let y = [];
+        try {
+            const values = data["value"]['timeSeries'][0]['values'][0]['value']
+            y = values.map(v=>v['value'])
+            x = values.map(v=>v['dateTime'])
 
-        const values = data["value"]['timeSeries'][0]['values'][0]['value']
-        const y = values.map(v=>v['value'])
-        const x = values.map(v=>v['dateTime'])
+        } catch (e) {
+
+        }
 
         const timeseries = {
             x: x,
@@ -76,11 +82,10 @@ function GraphButton({row, setSelectedAsset, setPlotData, auth}){
         console.log('graph', row)
         getJson(settings.BASE_API_URL+'/asset/'+row.original.slug+'/data_url', auth)
         .then(asset_data=> {
-            getJson(asset_data.prev_url, {})
+            getJson(asset_data.prev_url, null)
             .then(data =>{
-                getJson(asset_data.scoring_url, {})
+                getJson(asset_data.scoring_url, null)
                     .then(score_data => {
-
                         const [prev_timeseries, prev_baseline,
                             prev_scorebar,prev_label] = getGraphs(data, 'Prev', 'sold')
                         const [score_timeseries,score_baseline,

@@ -2,7 +2,7 @@ export function getJson(url, auth) {
 
     console.log('getJson url:', auth)
     let headers={}
-    if (auth) {
+    if (auth !==null) {
         headers['Authorization'] = `Bearer ` + auth['token']?.access_token
     }
     console.log('getJson url:', headers)
