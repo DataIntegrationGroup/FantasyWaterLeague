@@ -12,6 +12,9 @@ import AppNavbar from "./components/Navbar/Navbar";
 import useAuth from "./components/App/useAuth";
 
 
+function Home(){
+    return <h2>Welcome to Fantasy Water League</h2>;
+}
 function App() {
 
     const {auth, setAuth} = useAuth({});
@@ -27,6 +30,7 @@ function App() {
 
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Home />}/>
             <Route path="/dashboard" element={<Dashboard auth={auth}/>}/>
             <Route path="/preferences" element={<Preferences />}/>
           </Routes>

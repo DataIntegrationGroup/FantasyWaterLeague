@@ -10,30 +10,20 @@ import styled from "styled-components";
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import Leaderboard from "./Leaderboard";
 import Scoreboard from "./Scoreboard";
-import {getJson} from "../../util";
+import {getJson, indexOfMinimumValue, indexOfMaximumValue} from "../../util";
+import streamgauge_image from '../../img/stream_gauge.png'
+import gwell_image from '../../img/gwell.png'
 
-function indexOfMaximumValue(my_array) {
-    if (my_array.length === 0) {
-        return -1;
-    }
-    else{
-        var maximumValue = my_array[0];
-        var maxIndex = 0;
 
-        for (var i = 1; i < my_array.length; i++) {
-            if (my_array[i] > maximumValue) {
-                maxIndex = i;
-                maximumValue = my_array[i];
-            }
-        }
-        return maxIndex;
-    }
-}
-function GraphButton({row, setSelectedAsset, setPlotData, auth}){
+function GraphButton({row, setSelectedAsset,
+                         setPlotLayout,
+                         setPlotData, auth}){
 
     const getGraphs = (data, tag, linestyle) => {
         let x = [];
         let y = [];
+        let extralayout = {}
+
         try {
             const values = data["value"]['timeSeries'][0]['values'][0]['value']
             y = values.map(v=>v['value'])
@@ -41,6 +31,15 @@ function GraphButton({row, setSelectedAsset, setPlotData, auth}){
 
         } catch (e) {
 
+        }
+        let scalar = 1
+        if (row.original.atype==='stream_gauge'){
+            scalar = 1.0
+        } else if (row.original.atype==='continuous_groundwater'){
+            scalar = 20
+            extralayout['yaxis'] ={'autorange': 'reversed'}
+        } else if (row.original.atype==='rain_gauge'){
+            scalar = 10
         }
 
         const timeseries = {
@@ -59,23 +58,33 @@ function GraphButton({row, setSelectedAsset, setPlotData, auth}){
             name: tag+'Baseline',
             line: {color: '#d9d90b'}
         };
+        let xidx = 0;
+        let score = 0;
+        let yscore = 0;
+        if (row.original.atype==='continuous_groundwater'){
+            xidx = indexOfMinimumValue(y)
+            score = (y[0] - y[xidx])
 
-        var xmax = indexOfMaximumValue(y)
+        } else{
+            xidx = indexOfMaximumValue(y)
+            score = (y[xidx]-y[0])
+        }
+        yscore = y[xidx]
         const scorebar = {
-            x: [x[xmax], x[xmax]],
-            y: [Math.max(...y), y[0]],
+            x: [x[xidx], x[xidx]],
+            y: [yscore, y[0]],
             mode: 'lines',
             name: tag+' Score',
             line: {color: '#d90b0b'}
         };
 
-        const scorelabel = {x: [x[xmax]], y: [y[xmax]],
+        const scorelabel = {x: [x[xidx]], y: [y[xidx]],
             mode: 'markers+text',
             name: 'Markers and Text',
-            text: ['Score: '+(y[xmax]-y[0]).toFixed(2)],
+            text: ['Score: '+(score*scalar).toFixed(2)],
             textposition: 'top',
             type: 'scatter'}
-        return [timeseries, baseline, scorebar, scorelabel]
+        return [timeseries, baseline, scorebar, scorelabel, extralayout]
     }
 
     const handleClick = () => {
@@ -87,14 +96,22 @@ function GraphButton({row, setSelectedAsset, setPlotData, auth}){
                 getJson(asset_data.scoring_url, null)
                     .then(score_data => {
                         const [prev_timeseries, prev_baseline,
-                            prev_scorebar,prev_label] = getGraphs(data, 'Prev', 'sold')
+                            prev_scorebar,prev_label, prev_layout] = getGraphs(data, 'Prev', 'sold')
                         const [score_timeseries,score_baseline,
-                            score_scorebar, score_label] = getGraphs(score_data, 'Score', 'dashdot')
+                            score_scorebar, score_label,score_layout] = getGraphs(score_data, 'Score', 'dashdot')
 
                         console.log('prev', prev_timeseries, prev_baseline, prev_scorebar)
+                        setSelectedAsset(row.original.name)
                         setPlotData([prev_timeseries,prev_baseline, prev_scorebar, prev_label,
                                      score_timeseries, score_baseline, score_scorebar, score_label])
-                        setSelectedAsset(row.original.name)
+
+                        let layout = {width: '100%',
+                                height: '100%',
+                                title: {text: row.original.name + '  '+ row.original.atype},
+                                showlegend: false}
+                        layout = {...layout, ...score_layout}
+
+                        setPlotLayout(layout)
                         console.log('selected', row.original.name)
                         document.getElementById('graphContainer').style.display = 'block'
                 })
@@ -145,7 +162,7 @@ function MapButton({map, row}){
 
 function ActiveRowButton({props, updateTable,
                              setLineup,
-                             setScore, roster_slug, gameData}){
+                             setScore, roster_slug, gameData, updateMap}){
     const handleClick = () => {
         if (gameData.active){
             alert('Game has already started. You cannot change your lineup.')
@@ -154,7 +171,8 @@ function ActiveRowButton({props, updateTable,
         toggleActive(roster_slug, props.original.slug, true,
             updateTable,
             setLineup,
-            setScore)
+            setScore,
+            updateMap)
     }
     return <button
         className='rowbutton'
@@ -163,7 +181,7 @@ function ActiveRowButton({props, updateTable,
 }
 function InactiveRowButton({props, updateTable,
                                setLineup,
-                               setScore, roster_slug, gameData}){
+                               setScore, roster_slug, gameData, updateMap}){
     const handleClick = () => {
         if (gameData.active){
             alert('Game has already started. You cannot change your lineup.')
@@ -172,7 +190,8 @@ function InactiveRowButton({props, updateTable,
         toggleActive(roster_slug, props.original.slug, false,
             updateTable,
             setLineup,
-            setScore)
+            setScore,
+            updateMap)
     }
     return <button
         className='rowbutton'
@@ -197,7 +216,7 @@ const updateScore = (roster_slug, setLineup, setScore,) => {
         })
 }
 
-function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore){
+function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore, updateMap){
     fetch(settings.BASE_API_URL+'/roster/'+roster_slug+'/'+slug,
         { method: 'PUT',
             headers: {
@@ -211,6 +230,7 @@ function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore
             console.log('success', resp)
             updateTable()
             updateScore(roster_slug, setLineup, setScore)
+            updateMap()
         }
     )
 }
@@ -229,6 +249,7 @@ export default function Dashboard({auth}) {
     const [zoom, setZoom] = useState(6.1);
 
     const [plotData, setPlotData] = useState(null)
+    const [plotLayout, setPlotLayout] = useState(null)
     const [selectedAsset, setSelectedAsset] = useState(null)
 
     const roster_columns = [{accessorKey: 'name',
@@ -265,17 +286,20 @@ export default function Dashboard({auth}) {
                                                      updateTable={fetchRosterData}
                                                      setLineup={setLineup}
                                                      gameData={gameData}
-                                                     setScore={setScore}>Active</ActiveRowButton>
+                                                     setScore={setScore}
+                                                     updateMap={updateMap}>Active</ActiveRowButton>
                                     <InactiveRowButton props={cell.row}
                                                        roster_slug={auth.slug+'.main'}
                                                        updateTable={fetchRosterData}
                                                        setLineup={setLineup}
-                                                        gameData={gameData}
-                                                       setScore={setScore}>Inactive</InactiveRowButton>
+                                                       gameData={gameData}
+                                                       setScore={setScore}
+                                                       updateMap={updateMap}>Inactive</InactiveRowButton>
                                     <GraphButton row={cell.row}
-                                                 setSelectedAsset={setSelectedAsset}
-                                                 setPlotData={setPlotData}
-                                                 auth={auth}>Graph</GraphButton>
+                                                    setSelectedAsset={setSelectedAsset}
+                                                    setPlotLayout={setPlotLayout}
+                                                    setPlotData={setPlotData}
+                                                    auth={auth}>Graph</GraphButton>
                                     <MapButton map={map} row={cell.row}>Map</MapButton>
             </div>
             )
@@ -316,6 +340,20 @@ export default function Dashboard({auth}) {
             setGameData(data)
         })
     }
+    const updateMap = () => {
+        getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
+            .then(data=> {
+                map.current.getSource('streamgauges').setData(make_fc(data, 'stream_gauge'))
+                map.current.getSource('gwells').setData(make_fc(data, 'continuous_groundwater'))
+            })
+
+    }
+
+    const make_fc = (data, tag) => {
+        return {'type': 'FeatureCollection',
+                'features': data['features'].filter(d=>d.properties.atype===tag)}
+    }
+
     const setUpMap = () => {
         if (auth.slug === undefined){
             return;
@@ -334,54 +372,72 @@ export default function Dashboard({auth}) {
                     minZoom: 5
                 });
 
+                const paint = {
+                    'circle-radius': 5,
+                    'circle-color': ['match', ['get', 'active'],
+                        1, '#64B976',
+                        0, '#B07D6E',
+                        '#d5633a'],
+                    'circle-stroke-color': 'black',
+                    'circle-stroke-width': 1,
+                }
 
-                // fetch(settings.BASE_API_URL+'/roster/jake.main/geojson')
-                //     .then(response => response.json())
-                //     .then(data=> {
-                //         console.log('geojson', data)
+                let layout = {
+
+                        'icon-size': 0.065,
+                        'icon-allow-overlap': true,
+                        'icon-offset': [0, -200],
+                }
                 map.current.on('load', function () {
-                    fetch(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson')
-                        .then(response => response.json())
+                    getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
                         .then(data=> {
                             console.log('geojson', data)
-                            let streamgauges = {'type': 'FeatureCollection',
-                                            'features': data['features'].filter(d=>d.properties.atype==='stream_gauge')}
-                            let gwells = {'type': 'FeatureCollection',
-                                        'features': data['features'].filter(d=>d.properties.atype==='continuous_groundwater')}
+                            let streamgauges = make_fc(data, 'stream_gauge')
+                            let gwells = make_fc(data, 'continuous_groundwater')
 
                             map.current.addSource('streamgauges', {type: 'geojson',
                                 data: streamgauges}) ;
                             map.current.addSource('gwells', {type: 'geojson',
                                 data: gwells}) ;
 
-                            map.current.addLayer({
-                                id: 'streamgauges',
-                                type: 'circle',
-                                source: 'streamgauges',
-                                paint: {
-                                    'circle-radius': 5,
-                                    'circle-color': '#5ce315',
-                                    'circle-stroke-color': 'rgba(0,0,0,1)',
-                                    'circle-stroke-width': 1,
-                                }
-                            })
-                            map.current.addLayer({
-                                id: 'gwells',
-                                type: 'circle',
-                                source: 'gwells',
-                                paint: {
-                                    'circle-radius': 5,
-                                    'circle-color': '#d5633a',
-                                    'circle-stroke-color': 'rgba(0,0,0,1)',
-                                    'circle-stroke-width': 1,
-                                }
-                            })
+                            map.current.loadImage(streamgauge_image, function(error, image) {
+                                map.current.addImage('streamgauge_image', image, {sdf: false})
+                                layout['icon-image'] = 'streamgauge_image'
+                                map.current.addLayer({
+                                    id: 'streamgauges_symbol',
+                                    source: 'streamgauges',
+                                    type: 'symbol',
+                                    layout: layout
+                                })
+
+                                map.current.addLayer({
+                                    id: 'streamgauges',
+                                    type: 'circle',
+                                    source: 'streamgauges',
+                                    paint: paint
+                                })
+                            });
+                            map.current.loadImage(gwell_image, function(error, image) {
+                                map.current.addImage('gwell_image', image, {sdf: false})
+
+                                layout['icon-image'] = 'gwell_image'
+                                map.current.addLayer({
+                                    id: 'gwells_symbol',
+                                    type: 'symbol',
+                                    source: 'gwells',
+                                    layout: layout
+                                })
+                                map.current.addLayer({
+                                    id: 'gwells',
+                                    type: 'circle',
+                                    source: 'gwells',
+                                    paint: paint
+                                })
+                            });
+
 
                         })
-
                 });
-
-
             })
     }
     useEffect(() => {
@@ -429,10 +485,7 @@ export default function Dashboard({auth}) {
                             <Plot
                                 divId={'graph'}
                                 data={plotData}
-                                layout={{width: '100%',
-                                    height: '100%',
-                                    title: {text: selectedAsset},
-                                    showlegend: false}}
+                                layout={plotLayout}
                             />
                         </div>
 

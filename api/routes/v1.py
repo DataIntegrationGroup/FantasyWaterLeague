@@ -143,6 +143,7 @@ async def get_roster_geojson(roster_slug, db=Depends(get_db)):
                     "name": a.name,
                     "score": a.score,
                     "atype": a.atype,
+                    "active": int(a.active),
                 },
                 "geometry": a.geometry,
             }
