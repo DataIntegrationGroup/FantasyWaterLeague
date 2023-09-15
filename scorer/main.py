@@ -117,8 +117,10 @@ def calculate_scores():
 
 
 def get_access_token():
-    resp = requests.post(f"{HOST}/auth/jwt/login", data={"username": "jake@foo.com",
-                                                         "password": "foobar1234"})
+    resp = requests.post(
+        f"{HOST}/auth/jwt/login",
+        data={"username": "jake@foo.com", "password": "foobar1234"},
+    )
 
     access_token = resp.json()["access_token"]
     return access_token

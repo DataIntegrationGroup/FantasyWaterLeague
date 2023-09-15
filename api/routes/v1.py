@@ -43,7 +43,10 @@ from api.rules import (
 from api.users import current_active_user
 
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
-auth_router = APIRouter(prefix=f"/api/v1", tags=["API V1"], dependencies=[Depends(current_active_user)])
+auth_router = APIRouter(
+    prefix=f"/api/v1", tags=["API V1"], dependencies=[Depends(current_active_user)]
+)
+
 
 # GET ===============================================================================
 @auth_router.get("/mapboxtoken")

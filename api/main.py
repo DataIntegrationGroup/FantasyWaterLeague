@@ -32,7 +32,7 @@ from api.users import (
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
-origins = ['*']
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
