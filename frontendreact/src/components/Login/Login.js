@@ -37,7 +37,7 @@ export default function Login({ setAuth }) {
             password
         });
 
-        fetch('http://localhost:4040/api/v1/user/'+username, )
+        fetch(settings.BASE_API_URL+'/user/'+username, )
             .then(data => data.json())
             .then(data => {
 
