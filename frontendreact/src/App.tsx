@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 // import Dashboard from './components/Dashboard/Dashboard';
 import Preferences from './components/Preferences/Preferences';
@@ -17,7 +16,7 @@ function Home(){
 }
 function App() {
 
-    const {auth, setAuth} = useAuth({});
+    const {auth, setAuth} = useAuth();
     console.log('App auth:', auth)
     if(!auth?.token) {
         return <Login setAuth={setAuth}/>
