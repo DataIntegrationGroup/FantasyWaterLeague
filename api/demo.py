@@ -51,6 +51,13 @@ def make_usgs_gageheight_sites(db):
                            url)
 
 
+def make_usgs_rain_gauge_sites(db):
+    url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00045&siteStatus=active'
+    return make_usgs_sites(db, 'continuous_rain_gauge',
+                           'usgs_nwis_rain_gauge',
+                           url)
+
+
 def make_usgs_sites(db, atype, source_slug, url):
     cpath = f'{source_slug}.csv'
     if os.path.isfile(cpath):
@@ -74,6 +81,7 @@ def make_usgs_sites(db, atype, source_slug, url):
 
             name = sitename.split(',')[0].strip()
             slug = name.replace(' ', '_').lower()
+            slug = f'{slug}.{atype}'
             geo = tsi['sourceInfo']['geoLocation']['geogLocation']
             lat, lon = (geo['latitude'], geo['longitude'])
             rows.append((slug, name, source_id, lon, lat))
@@ -135,6 +143,10 @@ async def setup_demo():
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'
                            'parameterCd=72019'
                            '&format=json'))
+    db.add(Source(slug='usgs_nwis_rain_gauge', name='UGSS-NWIS-RainGauge',
+                  base_url='https://waterservices.usgs.gov/nwis/iv/?'
+                            'parameterCd=00045'
+                            '&format=json'))
     db.add(Source(slug='test',
                   name='Test',
                   base_url='https://foo.test.com'))
@@ -152,18 +164,7 @@ async def setup_demo():
     # uds = make_usgs_discharge_sites(db)
     sgs = make_usgs_gageheight_sites(db)
     gws = make_gw_sites(db)
-    # uds.extend(make_weather_sites(db))
-    # for slug, name, atype, source_slug, source_identifier in (
-    #         ('embudo', 'Embudo', 'stream_gauge', 'usgs_nwis_discharge', '08279000'),
-    #         ('costilla_creek', 'COSTILLA CREEK ABOVE COSTILLA DAM', 'stream_gauge', 'usgs_nwis_discharge', '08252500'),
-    #         ('casias_creek', 'CASIAS CREEK NEAR COSTILLA', 'stream_gauge', 'usgs_nwis_discharge', '08253000'),
-    #                           ('MG-030', 'MG-030', 'continuous_groundwater', 'test', 'MG-030'),
-    #                           ('KNM47Socorro', 'KNM47Socorro', 'continuous_rain_gauge', 'test', 'KNM47Socorro')):
-    #     db.add(Asset(slug=slug,
-    #                         name=name,
-    #                         atype=atype,
-    #                         source_slug=source_slug,
-    #                         source_identifier=source_identifier))
+    rgs = make_usgs_rain_gauge_sites(db)
 
     db.commit()
     db.flush()
@@ -202,7 +203,8 @@ async def setup_demo():
     nplayers = len(players)
 
     for n, assets, nactive in ((5, gws, 3),
-                      (15, sgs, 9)):
+                               (5, rgs, 3),
+                               (10, sgs, 6)):
         draft = make_draft(assets)
         c = 0
 
