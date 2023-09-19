@@ -31,7 +31,8 @@ from api.crud import (
     update_roster_asset,
     add_asset_score,
     retrieve_game,
-    retrieve_player_by_user, add_roster_score,
+    retrieve_player_by_user,
+    add_roster_score,
 )
 from api.rules import (
     validate_team,
@@ -86,7 +87,7 @@ async def get_leaderboard(db=Depends(get_db)):
 
     for player in players:
         for roster in player.rosters:
-            if roster.active and roster.name == 'main':
+            if roster.active and roster.name == "main":
                 player.score = roster.scores[-1].score
                 break
 
@@ -252,5 +253,6 @@ async def put_asset_score(asset_slug: str, payload: ScorePayload, db=Depends(get
 async def put_player_score(roster_slug: str, payload: ScorePayload, db=Depends(get_db)):
     add_roster_score(db, roster_slug, payload)
     return {"slug": roster_slug, "score": payload.score, "game_slug": payload.game_slug}
+
 
 # ============= EOF =============================================

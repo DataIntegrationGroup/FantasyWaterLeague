@@ -13,7 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
-from sqlalchemy import Column, String, ForeignKey, Integer, Boolean, UUID, TIMESTAMP, func, Float
+from sqlalchemy import (
+    Column,
+    String,
+    ForeignKey,
+    Integer,
+    Boolean,
+    UUID,
+    TIMESTAMP,
+    func,
+    Float,
+)
 from sqlalchemy.orm import relationship
 
 from api.database import Base, Slugged
@@ -57,4 +67,6 @@ class RosterScore(Base):
     timestamp = Column(TIMESTAMP, nullable=False, default=func.now())
 
     roster = relationship("Roster", backref="scores")
+
+
 # ============= EOF =============================================

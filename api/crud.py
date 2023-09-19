@@ -99,12 +99,13 @@ def add_asset_score(db, asset_slug, payload):
 
 
 def add_roster_score(db, roster_slug, payload):
-    print('adding roster score', payload)
+    print("adding roster score", payload)
     db.add(
-        RosterScore(roster_slug=roster_slug,
-                    game_slug=payload.game_slug,
-                    score=payload.score)
+        RosterScore(
+            roster_slug=roster_slug, game_slug=payload.game_slug, score=payload.score
+        )
     )
     db.commit()
+
 
 # ============= EOF =============================================

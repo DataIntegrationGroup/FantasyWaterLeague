@@ -94,7 +94,7 @@ def score_continuous_rain_gauge(data):
 def update_roster_score(game_slug, roster_slug, score, access_token):
     resp = requests.put(
         f"{HOST}/api/v1/score/roster/{roster_slug}",
-        json={"game_slug": game_slug, 'score': round(float(score), 2)},
+        json={"game_slug": game_slug, "score": round(float(score), 2)},
         headers={"Authorization": f"Bearer {access_token}"},
     )
     if resp.status_code == 422:
@@ -122,13 +122,12 @@ def calculate_scores():
                 continue
 
             update_score(asset["slug"], score, "game1", access_token)
-            if asset['active']:
+            if asset["active"]:
                 player_score += score or 0
 
-        update_roster_score('game1',
-                            f"{player['slug']}.main",
-                            player_score,
-                            access_token)
+        update_roster_score(
+            "game1", f"{player['slug']}.main", player_score, access_token
+        )
 
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")
