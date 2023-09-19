@@ -56,17 +56,21 @@ export default function Scoreboard({gameData, roster_slug, score, lineup}){
 
             <table className={'table-bordered display-table'} style={{width: '100%'}}>
                 <thead>
-                    <tr><th>StreamGauge</th><th>Groundwater</th><th>Valid</th></tr>
+                    <tr><th>StreamGauge</th>
+                        <th>Groundwater</th>
+                        <th>RainGauge</th>
+                        <th>Valid</th></tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>{lineup.nstreamgauge}/{lineup.rstreamgauge}</td>
                         <td>{lineup.ngroundwater}/{lineup.rgroundwater}</td>
+                        <td>{lineup.nraingauge}/{lineup.rraingauge}</td>
                         <td>{lineup.lineup ? "True" : "False"}</td>
                     </tr>
                 </tbody>
             </table>
-            <p>Score: {score}</p>
+            <p>Score: {score.toFixed(2)}</p>
             <button  className="btn btn-primary">Calculate Score</button>
         </div>
     )

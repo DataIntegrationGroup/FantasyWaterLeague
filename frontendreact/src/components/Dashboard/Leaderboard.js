@@ -10,7 +10,7 @@ export default function Leaderboard() {
         cell: info => info.getValue()},
         {accessorKey: 'score',
             header: 'Score',
-            cell: info => info.getValue()
+            cell: info => info.getValue().toFixed(2)
         },
     ]
 

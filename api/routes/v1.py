@@ -88,7 +88,7 @@ async def get_leaderboard(db=Depends(get_db)):
     for player in players:
         for roster in player.rosters:
             if roster.active and roster.name == "main":
-                player.score = roster.scores[-1].score
+                player.score = roster.scores[-1].score if roster.scores else 0
                 break
 
     return players
@@ -125,9 +125,9 @@ async def get_validate_team(roster_slug, db=Depends(get_db)):
         "streamgauge": vstreamgauge,
         "nstreamgauge": nsg,
         "rstreamgauge": rsg,
-        "rain": vrain,
-        "nrain": nr,
-        "rrain": rrg,
+        "raingauge": vrain,
+        "nraingauge": nr,
+        "rraingauge": rrg,
     }
 
 

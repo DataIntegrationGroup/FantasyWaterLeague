@@ -52,7 +52,6 @@ export function api_getJson(url) {
         headers['Authorization'] = `Bearer ` + token.access_token
     }
 
-    console.log('api_getJson url:', headers)
     return api.get(url, {headers: headers}).then(response => response.data)
 }
 
@@ -94,13 +93,4 @@ export function indexOfMaximumValue(my_array) {
         }
         return maxIndex;
     }
-}
-
-
-
-
-
-export function auth_getJson(url){
-    // get auth from session storage
-    return api.get(url)
 }

@@ -9,8 +9,10 @@ import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-load
 import Leaderboard from "./Leaderboard";
 import Scoreboard from "./Scoreboard";
 import {getJson, indexOfMinimumValue, indexOfMaximumValue, api_getJson} from "../../util";
-import streamgauge_image from '../../img/stream_gauge.png'
+import streamgauge_image from '../../img/streamgauge.png'
+import raingauge_image from '../../img/raingauge.png'
 import gwell_image from '../../img/gwell.png'
+import {forEach} from "react-bootstrap/ElementChildren";
 
 
 function GraphButton({row, setSelectedAsset,
@@ -166,36 +168,36 @@ function ActiveRowButton({props, updateTable,
             alert('Game has already started. You cannot change your lineup.')
             return
         }
-        toggleActive(roster_slug, props.original.slug, true,
+        toggleActive(roster_slug, props.original.slug, !props.original.active,
             updateTable,
             setLineup,
             setScore,
             updateMap)
     }
+
     return <button
-        className='rowbutton'
-        style={{background: '#2c974b'}}
-        onClick={handleClick}>Active</button>
+        className={'rowbutton rowbutton_' + (props.original.active ? 'active' : 'inactive')}
+        onClick={handleClick}>{props.original.active ? 'Active' : 'Inactive'}</button>
 }
-function InactiveRowButton({props, updateTable,
-                               setLineup,
-                               setScore, roster_slug, gameData, updateMap}){
-    const handleClick = () => {
-        if (gameData.active){
-            alert('Game has already started. You cannot change your lineup.')
-            return
-        }
-        toggleActive(roster_slug, props.original.slug, false,
-            updateTable,
-            setLineup,
-            setScore,
-            updateMap)
-    }
-    return <button
-        className='rowbutton'
-        style={{background: '#c24850'}}
-        onClick={handleClick}>Inactive</button>
-}
+// function InactiveRowButton({props, updateTable,
+//                                setLineup,
+//                                setScore, roster_slug, gameData, updateMap}){
+//     const handleClick = () => {
+//         if (gameData.active){
+//             alert('Game has already started. You cannot change your lineup.')
+//             return
+//         }
+//         toggleActive(roster_slug, props.original.slug, false,
+//             updateTable,
+//             setLineup,
+//             setScore,
+//             updateMap)
+//     }
+//     return <button
+//         className='rowbutton'
+//         style={{background: '#c24850'}}
+//         onClick={handleClick}>Inactive</button>
+// }
 
 
 const updateScore = (roster_slug, setLineup, setScore,) => {
@@ -286,13 +288,13 @@ export default function Dashboard({auth, setAuth}) {
                                                      gameData={gameData}
                                                      setScore={setScore}
                                                      updateMap={updateMap}>Active</ActiveRowButton>
-                                    <InactiveRowButton props={cell.row}
-                                                       roster_slug={auth.slug+'.main'}
-                                                       updateTable={fetchRosterData}
-                                                       setLineup={setLineup}
-                                                       gameData={gameData}
-                                                       setScore={setScore}
-                                                       updateMap={updateMap}>Inactive</InactiveRowButton>
+                                    {/*<InactiveRowButton props={cell.row}*/}
+                                    {/*                   roster_slug={auth.slug+'.main'}*/}
+                                    {/*                   updateTable={fetchRosterData}*/}
+                                    {/*                   setLineup={setLineup}*/}
+                                    {/*                   gameData={gameData}*/}
+                                    {/*                   setScore={setScore}*/}
+                                    {/*                   updateMap={updateMap}>Inactive</InactiveRowButton>*/}
                                     <GraphButton row={cell.row}
                                                     setSelectedAsset={setSelectedAsset}
                                                     setPlotLayout={setPlotLayout}
@@ -381,48 +383,82 @@ export default function Dashboard({auth, setAuth}) {
                     api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
                         .then(data=> {
                             console.log('geojson', data)
-                            let streamgauges = make_fc(data, 'stream_gauge')
-                            let gwells = make_fc(data, 'continuous_groundwater')
+                            let items =[['stream_gauge', streamgauge_image],
+                                ['continuous_groundwater',gwell_image],
+                                ['continuous_rain_gauge', raingauge_image]]
+                            items.forEach((item)=>{
+                                            let tag = item[0]
+                                            let image = item[1]
+                                            console.log('adfsasfasfasfd', tag)
 
-                            map.current.addSource('streamgauges', {type: 'geojson',
-                                data: streamgauges}) ;
-                            map.current.addSource('gwells', {type: 'geojson',
-                                data: gwells}) ;
+                                            let fc = make_fc(data, tag)
+                                            console.log(fc)
+                                            map.current.addSource(tag, {type: 'geojson',
+                                                data: fc}) ;
+                                            map.current.loadImage(image, function(error, image) {
+                                                map.current.addImage(tag + '_image', image, {sdf: false})
+                                                layout['icon-image'] = tag + '_image'
+                                                map.current.addLayer({
+                                                    id: tag + '_symbol',
+                                                    source: tag,
+                                                    type: 'symbol',
+                                                    layout: layout
+                                                })
 
-                            map.current.loadImage(streamgauge_image, function(error, image) {
-                                map.current.addImage('streamgauge_image', image, {sdf: false})
-                                layout['icon-image'] = 'streamgauge_image'
-                                map.current.addLayer({
-                                    id: 'streamgauges_symbol',
-                                    source: 'streamgauges',
-                                    type: 'symbol',
-                                    layout: layout
-                                })
+                                                map.current.addLayer({
+                                                    id: tag,
+                                                    type: 'circle',
+                                                    source: tag,
+                                                    paint: paint
+                                                })
+                                            })
+                                            }
+                                        )
 
-                                map.current.addLayer({
-                                    id: 'streamgauges',
-                                    type: 'circle',
-                                    source: 'streamgauges',
-                                    paint: paint
-                                })
-                            });
-                            map.current.loadImage(gwell_image, function(error, image) {
-                                map.current.addImage('gwell_image', image, {sdf: false})
 
-                                layout['icon-image'] = 'gwell_image'
-                                map.current.addLayer({
-                                    id: 'gwells_symbol',
-                                    type: 'symbol',
-                                    source: 'gwells',
-                                    layout: layout
-                                })
-                                map.current.addLayer({
-                                    id: 'gwells',
-                                    type: 'circle',
-                                    source: 'gwells',
-                                    paint: paint
-                                })
-                            });
+                            // let streamgauges = make_fc(data, 'stream_gauge')
+                            // let gwells = make_fc(data, 'continuous_groundwater')
+
+                            // map.current.addSource('streamgauges', {type: 'geojson',
+                            //     data: streamgauges}) ;
+                            // map.current.addSource('gwells', {type: 'geojson',
+                            //     data: gwells}) ;
+                            //
+                            //
+                            // map.current.loadImage(streamgauge_image, function(error, image) {
+                            //     map.current.addImage('streamgauge_image', image, {sdf: false})
+                            //     layout['icon-image'] = 'streamgauge_image'
+                            //     map.current.addLayer({
+                            //         id: 'streamgauges_symbol',
+                            //         source: 'streamgauges',
+                            //         type: 'symbol',
+                            //         layout: layout
+                            //     })
+                            //
+                            //     map.current.addLayer({
+                            //         id: 'streamgauges',
+                            //         type: 'circle',
+                            //         source: 'streamgauges',
+                            //         paint: paint
+                            //     })
+                            // });
+                            // map.current.loadImage(gwell_image, function(error, image) {
+                            //     map.current.addImage('gwell_image', image, {sdf: false})
+                            //
+                            //     layout['icon-image'] = 'gwell_image'
+                            //     map.current.addLayer({
+                            //         id: 'gwells_symbol',
+                            //         type: 'symbol',
+                            //         source: 'gwells',
+                            //         layout: layout
+                            //     })
+                            //     map.current.addLayer({
+                            //         id: 'gwells',
+                            //         type: 'circle',
+                            //         source: 'gwells',
+                            //         paint: paint
+                            //     })
+                            // });
 
 
                         })
