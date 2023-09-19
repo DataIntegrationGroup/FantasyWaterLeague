@@ -90,8 +90,7 @@ async def get_leaderboard(db=Depends(get_db)):
             if roster.active and roster.name == "main":
                 player.score = roster.scores[-1].score if roster.scores else 0
                 break
-
-    return players
+    return sorted(players, key=lambda x: x.score, reverse=True)
 
 
 @router.get("/user/{username}")

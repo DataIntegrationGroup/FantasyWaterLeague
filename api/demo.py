@@ -174,9 +174,9 @@ async def setup_demo():
     get_user_db_context = contextlib.asynccontextmanager(get_user_db)
 
     players = (('jake', 'Jake Ross', 'Leroy Flyers'),
-               # ('ethan', 'Ethan', 'Melody Lane Packers'),
+               ('ethan', 'Ethan', 'Melody Lane Packers'),
                ('marissa', 'Marissa', 'Bevilacqua'),
-               # ('nels', 'Nels', 'Shedland Builders'),
+               ('nels', 'Nels', 'Shedland Builders'),
                # ('mattz', 'Mattz', 'PartyBoy Dancers'),
                ('rachel', 'Rachel', 'Socorro Managers'),
                )

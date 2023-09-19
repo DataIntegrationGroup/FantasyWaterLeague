@@ -7,11 +7,16 @@ export default function Leaderboard() {
 
     const columns = [{accessorKey: 'name',
         header: 'Name',
-        cell: info => info.getValue()},
+        cell: info => info.getValue()
+        },
+        {'accessorKey': 'team_name',
+            'header': 'Team',
+            'cell': info => info.getValue()},
         {accessorKey: 'score',
             header: 'Score',
             cell: info => info.getValue().toFixed(2)
         },
+
     ]
 
     const table = useReactTable({ data: data, columns: columns ,
