@@ -14,6 +14,10 @@ import raingauge_image from '../../img/raingauge.png'
 import gwell_image from '../../img/gwell.png'
 import {forEach} from "react-bootstrap/ElementChildren";
 
+const STREAM_GAUGE = 'stream_gauge'
+const CONTINUOUS_GROUNDWATER = 'continuous_groundwater'
+const CONTINUOUS_RAIN_GAUGE = 'continuous_rain_gauge'
+
 
 function GraphButton({row, setSelectedAsset,
                          setPlotLayout,
@@ -334,8 +338,10 @@ export default function Dashboard({auth, setAuth}) {
     const updateMap = () => {
         api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
             .then(data=> {
-                map.current.getSource('streamgauges').setData(make_fc(data, 'stream_gauge'))
-                map.current.getSource('gwells').setData(make_fc(data, 'continuous_groundwater'))
+                [STREAM_GAUGE, CONTINUOUS_GROUNDWATER, CONTINUOUS_RAIN_GAUGE].forEach((tag)=>{
+                    map.current.getSource(tag).setData(make_fc(data, tag))
+                })
+
             })
 
     }
@@ -352,7 +358,6 @@ export default function Dashboard({auth, setAuth}) {
 
         api_getJson(settings.BASE_API_URL+'/mapboxtoken', auth)
             .then(data=> {
-                console.log('mapboxfasd token', data.token)
                 mapboxgl.accessToken = data.token
                 if (map.current) return; // initialize map only once
                 map.current = new mapboxgl.Map({
@@ -383,9 +388,9 @@ export default function Dashboard({auth, setAuth}) {
                     api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
                         .then(data=> {
                             console.log('geojson', data)
-                            let items =[['stream_gauge', streamgauge_image],
-                                ['continuous_groundwater',gwell_image],
-                                ['continuous_rain_gauge', raingauge_image]]
+                            let items =[[STREAM_GAUGE, streamgauge_image],
+                                [CONTINUOUS_GROUNDWATER,gwell_image],
+                                [CONTINUOUS_RAIN_GAUGE, raingauge_image]]
                             items.forEach((item)=>{
                                             let tag = item[0]
                                             let image = item[1]
@@ -412,78 +417,14 @@ export default function Dashboard({auth, setAuth}) {
                                                     paint: paint
                                                 })
                                             })
-                                            }
-                                        )
-
-
-                            // let streamgauges = make_fc(data, 'stream_gauge')
-                            // let gwells = make_fc(data, 'continuous_groundwater')
-
-                            // map.current.addSource('streamgauges', {type: 'geojson',
-                            //     data: streamgauges}) ;
-                            // map.current.addSource('gwells', {type: 'geojson',
-                            //     data: gwells}) ;
-                            //
-                            //
-                            // map.current.loadImage(streamgauge_image, function(error, image) {
-                            //     map.current.addImage('streamgauge_image', image, {sdf: false})
-                            //     layout['icon-image'] = 'streamgauge_image'
-                            //     map.current.addLayer({
-                            //         id: 'streamgauges_symbol',
-                            //         source: 'streamgauges',
-                            //         type: 'symbol',
-                            //         layout: layout
-                            //     })
-                            //
-                            //     map.current.addLayer({
-                            //         id: 'streamgauges',
-                            //         type: 'circle',
-                            //         source: 'streamgauges',
-                            //         paint: paint
-                            //     })
-                            // });
-                            // map.current.loadImage(gwell_image, function(error, image) {
-                            //     map.current.addImage('gwell_image', image, {sdf: false})
-                            //
-                            //     layout['icon-image'] = 'gwell_image'
-                            //     map.current.addLayer({
-                            //         id: 'gwells_symbol',
-                            //         type: 'symbol',
-                            //         source: 'gwells',
-                            //         layout: layout
-                            //     })
-                            //     map.current.addLayer({
-                            //         id: 'gwells',
-                            //         type: 'circle',
-                            //         source: 'gwells',
-                            //         paint: paint
-                            //     })
-                            // });
-
-
+                                            }) // end forEach
                         })
-                });
+                })
             })
     }
 
-
-    // const refreshAccessToken = () => {
-    //
-    //     console.log('refreshing access token', auth)
-    //
-    //     loginUser({
-    //         username: auth.credentials.username,
-    //         password: auth.credentials.password
-    //     }).then(token=> {
-    //         saveAuthentication(setAuth, token,
-    //             auth.credentials.username,
-    //             auth.credentials.password)
-    //     });
-    // }
     useEffect(() => {
-
         setUpGame()
-
         setUpMap()
         fetchRosterData()
         updateScore(auth.slug+'.main', setLineup, setScore)
