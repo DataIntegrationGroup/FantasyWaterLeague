@@ -1,6 +1,4 @@
 import React, {useEffect, useState} from "react";
-import {settings} from "../../settings";
-import {getJson} from "../../util";
 
 export default function Scoreboard({gameData, roster_slug, score, lineup}){
 
@@ -8,7 +6,7 @@ export default function Scoreboard({gameData, roster_slug, score, lineup}){
     // const validateLineup = async () => {
     //     return await fetch(settings.BASE_API_URL+'/roster/'+ roster_slug +'/validate').then(
     //         response => response.json()
-    //     ).then(data => {
+    //     ).then(data => {s
     //         return data.lineup
     //         })
     //     }

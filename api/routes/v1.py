@@ -29,9 +29,9 @@ from api.crud import (
     retrieve_roster_assets,
     retrieve_roster_asset,
     update_roster_asset,
-    update_asset,
+    add_asset_score,
     retrieve_game,
-    retrieve_player_by_user,
+    retrieve_player_by_user, add_roster_score,
 )
 from api.rules import (
     validate_team,
@@ -84,15 +84,11 @@ async def health():
 async def get_leaderboard(db=Depends(get_db)):
     players = retrieve_players(db)
 
-    # for player in players:
-    #     if player.slug not in SCORES:
-    #         SCORES[player.slug] = calculate_player_score(db, player.slug)
-    #
-    #     player.score = SCORES[player.slug]
-
     for player in players:
-        player.score = 0
-        # player.score = retrieve_player_score(db, player.slug)
+        for roster in player.rosters:
+            if roster.active and roster.name == 'main':
+                player.score = roster.scores[-1].score
+                break
 
     return players
 
@@ -247,9 +243,14 @@ async def put_roster_asset(
 
 
 @auth_router.put("/asset/{asset_slug}/score")
-async def put_asset_score(asset_slug, payload: ScorePayload, db=Depends(get_db)):
-    update_asset(db, asset_slug, payload)
+async def put_asset_score(asset_slug: str, payload: ScorePayload, db=Depends(get_db)):
+    add_asset_score(db, asset_slug, payload)
     return {"slug": asset_slug, "score": payload.score, "game_slug": payload.game_slug}
 
+
+@auth_router.put("/score/roster/{roster_slug}")
+async def put_player_score(roster_slug: str, payload: ScorePayload, db=Depends(get_db)):
+    add_roster_score(db, roster_slug, payload)
+    return {"slug": roster_slug, "score": payload.score, "game_slug": payload.game_slug}
 
 # ============= EOF =============================================

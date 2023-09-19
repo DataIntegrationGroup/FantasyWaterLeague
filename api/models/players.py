@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
-from sqlalchemy import Column, String, ForeignKey, Integer, Boolean, UUID
+from sqlalchemy import Column, String, ForeignKey, Integer, Boolean, UUID, TIMESTAMP, func, Float
 from sqlalchemy.orm import relationship
 
 from api.database import Base, Slugged
@@ -25,6 +25,7 @@ class Player(Base, Slugged):
     user_id = Column(UUID, ForeignKey("user.id"), nullable=False)
 
     user = relationship("User", backref="player", uselist=False)
+    rosters = relationship("Roster", backref="player")
 
 
 class Roster(Base, Slugged):
@@ -46,4 +47,14 @@ class RosterAsset(Base):
     asset = relationship("Asset", backref="rosters")
 
 
+class RosterScore(Base):
+    __tablename__ = "rosterscore"
+    id = Column(Integer, primary_key=True)
+    roster_slug = Column(String(128), ForeignKey("roster.slug"))
+    game_slug = Column(String(128), ForeignKey("game.slug"))
+
+    score = Column(Float, default=0)
+    timestamp = Column(TIMESTAMP, nullable=False, default=func.now())
+
+    roster = relationship("Roster", backref="scores")
 # ============= EOF =============================================

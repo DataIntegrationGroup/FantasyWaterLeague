@@ -18,7 +18,7 @@ from numpy import array
 
 from api.database import get_db
 from api.models.game import Game
-from api.models.players import Roster, Player, RosterAsset
+from api.models.players import Roster, Player, RosterAsset, RosterScore
 from api.models.assets import Asset, Score
 import requests
 
@@ -91,11 +91,20 @@ def update_roster_asset(db, roster_slug, asset_slug, payload):
     db.commit()
 
 
-def update_asset(db, asset_slug, payload):
+def add_asset_score(db, asset_slug, payload):
     db.add(
         Score(asset_slug=asset_slug, score=payload.score, game_slug=payload.game_slug)
     )
     db.commit()
 
+
+def add_roster_score(db, roster_slug, payload):
+    print('adding roster score', payload)
+    db.add(
+        RosterScore(roster_slug=roster_slug,
+                    game_slug=payload.game_slug,
+                    score=payload.score)
+    )
+    db.commit()
 
 # ============= EOF =============================================

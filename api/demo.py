@@ -199,9 +199,10 @@ async def setup_demo():
         db.add(roster)
     db.commit()
     db.flush()
+    nplayers = len(players)
 
-    for n, assets in ((5, gws),
-                      (15, sgs)):
+    for n, assets, nactive in ((5, gws, 3),
+                      (15, sgs, 9)):
         draft = make_draft(assets)
         c = 0
 
@@ -209,12 +210,15 @@ async def setup_demo():
             try:
                 for player in players:
                     asset = next(draft)
-                    db.add(RosterAsset(roster_slug=f'{player[0]}.main', asset_slug=asset))
+
+                    db.add(RosterAsset(roster_slug=f'{player[0]}.main',
+                                       active=c < nactive * nplayers,
+                                       asset_slug=asset))
                     c += 1
             except StopIteration:
                 break
 
-            if c == n * len(players):
+            if c == n * nplayers:
                 break
 
     db.commit()

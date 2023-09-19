@@ -1,17 +1,14 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, useMemo} from 'react';
 import Plot from 'react-plotly.js';
 import {getCoreRowModel, flexRender, useReactTable} from '@tanstack/react-table'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './Dashboard.css'
-// import { Table as Table } from 'react-bootstrap'
 import {settings} from "../../settings";
-import styled from "styled-components";
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import Leaderboard from "./Leaderboard";
 import Scoreboard from "./Scoreboard";
-import {getJson, indexOfMinimumValue, indexOfMaximumValue} from "../../util";
-import {loginUser, saveAuthentication} from "../Login/Login";
+import {getJson, indexOfMinimumValue, indexOfMaximumValue, api_getJson} from "../../util";
 import streamgauge_image from '../../img/stream_gauge.png'
 import gwell_image from '../../img/gwell.png'
 
@@ -90,11 +87,11 @@ function GraphButton({row, setSelectedAsset,
 
     const handleClick = () => {
         console.log('graph', row)
-        getJson(settings.BASE_API_URL+'/asset/'+row.original.slug+'/data_url', auth)
+        api_getJson(settings.BASE_API_URL+'/asset/'+row.original.slug+'/data_url')
         .then(asset_data=> {
-            getJson(asset_data.prev_url, null)
+            getJson(asset_data.prev_url)
             .then(data =>{
-                getJson(asset_data.scoring_url, null)
+                getJson(asset_data.scoring_url)
                     .then(score_data => {
                         const [prev_timeseries, prev_baseline,
                             prev_scorebar,prev_label, prev_layout] = getGraphs(data, 'Prev', 'sold')
@@ -253,7 +250,7 @@ export default function Dashboard({auth, setAuth}) {
     const [plotLayout, setPlotLayout] = useState(null)
     const [selectedAsset, setSelectedAsset] = useState(null)
 
-    const roster_columns = [{accessorKey: 'name',
+    const roster_columns = useMemo(()=>[{accessorKey: 'name',
         header: 'Name',
         cell: info => info.getValue(),
         meta: {
@@ -306,6 +303,7 @@ export default function Dashboard({auth, setAuth}) {
             )
         },
     ]
+    )
 
 
     const roster_table = useReactTable({ data: roster_data,
@@ -320,29 +318,19 @@ export default function Dashboard({auth, setAuth}) {
     const fetchRosterData = () => {
         if (auth.slug !== undefined){
             console.log('fetching roster data for', auth.slug)
-            getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main', auth)
+            api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main', auth)
                 .then(data=> setRosterData(data))
-            // fetch(settings.BASE_API_URL+'/roster/'+auth.slug+'.main')
-            //     .then(response => response.json())
-            //     .then(data=> setRosterData(data))
         }
 
     }
     const setUpGame = () =>{
-        // fetch(settings.BASE_API_URL+'/game')
-        //     .then(response => response.json())
-        //     .then(data=> {
-        //         console.log('game', data)
-        //         setScore(data.score)
-        //         setLineup(data.lineup)
-        //     })
-        getJson(settings.BASE_API_URL+'/game', {}).then(data =>{
+        api_getJson(settings.BASE_API_URL+'/game', {}).then(data =>{
             console.log('game', data)
             setGameData(data)
         })
     }
     const updateMap = () => {
-        getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
+        api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
             .then(data=> {
                 map.current.getSource('streamgauges').setData(make_fc(data, 'stream_gauge'))
                 map.current.getSource('gwells').setData(make_fc(data, 'continuous_groundwater'))
@@ -360,9 +348,9 @@ export default function Dashboard({auth, setAuth}) {
             return;
         }
 
-        getJson(settings.BASE_API_URL+'/mapboxtoken', auth)
+        api_getJson(settings.BASE_API_URL+'/mapboxtoken', auth)
             .then(data=> {
-                console.log('mapboxfasd token', data)
+                console.log('mapboxfasd token', data.token)
                 mapboxgl.accessToken = data.token
                 if (map.current) return; // initialize map only once
                 map.current = new mapboxgl.Map({
@@ -390,7 +378,7 @@ export default function Dashboard({auth, setAuth}) {
                         'icon-offset': [0, -200],
                 }
                 map.current.on('load', function () {
-                    getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
+                    api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
                         .then(data=> {
                             console.log('geojson', data)
                             let streamgauges = make_fc(data, 'stream_gauge')
@@ -443,21 +431,20 @@ export default function Dashboard({auth, setAuth}) {
     }
 
 
-    const refreshAccessToken = () => {
-
-        console.log('refreshing access token', auth)
-
-        loginUser({
-            username: auth.credentials.username,
-            password: auth.credentials.password
-        }).then(token=> {
-            saveAuthentication(setAuth, token,
-                auth.credentials.username,
-                auth.credentials.password)
-        });
-    }
+    // const refreshAccessToken = () => {
+    //
+    //     console.log('refreshing access token', auth)
+    //
+    //     loginUser({
+    //         username: auth.credentials.username,
+    //         password: auth.credentials.password
+    //     }).then(token=> {
+    //         saveAuthentication(setAuth, token,
+    //             auth.credentials.username,
+    //             auth.credentials.password)
+    //     });
+    // }
     useEffect(() => {
-        refreshAccessToken()
 
         setUpGame()
 

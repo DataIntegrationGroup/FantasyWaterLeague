@@ -91,10 +91,20 @@ def score_continuous_rain_gauge(data):
     return 10 * score_timeseries(data)
 
 
+def update_roster_score(game_slug, roster_slug, score, access_token):
+    resp = requests.put(
+        f"{HOST}/api/v1/score/roster/{roster_slug}",
+        json={"game_slug": game_slug, 'score': round(float(score), 2)},
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    if resp.status_code == 422:
+        print(resp.json())
+
+
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job("cron", hour=15)
+@sched.scheduled_job("cron", hour=23)
 def calculate_scores():
     access_token = get_access_token()
 
@@ -103,6 +113,7 @@ def calculate_scores():
     st = time.time()
     for player in data:
         data = get_json(f'{HOST}/api/v1/roster/{player["slug"]}.main', access_token)
+        player_score = 0
         for asset in data:
             try:
                 score = calculate_asset_score(asset)
@@ -111,6 +122,13 @@ def calculate_scores():
                 continue
 
             update_score(asset["slug"], score, "game1", access_token)
+            if asset['active']:
+                player_score += score or 0
+
+        update_roster_score('game1',
+                            f"{player['slug']}.main",
+                            player_score,
+                            access_token)
 
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")

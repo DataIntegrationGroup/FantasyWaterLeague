@@ -3,34 +3,16 @@ import PropTypes from 'prop-types';
 import axios from "axios";
 import './Login.css';
 import {settings} from "../../settings";
-import { getJson} from "../../util";
+import {api_getJson, loginUser} from "../../util";
 
 
-export async function loginUser(credentials) {
-    const formData = new FormData()
-    formData.set('username', credentials.username)
-    formData.set('password', credentials.password)
-
-    return axios.post(settings.AUTH_URL+'/login', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-            }
-        }
-    )
-    // return fetch('http://localhost:4040/auth/jwt/login', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'multipart/form-data'
-    //     },
-    //     body: formData
-    // })
-    //     .then(data => data.json())
-}
 
 export function saveAuthentication(setAuth, token, username, password) {
-    getJson(settings.BASE_API_URL+'/user/'+username)
+    api_getJson(settings.BASE_API_URL+'/user/'+username)
         .then(data => {
-            setAuth(data, token, username, password);
+
+            console.log('saveAuthentication:', data, token, username, password)
+            setAuth(data, token.data, username, password);
         })
 }
 

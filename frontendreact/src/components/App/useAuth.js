@@ -12,7 +12,7 @@ export default function useAuth() {
         const token = JSON.parse(sessionStorage.getItem('token'));
         const credentials = JSON.parse(sessionStorage.getItem('credentials'));
         return {'slug': user?.slug,
-                'token': token?.data,
+                'token': token,
                 'credentials': credentials}
     };
 
@@ -25,7 +25,7 @@ export default function useAuth() {
         sessionStorage.setItem('credentials', JSON.stringify(credentials));
 
 
-        setAuth({'slug': user?.slug, 'token': token?.data, 'credentials': credentials});
+        setAuth({'slug': user?.slug, 'token': token, 'credentials': credentials});
     };
     return {auth, setAuth: saveAuth}
 }
