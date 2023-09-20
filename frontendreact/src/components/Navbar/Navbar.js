@@ -21,7 +21,7 @@ function AppNavbar({setToken}) {
     }
 
     return (
-        <Navbar expand="lg" className="bg-body-tertiary">
+        <Navbar style={{marginBottom: "10px", borderRadius: "10px"}} expand="lg" className="bg-body-tertiary">
             <Container>
                 <Navbar.Brand href="/">FantasyWaterLeague</Navbar.Brand>
                 <Navbar.Collapse id="basic-navbar-nav">
@@ -49,6 +49,9 @@ function AppNavbar({setToken}) {
                 <Row>
                     <Col xs="auto">
                         <Button type="submit"
+                                style={{backgroundColor: "#2b2b2b",
+                                        margin: '0px 10px 0px 10px',
+                                        borderColor: "#2b2b2b"}}
                                 onClick={handleLogout}>Logout</Button>
                     </Col>
                 </Row>

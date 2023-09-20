@@ -70,7 +70,7 @@ export default function Scoreboard({gameData, roster_slug, score, lineup}){
                     </tr>
                 </tbody>
             </table>
-            <p>Score: {score.toFixed(2)}</p>
+            <p>Score: {score.toFixed()}</p>
             <button  className="btn btn-primary">Calculate Score</button>
         </div>
     )

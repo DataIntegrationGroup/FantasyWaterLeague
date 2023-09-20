@@ -239,6 +239,12 @@ function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore
     )
 }
 
+function toNameCase(txt){
+    // replace underscores with spaces and capitalize first letter of each word
+    return txt.replace(/_/g, ' ').replace(/\w\S*/g,
+        function(txt){return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();});
+}
+
 export default function Dashboard({auth, setAuth}) {
     const [roster_data, setRosterData] = React.useState([])
 
@@ -260,17 +266,25 @@ export default function Dashboard({auth, setAuth}) {
         header: 'Name',
         cell: info => info.getValue(),
         meta: {
-            width: 300
+            width: 350
             }
         },
         {accessorKey: 'atype',
+            meta: { width: 150},
+            cell: info => toNameCase(info.getValue()),
             header: 'Type',},
         {accessorKey: 'prev_score',
             header: 'Prev Score',
+            meta: {
+                width: 100,
+            },
             cell: info => info.getValue().toFixed(2),
         },
         {accessorKey: 'score',
             header: 'Score',
+            meta: {
+                width: 100,
+            },
             cell: info =>(info.row.original.active&&lineup.lineup&&gameData.active) ? info.getValue().toFixed(2) : '',
             // {
             //     console.log('score', info)
@@ -426,14 +440,10 @@ export default function Dashboard({auth, setAuth}) {
 
                                                     map.current.getCanvas().style.cursor = 'pointer';
                                                     const coordinates = e.features[0].geometry.coordinates.slice();
-
-                                                    let atype = e.features[0].properties.atype
-                                                    atype = atype.replace('_', ' ')
-                                                    let words = atype.split(' ')
-                                                    atype = words.map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ')
+                                                    const atype = toNameCase(e.features[0].properties.atype)
 
                                                     const html= `<div class="popup">
-<table class="table-sm table-bordered display-table">
+<table class="table-sm table-bordered">
 <tr><td class="popup-td">Name</td><td>${e.features[0].properties.name}</td></tr>
 <tr><td class="popup-td">Type</td><td>${atype}</td></tr>
 <tr><td class="popup-td">Score</td><td>${e.features[0].properties.score.toFixed(2)}</td></tr>

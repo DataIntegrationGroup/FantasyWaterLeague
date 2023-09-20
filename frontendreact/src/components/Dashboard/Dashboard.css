@@ -101,6 +101,10 @@
     font-size: 8pt;
 }
 
+.display-table th {
+    padding: 2px;
+    font-size: 10pt;
+}
 .col-6 {
     padding: 0px;
 }
@@ -133,4 +137,5 @@
 }
 .popup-td {
     font-weight: bold;
+    font-size: 12pt;
 }
