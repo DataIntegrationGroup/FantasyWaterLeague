@@ -365,7 +365,8 @@ export default function Dashboard({auth, setAuth}) {
                     style: 'mapbox://styles/mapbox/streets-v12',
                     center: [lng, lat],
                     zoom: zoom,
-                    minZoom: 5
+                    minZoom: 5,
+                    maxZoom: 15
                 });
 
                 const paint = {
@@ -379,7 +380,6 @@ export default function Dashboard({auth, setAuth}) {
                 }
 
                 let layout = {
-
                         'icon-size': 0.065,
                         'icon-allow-overlap': true,
                         'icon-offset': [0, -200],
@@ -416,8 +416,39 @@ export default function Dashboard({auth, setAuth}) {
                                                     source: tag,
                                                     paint: paint
                                                 })
+
+                                                const popup = new mapboxgl.Popup({
+                                                    closeButton: false,
+                                                    closeOnClick: false
+                                                })
+
+                                                map.current.on('mouseenter', tag, function (e) {
+
+                                                    map.current.getCanvas().style.cursor = 'pointer';
+                                                    const coordinates = e.features[0].geometry.coordinates.slice();
+
+                                                    let atype = e.features[0].properties.atype
+                                                    atype = atype.replace('_', ' ')
+                                                    let words = atype.split(' ')
+                                                    atype = words.map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ')
+
+                                                    const html= `<div class="popup">
+<table class="table-sm table-bordered display-table">
+<tr><td class="popup-td">Name</td><td>${e.features[0].properties.name}</td></tr>
+<tr><td class="popup-td">Type</td><td>${atype}</td></tr>
+<tr><td class="popup-td">Score</td><td>${e.features[0].properties.score.toFixed(2)}</td></tr>
+</table></div>`
+                                                    popup.setLngLat(coordinates)
+                                                        .setHTML(html)
+                                                        .addTo(map.current);
+                                                })
+
+                                                map.current.on('mouseleave', tag, function () {
+                                                    map.current.getCanvas().style.cursor = '';
+                                                    popup.remove();
+                                                })
                                             })
-                                            }) // end forEach
+                            }) // end forEach
                         })
                 })
             })

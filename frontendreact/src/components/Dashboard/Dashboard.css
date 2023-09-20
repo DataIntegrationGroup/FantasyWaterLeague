@@ -120,3 +120,17 @@
 .spacer {
     margin: 5px;
 }
+
+.mapboxgl-popup {
+}
+
+.mapboxgl-popup table {
+    border-radius: 10px;
+    border: 3px solid #2b7dc0;
+}
+.mapboxgl-popup-content {
+    border-radius: 10px;
+}
+.popup-td {
+    font-weight: bold;
+}
