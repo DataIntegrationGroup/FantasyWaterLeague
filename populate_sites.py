@@ -4,23 +4,23 @@ import requests
 
 
 def rget_features(url):
-    print('getting', url)
+    print("getting", url)
     resp = requests.get(url)
     doc = resp.json()
     features = doc["features"]
     if features and "pagination" in doc:
-        features.extend(rget_features(doc['pagination']["next"]))
+        features.extend(rget_features(doc["pagination"]["next"]))
 
     return features
 
 
 def nws():
-    url = 'https://api.weather.gov/stations?limit=500&state=NM'
+    url = "https://api.weather.gov/stations?limit=500&state=NM"
     features = rget_features(url)
     for feature in features:
-        props = feature['properties']
-        print(props['name'], props['stationIdentifier'])
-        print(feature['geometry']['coordinates'])
+        props = feature["properties"]
+        print(props["name"], props["stationIdentifier"])
+        print(feature["geometry"]["coordinates"])
 
 
 def streamgauges():
