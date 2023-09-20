@@ -42,7 +42,9 @@ export default function Scoreboard({gameData, roster_slug, score, lineup}){
 
     return (
         <div>
-            <h4>Scoreboard: {roster_slug}</h4>
+            <div className={'card card-dashboard'}>
+                <h4>Scoreboard: {roster_slug}</h4>
+            </div>
             <table className={'table-bordered display-table'} style={{width: '100%'}}>
                 <thead>
                     <tr><th>Game Start</th><th>Game End</th></tr>

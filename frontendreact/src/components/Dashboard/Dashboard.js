@@ -12,6 +12,9 @@ import {getJson, indexOfMinimumValue, indexOfMaximumValue, api_getJson} from "..
 import streamgauge_image from '../../img/streamgauge.png'
 import raingauge_image from '../../img/raingauge.png'
 import gwell_image from '../../img/gwell.png'
+import nws_image from '../../img/nws.png'
+import usgs_image from '../../img/usgs.png'
+
 import {forEach} from "react-bootstrap/ElementChildren";
 
 const STREAM_GAUGE = 'stream_gauge'
@@ -262,7 +265,31 @@ export default function Dashboard({auth, setAuth}) {
     const [plotLayout, setPlotLayout] = useState(null)
     const [selectedAsset, setSelectedAsset] = useState(null)
 
-    const roster_columns = useMemo(()=>[{accessorKey: 'name',
+    const roster_columns = useMemo(()=>[
+            {accessorKey: 'source_slug',
+                header: 'Source',
+                cell: info => {
+                    let src=''
+                    let slug = info.getValue()
+                    console.log(slug)
+                    switch (slug){
+                        case 'nws':
+                            src = nws_image
+                            break;
+                        case 'usgs_nwis_depthtowater':
+                            src = usgs_image
+                            break;
+                        case 'usgs_nwis_gageheight':
+                            src = usgs_image
+                            break;
+                        case 'usgs_nwis_rain_gauge':
+                            src = usgs_image
+                            break;
+                    }
+                return <img width={'50%'} src={src}/>
+                },
+            },
+        {accessorKey: 'name',
         header: 'Name',
         cell: info => info.getValue(),
         meta: {
@@ -271,7 +298,29 @@ export default function Dashboard({auth, setAuth}) {
         },
         {accessorKey: 'atype',
             meta: { width: 150},
-            cell: info => toNameCase(info.getValue()),
+            cell: info => {
+            let src = ''
+                let value = info.getValue()
+                switch (value){
+                    case 'stream_gauge':
+                        src = streamgauge_image
+                        break;
+                    case 'continuous_groundwater':
+                        src = gwell_image
+                        break;
+                    case 'continuous_rain_gauge':
+                        src = raingauge_image
+                        break;
+                }
+                // if (value==='stream_gauge'){
+                //     src = streamgauge_image
+                // } else if (value==='continuous_groundwater'){
+                //     src = gwell_image
+                // } else if (value==='continuous_rain_gauge'){
+                //     src = raingauge_image
+                // }
+            return <img width={'30%'} src={src}/>
+            },
             header: 'Type',},
         {accessorKey: 'prev_score',
             header: 'Prev Score',
@@ -493,13 +542,20 @@ export default function Dashboard({auth, setAuth}) {
             <div className='row'>
                 <div className='col-6'>
                     <div className={'pane'}>
-                        <div ref={mapContainer} className="map-container" />
+                        <div className={'card card-dashboard'}>
+                            <h4>Map</h4>
+                        </div>
+                        <div>
+                            <div ref={mapContainer} className="map-container" />
+                        </div>
                     </div>
                 </div>
                 <div className='col-6 '>
                     <div className={'pane'}>
+                        <div className={'card card-dashboard'}>
+                            <h4>Roster</h4>
+                        </div>
                         <div id={'graphContainer'}>
-
                                 <button id={'graphbutton'} onClick={(event) =>
                                 {document.getElementById('graphContainer').style.display='none'}}>
                                     Close</button>

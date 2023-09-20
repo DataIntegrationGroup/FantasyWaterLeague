@@ -3,6 +3,26 @@ from pprint import pprint
 import requests
 
 
+def rget_features(url):
+    print('getting', url)
+    resp = requests.get(url)
+    doc = resp.json()
+    features = doc["features"]
+    if features and "pagination" in doc:
+        features.extend(rget_features(doc['pagination']["next"]))
+
+    return features
+
+
+def nws():
+    url = 'https://api.weather.gov/stations?limit=500&state=NM'
+    features = rget_features(url)
+    for feature in features:
+        props = feature['properties']
+        print(props['name'], props['stationIdentifier'])
+        print(feature['geometry']['coordinates'])
+
+
 def streamgauges():
     resp = requests.get(
         "https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00060&siteStatus=active"
@@ -51,4 +71,5 @@ def gw():
 
 if __name__ == "__main__":
     # streamgauges()
-    gw()
+    # gw()
+    nws()

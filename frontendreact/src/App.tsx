@@ -14,6 +14,28 @@ import Admin from "./components/Admin/Admin";
 function Home(){
     return <h2>Welcome to Fantasy Water League</h2>;
 }
+
+function Footer(){
+    return (
+        <section>
+            <footer className={'text-center'} style={{'backgroundColor': '#a4c8ec'}}>
+                <div className={'text-center p-3'}>
+                    <p>Uses data collected by <a href={'https://waterdata.usgs.gov/nm/nwis/current/'}>USGS NWIS</a>
+                        and <a href={'https://www.weather.gov/documentation/services-web-api'}>NWS</a>
+                    </p>
+                </div>
+
+                <div className={'text-center p-3'}>
+                    <p>© 2021 Fantasy Water League</p>
+                </div>
+
+            </footer>
+
+        </section>
+
+    )
+}
+
 function App() {
 
     const {auth, setAuth} = useAuth();
@@ -35,6 +57,7 @@ function App() {
             <Route path="/admin" element={<Admin auth={auth}/>}/>
           </Routes>
         </BrowserRouter>
+          <Footer />
       </div>
   );
 }

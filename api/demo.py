@@ -57,6 +57,44 @@ def make_usgs_rain_gauge_sites(db):
                            'usgs_nwis_rain_gauge',
                            url)
 
+def rget_features(url):
+    print('getting', url)
+    resp = requests.get(url)
+    doc = resp.json()
+    features = doc["features"]
+    if features and "pagination" in doc:
+        features.extend(rget_features(doc['pagination']["next"]))
+
+    return features
+
+
+def make_nws_sites(db):
+    url = 'https://api.weather.gov/stations?limit=500&state=NM'
+    features = rget_features(url)
+    rows = []
+    for feature in features:
+        props = feature['properties']
+        print(props['name'], props['stationIdentifier'])
+        print(feature['geometry']['coordinates'])
+        source_id = props['stationIdentifier']
+        name = props['name']
+        slug = f"{name.replace(' ', '_').lower()}-{source_id}"
+        atype = 'continuous_rain_gauge'
+        source_slug = 'nws'
+        lon = feature['geometry']['coordinates'][0]
+        lat = feature['geometry']['coordinates'][1]
+
+        rows.append((slug, name, source_id, lon, lat))
+        db.add(Asset(slug=slug,
+                     name=name,
+                     atype=atype,
+                     source_slug=source_slug,
+                     source_identifier=source_id,
+                     location=f'POINT({lon} {lat})'))
+        db.commit()
+
+    return rows
+
 
 def make_usgs_sites(db, atype, source_slug, url):
     cpath = f'{source_slug}.csv'
@@ -147,6 +185,9 @@ async def setup_demo():
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'
                             'parameterCd=00045'
                             '&format=json'))
+    db.add(Source(slug='nws', name='National Weather Service',
+                  base_url='https://api.weather.gov/stations/{station_id}/observations'))
+
     db.add(Source(slug='test',
                   name='Test',
                   base_url='https://foo.test.com'))
@@ -165,6 +206,7 @@ async def setup_demo():
     sgs = make_usgs_gageheight_sites(db)
     gws = make_gw_sites(db)
     rgs = make_usgs_rain_gauge_sites(db)
+    nws = make_nws_sites(db)
 
     db.commit()
     db.flush()
@@ -179,6 +221,7 @@ async def setup_demo():
                ('nels', 'Nels', 'Shedland Builders'),
                # ('mattz', 'Mattz', 'PartyBoy Dancers'),
                ('rachel', 'Rachel', 'Socorro Managers'),
+               ('chriscox', 'Chris Cox', 'Sandia Sonics')
                )
     for slug, name, team in players:
         async with get_async_session_context() as session:
@@ -204,7 +247,9 @@ async def setup_demo():
 
     for n, assets, nactive in ((5, gws, 3),
                                (5, rgs, 3),
-                               (10, sgs, 6)):
+                               (10, sgs, 6),
+                               (10, nws, 6)
+                               ):
         draft = make_draft(assets)
         c = 0
 

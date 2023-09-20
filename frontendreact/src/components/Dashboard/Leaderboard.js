@@ -34,7 +34,9 @@ export default function Leaderboard() {
 
     return (
         <div>
-            <h4>Leaderboard</h4>
+            <div className={'card card-dashboard'}>
+                <h4>Leaderboard</h4>
+            </div>
 
             <table className={'table-bordered display-table'} style={{ width: '100%'}}>
                 <thead>

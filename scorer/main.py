@@ -104,7 +104,7 @@ def update_roster_score(game_slug, roster_slug, score, access_token):
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job("cron", hour=23)
+@sched.scheduled_job("cron", minute=0)
 def calculate_scores():
     access_token = get_access_token()
 
