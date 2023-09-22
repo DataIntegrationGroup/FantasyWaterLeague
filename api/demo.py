@@ -186,7 +186,7 @@ async def setup_demo():
                             'parameterCd=00045'
                             '&format=json'))
     db.add(Source(slug='nws', name='National Weather Service',
-                  base_url='https://api.weather.gov/stations/{station_id}/observations'))
+                  base_url='https://api.weather.gov/stations/{source_id:}/observations'))
 
     db.add(Source(slug='test',
                   name='Test',
@@ -221,7 +221,8 @@ async def setup_demo():
                ('nels', 'Nels', 'Shedland Builders'),
                # ('mattz', 'Mattz', 'PartyBoy Dancers'),
                ('rachel', 'Rachel', 'Socorro Managers'),
-               ('chriscox', 'Chris Cox', 'Sandia Sonics')
+               ('chriscox', 'Chris Cox', 'Sandia Sonics'),
+               ('crismorton', 'Cris Morton', 'South Valley Mechanics'),
                )
     for slug, name, team in players:
         async with get_async_session_context() as session:

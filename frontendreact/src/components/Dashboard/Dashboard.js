@@ -26,19 +26,48 @@ function GraphButton({row, setSelectedAsset,
                          setPlotLayout,
                          setPlotData, auth}){
 
-    const getGraphs = (data, tag, linestyle) => {
+    const extractData = (source, data) => {
         let x = [];
         let y = [];
-        let extralayout = {}
-
         try {
-            const values = data["value"]['timeSeries'][0]['values'][0]['value']
-            y = values.map(v=>v['value'])
-            x = values.map(v=>v['dateTime'])
-
+            if (source.startsWith('usgs')){
+                [x,y] = extractUSGSData(data)
+            } else{
+                [x,y] = extractNWSData(data)
+            }
         } catch (e) {
-
+            console.log('error', e)
         }
+        return [x,y]
+    }
+
+    const extractNWSData = (data) => {
+        const values = data["features"]
+
+        const y = values.map(v=>{
+            let p = v['properties']['precipitationLast3Hours']
+            let vi = p['value']
+            if (p['unicode'] === 'wmoUnit:mm'){
+                vi = vi * 25.4
+            }
+            if (vi===null){
+                vi = 0
+            }
+            return vi
+        })
+
+        return [values.map(v=>v['properties']['timestamp']), y]
+    }
+    const extractUSGSData = (data) => {
+        const values = data["value"]['timeSeries'][0]['values'][0]['value']
+        return [values.map(v=>v['dateTime']), values.map(v=>v['value'])]
+    }
+
+    const getGraphs = (source, data, tag, linestyle) => {
+        let extralayout = {}
+        console.log('getting asdf', source)
+        let [x,y] = extractData(source, data)
+
         let scalar = 1
         if (row.original.atype==='stream_gauge'){
             scalar = 1.0
@@ -103,9 +132,9 @@ function GraphButton({row, setSelectedAsset,
                 getJson(asset_data.scoring_url)
                     .then(score_data => {
                         const [prev_timeseries, prev_baseline,
-                            prev_scorebar,prev_label, prev_layout] = getGraphs(data, 'Prev', 'sold')
+                            prev_scorebar,prev_label, prev_layout] = getGraphs(asset_data.source, data, 'Prev', 'sold')
                         const [score_timeseries,score_baseline,
-                            score_scorebar, score_label,score_layout] = getGraphs(score_data, 'Score', 'dashdot')
+                            score_scorebar, score_label,score_layout] = getGraphs(asset_data.source, score_data, 'Score', 'dashdot')
 
                         console.log('prev', prev_timeseries, prev_baseline, prev_scorebar)
                         setSelectedAsset(row.original.name)
@@ -271,7 +300,6 @@ export default function Dashboard({auth, setAuth}) {
                 cell: info => {
                     let src=''
                     let slug = info.getValue()
-                    console.log(slug)
                     switch (slug){
                         case 'nws':
                             src = nws_image
@@ -312,13 +340,6 @@ export default function Dashboard({auth, setAuth}) {
                         src = raingauge_image
                         break;
                 }
-                // if (value==='stream_gauge'){
-                //     src = streamgauge_image
-                // } else if (value==='continuous_groundwater'){
-                //     src = gwell_image
-                // } else if (value==='continuous_rain_gauge'){
-                //     src = raingauge_image
-                // }
             return <img width={'30%'} src={src}/>
             },
             header: 'Type',},
@@ -335,13 +356,6 @@ export default function Dashboard({auth, setAuth}) {
                 width: 100,
             },
             cell: info =>(info.row.original.active&&lineup.lineup&&gameData.active) ? info.getValue().toFixed(2) : '',
-            // {
-            //     console.log('score', info)
-            //     return info.getValue()
-            // }
-
-
-                // (info.row.original.active) ? info.getValue() : '',
         },
         {accessorKey: '',
             header: 'Action',
@@ -355,13 +369,7 @@ export default function Dashboard({auth, setAuth}) {
                                                      gameData={gameData}
                                                      setScore={setScore}
                                                      updateMap={updateMap}>Active</ActiveRowButton>
-                                    {/*<InactiveRowButton props={cell.row}*/}
-                                    {/*                   roster_slug={auth.slug+'.main'}*/}
-                                    {/*                   updateTable={fetchRosterData}*/}
-                                    {/*                   setLineup={setLineup}*/}
-                                    {/*                   gameData={gameData}*/}
-                                    {/*                   setScore={setScore}*/}
-                                    {/*                   updateMap={updateMap}>Inactive</InactiveRowButton>*/}
+
                                     <GraphButton row={cell.row}
                                                     setSelectedAsset={setSelectedAsset}
                                                     setPlotLayout={setPlotLayout}
@@ -524,12 +532,12 @@ export default function Dashboard({auth, setAuth}) {
     return(
         <div className='container-fluid'>
             <div className='row'>
-                <div className={'col-6'}>
+                <div className={'col-lg-6'}>
                     <div className={'pane'}>
                         <Leaderboard />
                     </div>
                 </div>
-                <div className={'col-6'}>
+                <div className={'col-lg-6'}>
                     <div className={'pane'}>
                         <Scoreboard roster_slug={auth.slug+'.main'}
                                     lineup={lineup}

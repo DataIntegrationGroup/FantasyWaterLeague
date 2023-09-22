@@ -15,6 +15,7 @@
 # ===============================================================================
 import os
 import time
+import traceback
 
 import requests
 from numpy import array
@@ -49,14 +50,38 @@ def calculate_asset_score(asset, url="scoring_url"):
     u = get_json(f"{HOST}/api/v1/asset/{asset['slug']}/data_url")
     if u:
         # get data from source
-        data = get_data(u[url])
+        data = get_data(source, u[url])
         return score_data(source, atype, data)
 
 
-def get_data(url):
+def get_data(source, url):
     print("------- get data", url)
     resp = requests.get(url)
-    return [d for d in resp.json()["value"]["timeSeries"][0]["values"][0]["value"]]
+    d = []
+    if resp.status_code == 200:
+        data = resp.json()
+        if source.startswith('usgs'):
+            d = extract_usgs_data(data)
+        else:
+            d = extract_nws_data(data)
+
+    return d
+
+
+def extract_nws_data(data):
+    features = data['features']
+
+    def extract(fi):
+        props = fi['properties']['precipitationLast3Hours']
+        v = props['value'] or 0
+        return {'value': v * 25.4 if props['unitCode'] == 'wmoUnit:mm' else v}
+
+    return [extract(f) for f in features]
+
+
+def extract_usgs_data(data):
+    ret = [d for d in data["value"]["timeSeries"][0]["values"][0]["value"]]
+    return ret
 
 
 def score_data(source, atype, data):
@@ -156,6 +181,7 @@ def calculate_previous_scores():
                 score = calculate_asset_score(asset, url="prev_url")
             except Exception as e:
                 print("Exception calculating score for", asset["slug"])
+                traceback.print_exc()
                 continue
 
             update_score(asset["slug"], score, "game0", access_token)

@@ -9,6 +9,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import AppNavbar from "./components/Navbar/Navbar";
 import useAuth from "./components/App/useAuth";
 import Admin from "./components/Admin/Admin";
+import Documentation from "./components/App/Documentation.js";
 
 
 function Home(){
@@ -53,8 +54,9 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />}/>
             <Route path="/dashboard" element={<Dashboard auth={auth} setAuth={setAuth}/>}/>
-            <Route path="/preferences" element={<Preferences />}/>
+            {/*<Route path="/preferences" element={<Preferences />}/>*/}
             <Route path="/admin" element={<Admin auth={auth}/>}/>
+            <Route path="/documentation" element={<Documentation />}/>
           </Routes>
         </BrowserRouter>
           <Footer />
