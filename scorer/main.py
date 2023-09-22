@@ -60,7 +60,7 @@ def get_data(source, url):
     d = []
     if resp.status_code == 200:
         data = resp.json()
-        if source.startswith('usgs'):
+        if source.startswith("usgs"):
             d = extract_usgs_data(data)
         else:
             d = extract_nws_data(data)
@@ -69,12 +69,12 @@ def get_data(source, url):
 
 
 def extract_nws_data(data):
-    features = data['features']
+    features = data["features"]
 
     def extract(fi):
-        props = fi['properties']['precipitationLast3Hours']
-        v = props['value'] or 0
-        return {'value': v * 25.4 if props['unitCode'] == 'wmoUnit:mm' else v}
+        props = fi["properties"]["precipitationLast3Hours"]
+        v = props["value"] or 0
+        return {"value": v * 25.4 if props["unitCode"] == "wmoUnit:mm" else v}
 
     return [extract(f) for f in features]
 

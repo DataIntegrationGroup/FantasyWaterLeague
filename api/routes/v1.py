@@ -200,9 +200,9 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
     asset = retrieve_asset(db, asset_slug)
     source_id = asset.source_identifier
 
-    prev_start_dt = (game.start - timedelta(days=7)).isoformat(timespec='seconds') + 'Z'
-    start_dt = game.start.isoformat(timespec='seconds') + 'Z'
-    if asset.source.slug.startswith('usgs'):
+    prev_start_dt = (game.start - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
+    start_dt = game.start.isoformat(timespec="seconds") + "Z"
+    if asset.source.slug.startswith("usgs"):
         request_url = f"{asset.source.base_url}&site={source_id}&period=P7D"
         prev_url = (
             f"{asset.source.base_url}"
@@ -211,28 +211,29 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
             f"&endDT={start_dt}"
         )
         scoring_url = (
-            f"{asset.source.base_url}"
-            f"&site={source_id}"
-            f"&startDT={start_dt}"
+            f"{asset.source.base_url}" f"&site={source_id}" f"&startDT={start_dt}"
         )
     else:
         base_url = asset.source.base_url
-        if '{' in base_url and '}' in base_url:
+        if "{" in base_url and "}" in base_url:
             base_url = base_url.format(source_id=source_id)
 
         request_url = base_url
-        prev_url = f'{base_url}?start={prev_start_dt}&end={start_dt}'
-        scoring_url = f'{base_url}?start={start_dt}'
+        prev_url = f"{base_url}?start={prev_start_dt}&end={start_dt}"
+        scoring_url = f"{base_url}?start={start_dt}"
         # scoring_url = (
         #     f"{asset.source.base_url}"
         #     f"&sites={source_id}"
         #     f"&startDT={game.start.isoformat()}"
         # )
 
-    return {"url": request_url, "prev_url": prev_url,
-            "scoring_url": scoring_url,
-            "source": asset.source.slug,
-            "atype": asset.atype,}
+    return {
+        "url": request_url,
+        "prev_url": prev_url,
+        "scoring_url": scoring_url,
+        "source": asset.source.slug,
+        "atype": asset.atype,
+    }
 
 
 @router.get("/asset/{asset_slug}/score")
