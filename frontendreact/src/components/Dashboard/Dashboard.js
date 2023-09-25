@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState, useMemo} from 'react';
 import Plot from 'react-plotly.js';
-import {getCoreRowModel, flexRender, useReactTable} from '@tanstack/react-table'
+import {getCoreRowModel, flexRender, useReactTable, getSortedRowModel} from '@tanstack/react-table'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './Dashboard.css'
@@ -294,6 +294,9 @@ export default function Dashboard({auth, setAuth}) {
     const [plotLayout, setPlotLayout] = useState(null)
     const [selectedAsset, setSelectedAsset] = useState(null)
 
+    const [hover_active, setHoverActive] = useState(null)
+    const [sorting, setSorting] = useState([])
+
     const roster_columns = useMemo(()=>[
             {accessorKey: 'source_slug',
                 header: 'Source',
@@ -359,6 +362,7 @@ export default function Dashboard({auth, setAuth}) {
         },
         {accessorKey: '',
             header: 'Action',
+            enableSorting: false,
             meta: {
                 width: 400
             },
@@ -382,14 +386,20 @@ export default function Dashboard({auth, setAuth}) {
     ]
     )
 
+    function getRowStyles(row) {
+        return {
+            background: (hover_active && row.original.name ===hover_active)? '#eac15a' : (row.original.active ? "#64B976FF" : "#B07D6EFF")
+        }
+    }
 
     const roster_table = useReactTable({ data: roster_data,
         columns: roster_columns ,
         meta: {
-            getRowStyles: (row) => ({
-                background: row.original.active ? "#64B976FF" : "#B07D6EFF"
-            })
+            getRowStyles: getRowStyles
         },
+        state: {sorting},
+        onSortingChange: setSorting,
+        getSortedRowModel: getSortedRowModel(),
         getCoreRowModel: getCoreRowModel()})
 
     const fetchRosterData = () => {
@@ -465,7 +475,6 @@ export default function Dashboard({auth, setAuth}) {
                             items.forEach((item)=>{
                                             let tag = item[0]
                                             let image = item[1]
-                                            console.log('adfsasfasfasfd', tag)
 
                                             let fc = make_fc(data, tag)
                                             console.log(fc)
@@ -508,6 +517,8 @@ export default function Dashboard({auth, setAuth}) {
                                                     popup.setLngLat(coordinates)
                                                         .setHTML(html)
                                                         .addTo(map.current);
+
+                                                    setHoverActive(e.features[0].properties.name)
                                                 })
 
                                                 map.current.on('mouseleave', tag, function () {
@@ -585,11 +596,19 @@ export default function Dashboard({auth, setAuth}) {
                                         >
                                             {header.isPlaceholder
                                                 ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext(),
+                                                :
+                                                <div {...{className:
+                                                        header.column.getCanSort()?
+                                                            'cursor-pointer': '',
+                                                onClick: header.column.getToggleSortingHandler()}}>
+                                                    {flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext(),
 
-                                                )}
+                                                    )}
+
+                                                </div>
+                                            }
                                         </th>
                                     ))}
                                 </tr>

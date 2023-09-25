@@ -249,7 +249,7 @@ async def setup_demo():
     for n, assets, nactive in ((5, gws, 3),
                                (5, rgs, 3),
                                (10, sgs, 6),
-                               (10, nws, 6)
+                               (10, nws, 0)
                                ):
         draft = make_draft(assets)
         c = 0

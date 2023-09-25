@@ -25,7 +25,7 @@ export default function Scoreboard({gameData, roster_slug, score, lineup}){
                         <th>Valid</th></tr>
                 </thead>
                 <tbody>
-                    <tr className={gameData.active?'active_row':'inactive_row'}>
+                    <tr className={lineup.lineup?'active_row':'inactive_row'}>
                         <td>{lineup.nstreamgauge}/{lineup.rstreamgauge}</td>
                         <td>{lineup.ngroundwater}/{lineup.rgroundwater}</td>
                         <td>{lineup.nraingauge}/{lineup.rraingauge}</td>

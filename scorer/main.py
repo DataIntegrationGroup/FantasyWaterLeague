@@ -113,7 +113,9 @@ def score_continuous_groundwater(data):
 
 
 def score_continuous_rain_gauge(data):
-    return 10 * score_timeseries(data)
+    vs = array([float(d["value"]) for d in data])
+
+    return 10 * sum(vs)
 
 
 def update_roster_score(game_slug, roster_slug, score, access_token):

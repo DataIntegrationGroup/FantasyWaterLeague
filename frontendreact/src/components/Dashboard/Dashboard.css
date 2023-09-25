@@ -168,6 +168,10 @@
     margin-bottom: 5px;
 }
 
+.cursor-pointer {
+    cursor: pointer;
+}
+
 /*.bubble {*/
 /*    border-radius: 6px;*/
 /*    !*width: 20px;*!*/
