@@ -41,7 +41,7 @@ def update_score(asset_slug, score, game, access_token):
         json={"score": score, "game_slug": game},
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    print('update score response', score, resp.status_code)
+    print("update score response", score, resp.status_code)
 
 
 def calculate_asset_score(asset, url="scoring_url"):
