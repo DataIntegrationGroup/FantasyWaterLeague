@@ -36,11 +36,12 @@ def get_json(url, access_token=None):
 
 
 def update_score(asset_slug, score, game, access_token):
-    requests.put(
+    resp = requests.put(
         f"{HOST}/api/v1/asset/{asset_slug}/score",
         json={"score": score, "game_slug": game},
         headers={"Authorization": f"Bearer {access_token}"},
     )
+    print('update score response', score, resp.status_code)
 
 
 def calculate_asset_score(asset, url="scoring_url"):

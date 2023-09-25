@@ -74,8 +74,8 @@ def make_nws_sites(db):
     rows = []
     for feature in features:
         props = feature['properties']
-        print(props['name'], props['stationIdentifier'])
-        print(feature['geometry']['coordinates'])
+        # print(props['name'], props['stationIdentifier'])
+        # print(feature['geometry']['coordinates'])
         source_id = props['stationIdentifier']
         name = props['name']
         slug = f"{name.replace(' ', '_').lower()}-{source_id}"
