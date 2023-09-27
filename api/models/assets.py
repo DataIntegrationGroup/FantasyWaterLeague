@@ -55,7 +55,7 @@ class Asset(Base, Slugged):
     @property
     def score(self):
         sc = 0
-        if self.scores > 1:
+        if len(self.scores) > 1:
             sc = self.scores[-1].score
         return sc
 
