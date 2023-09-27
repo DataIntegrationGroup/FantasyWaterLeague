@@ -477,21 +477,21 @@ export default function Dashboard({auth, setAuth}) {
                     maxZoom: 15
                 });
 
-                // const paint = {
-                //     'circle-radius': 5,
-                //     'circle-color': ['match', ['get', 'active'],
-                //         1, '#64B976',
-                //         0, '#B07D6E',
-                //         '#d5633a'],
-                //     'circle-stroke-color': 'black',
-                //     'circle-stroke-width': 1,
-                // }
-                //
-                // let layout = {
-                //         'icon-size': 0.065,
-                //         'icon-allow-overlap': true,
-                //         'icon-offset': [0, -200],
-                // }
+                const paint = {
+                    'circle-radius': 5,
+                    'circle-color': ['match', ['get', 'active'],
+                        1, '#64B976',
+                        0, '#B07D6E',
+                        '#d5633a'],
+                    'circle-stroke-color': 'black',
+                    'circle-stroke-width': 1,
+                }
+
+                let layout = {
+                        'icon-size': 0.065,
+                        'icon-allow-overlap': true,
+                        'icon-offset': [0, -200],
+                }
                 map.current.on('load', function () {
 
                     //add precip layer
@@ -534,68 +534,68 @@ export default function Dashboard({auth, setAuth}) {
 
 
 
-//                     api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
-//                         .then(data=> {
-//                             console.log('geojson', data)
-//                             let items =[[STREAM_GAUGE, streamgauge_image],
-//                                 [CONTINUOUS_GROUNDWATER,gwell_image],
-//                                 [CONTINUOUS_RAIN_GAUGE, raingauge_image]]
-//                             items.forEach((item)=>{
-//                                             let tag = item[0]
-//                                             let image = item[1]
-//
-//                                             let fc = make_fc(data, tag)
-//                                             console.log(fc)
-//                                             map.current.addSource(tag, {type: 'geojson',
-//                                                 data: fc}) ;
-//                                             map.current.loadImage(image, function(error, image) {
-//                                                 map.current.addImage(tag + '_image', image, {sdf: false})
-//                                                 layout['icon-image'] = tag + '_image'
-//                                                 map.current.addLayer({
-//                                                     id: tag + '_symbol',
-//                                                     source: tag,
-//                                                     type: 'symbol',
-//                                                     layout: layout
-//                                                 })
-//
-//                                                 map.current.addLayer({
-//                                                     id: tag,
-//                                                     type: 'circle',
-//                                                     source: tag,
-//                                                     paint: paint
-//                                                 })
-//
-//                                                 const popup = new mapboxgl.Popup({
-//                                                     closeButton: false,
-//                                                     closeOnClick: false
-//                                                 })
-//
-//                                                 map.current.on('mouseenter', tag, function (e) {
-//
-//                                                     map.current.getCanvas().style.cursor = 'pointer';
-//                                                     const coordinates = e.features[0].geometry.coordinates.slice();
-//                                                     const atype = toNameCase(e.features[0].properties.atype)
-//
-//                                                     const html= `<div class="popup">
-// <table class="table-sm table-bordered">
-// <tr><td class="popup-td">Name</td><td>${e.features[0].properties.name}</td></tr>
-// <tr><td class="popup-td">Type</td><td>${atype}</td></tr>
-// <tr><td class="popup-td">Score</td><td>${e.features[0].properties.score.toFixed(2)}</td></tr>
-// </table></div>`
-//                                                     popup.setLngLat(coordinates)
-//                                                         .setHTML(html)
-//                                                         .addTo(map.current);
-//
-//                                                     setHoverActive(e.features[0].properties.name)
-//                                                 })
-//
-//                                                 map.current.on('mouseleave', tag, function () {
-//                                                     map.current.getCanvas().style.cursor = '';
-//                                                     popup.remove();
-//                                                 })
-//                                             })
-//                             }) // end forEach
-//                         })
+                    api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
+                        .then(data=> {
+                            console.log('geojson', data)
+                            let items =[[STREAM_GAUGE, streamgauge_image],
+                                [CONTINUOUS_GROUNDWATER,gwell_image],
+                                [CONTINUOUS_RAIN_GAUGE, raingauge_image]]
+                            items.forEach((item)=>{
+                                            let tag = item[0]
+                                            let image = item[1]
+
+                                            let fc = make_fc(data, tag)
+                                            console.log(fc)
+                                            map.current.addSource(tag, {type: 'geojson',
+                                                data: fc}) ;
+                                            map.current.loadImage(image, function(error, image) {
+                                                map.current.addImage(tag + '_image', image, {sdf: false})
+                                                layout['icon-image'] = tag + '_image'
+                                                map.current.addLayer({
+                                                    id: tag + '_symbol',
+                                                    source: tag,
+                                                    type: 'symbol',
+                                                    layout: layout
+                                                })
+
+                                                map.current.addLayer({
+                                                    id: tag,
+                                                    type: 'circle',
+                                                    source: tag,
+                                                    paint: paint
+                                                })
+
+                                                const popup = new mapboxgl.Popup({
+                                                    closeButton: false,
+                                                    closeOnClick: false
+                                                })
+
+                                                map.current.on('mouseenter', tag, function (e) {
+
+                                                    map.current.getCanvas().style.cursor = 'pointer';
+                                                    const coordinates = e.features[0].geometry.coordinates.slice();
+                                                    const atype = toNameCase(e.features[0].properties.atype)
+
+                                                    const html= `<div class="popup">
+<table class="table-sm table-bordered">
+<tr><td class="popup-td">Name</td><td>${e.features[0].properties.name}</td></tr>
+<tr><td class="popup-td">Type</td><td>${atype}</td></tr>
+<tr><td class="popup-td">Score</td><td>${e.features[0].properties.score.toFixed(2)}</td></tr>
+</table></div>`
+                                                    popup.setLngLat(coordinates)
+                                                        .setHTML(html)
+                                                        .addTo(map.current);
+
+                                                    setHoverActive(e.features[0].properties.name)
+                                                })
+
+                                                map.current.on('mouseleave', tag, function () {
+                                                    map.current.getCanvas().style.cursor = '';
+                                                    popup.remove();
+                                                })
+                                            })
+                            }) // end forEach
+                        })
                 })
             })
     }
