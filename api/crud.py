@@ -72,15 +72,13 @@ def retrieve_roster_assets(db, roster_slug, active_game=None, prev_game=None):
     roster = q.one()
     ret = []
     for a in roster.assets:
-
-
         aa = a.asset
         aa.active = a.active
 
         aa.score = 0
         aa.prev_score = 0
 
-        for (game, attr) in ((active_game, 'score'), (prev_game, 'prev_score')):
+        for game, attr in ((active_game, "score"), (prev_game, "prev_score")):
             if game:
                 for s in aa.scores:
                     if s.game_slug == game.slug:

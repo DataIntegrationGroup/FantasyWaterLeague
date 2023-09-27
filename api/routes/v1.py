@@ -32,7 +32,8 @@ from api.crud import (
     add_asset_score,
     retrieve_game,
     retrieve_player_by_user,
-    add_roster_score, retrieve_games,
+    add_roster_score,
+    retrieve_games,
 )
 from api.rules import (
     validate_team,
@@ -149,7 +150,6 @@ async def get_player(player_slug, db=Depends(get_db)):
 @auth_router.get("/roster/{roster_slug}", response_model=List[schemas.ActiveAsset])
 async def get_roster(roster_slug, db=Depends(get_db)):
     game1, game0 = retrieve_games(db, limit=2)
-
 
     return retrieve_roster_assets(db, roster_slug, game1, game0)
 
