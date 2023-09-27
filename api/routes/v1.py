@@ -90,6 +90,11 @@ async def get_leaderboard(db=Depends(get_db)):
             if roster.active and roster.name == "main":
                 player.score = roster.scores[-1].score if roster.scores else 0
                 break
+
+    splayers = sorted(players, key=lambda x: x.score, reverse=True)
+    for i, p in enumerate(splayers[:3]):
+        p.rank = 3 - i
+
     return sorted(players, key=lambda x: x.score, reverse=True)
 
 

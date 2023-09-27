@@ -43,6 +43,7 @@ class Player(NamedModel):
     slug: str
     score: float = Field(default=0)
     team_name: str
+    rank: int = Field(default=0)
 
 
 class Asset(ORMBaseModel):

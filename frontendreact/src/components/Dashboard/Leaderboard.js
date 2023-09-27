@@ -1,13 +1,27 @@
 import {flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
 import React, {useEffect} from "react";
 import {settings} from "../../settings";
+import star_icon from "../../img/icon/star.png";
+
+function nameCell(info) {
+    let name = info.getValue()
+    if (info.row.original.rank > 0){
+        let images = []
+        for (let i=0; i<info.row.original.rank; i++){
+            images.push(<img src={star_icon} style={{width: '20px', height: '20px'}}/>)
+        }
+        return <span>{name} {images} </span>
+    }
+    return name
+}
+
 
 export default function Leaderboard() {
     const [data, setData] = React.useState([])
 
     const columns = [{accessorKey: 'name',
         header: 'Name',
-        cell: info => info.getValue()
+        cell: nameCell
         },
         {'accessorKey': 'team_name',
             'header': 'Team',
