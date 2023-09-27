@@ -80,7 +80,7 @@ def retrieve_roster_assets(db, roster_slug, active_game=None, prev_game=None):
 
         for game, attr in ((active_game, "score"), (prev_game, "prev_score")):
             if game:
-                for s in aa.scores:
+                for s in sorted(aa.scores, key=lambda x: x.timestamp, reverse=True):
                     if s.game_slug == game.slug:
                         setattr(aa, attr, s.score)
                         break

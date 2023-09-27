@@ -200,7 +200,9 @@ if __name__ == "__main__":
         )
         exit(0)
 
-    calculate_previous_scores()
+    if os.environ.get('CALCULATE_PREVIOUS_SCORES', '0') == '1':
+        calculate_previous_scores()
+
     print("starting scorer schelduler")
     calculate_scores()
     sched.start()
