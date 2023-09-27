@@ -52,19 +52,19 @@ class Asset(Base, Slugged):
     source = relationship("Source", backref="assets")
     scores = relationship("Score", backref="asset")
 
-    @property
-    def score(self):
-        sc = 0
-        if len(self.scores) > 1:
-            sc = self.scores[-1].score
-        return sc
-
-    @property
-    def prev_score(self):
-        sc = 0
-        if len(self.scores) > 1:
-            sc = self.scores[-2].score
-        return sc
+    # @property
+    # def score(self):
+    #     sc = 0
+    #     if len(self.scores) > 1:
+    #         sc = self.scores[-1].score
+    #     return sc
+    #
+    # @property
+    # def prev_score(self):
+    #     sc = 0
+    #     if len(self.scores) > 1:
+    #         sc = self.scores[-2].score
+    #     return sc
 
     # score = Column(Float, default=0)
     # score_timestamp = Column(

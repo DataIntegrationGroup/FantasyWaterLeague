@@ -43,6 +43,13 @@ def retrieve_asset(db, asset_slug):
     return q.one()
 
 
+def retrieve_games(db, limit=2):
+    q = db.query(Game)
+    q = q.order_by(Game.start.desc())
+    q = q.limit(limit)
+    return q.all()
+
+
 def retrieve_game(db):
     q = db.query(Game)
     q = q.order_by(Game.start.desc())
@@ -59,14 +66,27 @@ def retrieve_roster_asset(db, roster_slug, asset_slug):
     return q.one()
 
 
-def retrieve_roster_assets(db, roster_slug):
+def retrieve_roster_assets(db, roster_slug, active_game=None, prev_game=None):
     q = db.query(Roster)
     q = q.filter(Roster.slug == roster_slug)
     roster = q.one()
     ret = []
     for a in roster.assets:
+
+
         aa = a.asset
         aa.active = a.active
+
+        aa.score = 0
+        aa.prev_score = 0
+
+        for (game, attr) in ((active_game, 'score'), (prev_game, 'prev_score')):
+            if game:
+                for s in aa.scores:
+                    if s.game_slug == game.slug:
+                        setattr(aa, attr, s.score)
+                        break
+
         ret.append(aa)
 
     return sorted(ret, key=lambda x: x.slug)
