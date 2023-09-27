@@ -182,7 +182,10 @@ async def get_roster_geojson(roster_slug, db=Depends(get_db)):
 @router.get("/roster/{roster_slug}/score")
 async def get_roster_score(roster_slug, db=Depends(get_db)):
     score = 0
-    for a in retrieve_roster_assets(db, roster_slug):
+
+    game1, game0 = retrieve_games(db, limit=2)
+
+    for a in retrieve_roster_assets(db, roster_slug, game1, game0):
         if a.active:
             score += a.score
 
