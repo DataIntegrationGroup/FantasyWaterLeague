@@ -8,7 +8,7 @@ function nameCell(info) {
     if (info.row.original.rank > 0){
         let images = []
         for (let i=0; i<info.row.original.rank; i++){
-            images.push(<img src={star_icon} style={{width: '20px', height: '20px'}}/>)
+            images.push(<img key={'star'+i} src={star_icon} style={{width: '20px', height: '20px'}}/>)
         }
         return <span>{name} {images} </span>
     }

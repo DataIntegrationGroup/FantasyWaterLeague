@@ -16,6 +16,7 @@ import nws_image from '../../img/nws.png'
 import usgs_image from '../../img/usgs.png'
 
 import {forEach} from "react-bootstrap/ElementChildren";
+import NWSLegend from "./NWSLegend";
 
 const STREAM_GAUGE = 'stream_gauge'
 const CONTINUOUS_GROUNDWATER = 'continuous_groundwater'
@@ -293,7 +294,7 @@ export default function Dashboard({auth, setAuth}) {
     const [plotData, setPlotData] = useState(null)
     const [plotLayout, setPlotLayout] = useState(null)
     const [selectedAsset, setSelectedAsset] = useState(null)
-
+    const [legend, setLegend] = useState([])
     const [hover_active, setHoverActive] = useState(null)
     const [sorting, setSorting] = useState([])
 
@@ -437,6 +438,32 @@ export default function Dashboard({auth, setAuth}) {
             return;
         }
 
+        getJson('https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/cpc_6_10_day_outlk/MapServer/legend?f=pjson')
+            .then( data=>{
+                    const precip = data.layers[1].legend
+                    console.log('legend', precip)
+
+                    setLegend(precip)
+                    // const legend = document.getElementById('legend');
+
+                    // precip.forEach((layer, i) => {
+                    //     // const color = colors[i];
+                    //     const item = document.createElement('div');
+                    //     const key = document.createElement('span');
+                    //     key.className = 'legend-key';
+                    //     // key.style.backgroundColor = color;
+                    //
+                    //     const value = document.createElement('span');
+                    //     value.innerHTML = `${layer}`;
+                    //     item.appendChild(key);
+                    //     item.appendChild(value);
+                    //     legend.appendChild(item);
+                    // });
+
+
+                }
+            )
+
         api_getJson(settings.BASE_API_URL+'/mapboxtoken', auth)
             .then(data=> {
                 mapboxgl.accessToken = data.token
@@ -450,84 +477,125 @@ export default function Dashboard({auth, setAuth}) {
                     maxZoom: 15
                 });
 
-                const paint = {
-                    'circle-radius': 5,
-                    'circle-color': ['match', ['get', 'active'],
-                        1, '#64B976',
-                        0, '#B07D6E',
-                        '#d5633a'],
-                    'circle-stroke-color': 'black',
-                    'circle-stroke-width': 1,
-                }
-
-                let layout = {
-                        'icon-size': 0.065,
-                        'icon-allow-overlap': true,
-                        'icon-offset': [0, -200],
-                }
+                // const paint = {
+                //     'circle-radius': 5,
+                //     'circle-color': ['match', ['get', 'active'],
+                //         1, '#64B976',
+                //         0, '#B07D6E',
+                //         '#d5633a'],
+                //     'circle-stroke-color': 'black',
+                //     'circle-stroke-width': 1,
+                // }
+                //
+                // let layout = {
+                //         'icon-size': 0.065,
+                //         'icon-allow-overlap': true,
+                //         'icon-offset': [0, -200],
+                // }
                 map.current.on('load', function () {
-                    api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
-                        .then(data=> {
-                            console.log('geojson', data)
-                            let items =[[STREAM_GAUGE, streamgauge_image],
-                                [CONTINUOUS_GROUNDWATER,gwell_image],
-                                [CONTINUOUS_RAIN_GAUGE, raingauge_image]]
-                            items.forEach((item)=>{
-                                            let tag = item[0]
-                                            let image = item[1]
 
-                                            let fc = make_fc(data, tag)
-                                            console.log(fc)
-                                            map.current.addSource(tag, {type: 'geojson',
-                                                data: fc}) ;
-                                            map.current.loadImage(image, function(error, image) {
-                                                map.current.addImage(tag + '_image', image, {sdf: false})
-                                                layout['icon-image'] = tag + '_image'
-                                                map.current.addLayer({
-                                                    id: tag + '_symbol',
-                                                    source: tag,
-                                                    type: 'symbol',
-                                                    layout: layout
-                                                })
+                    //add precip layer
+                    map.current.addLayer({
+                        'id': 'precip',
+                        'type': 'raster',
+                        'paint': {'raster-opacity': 0.5},
+                        'source': {
+                            'type': 'raster',
+                            'tileSize': 256,
+                            'tiles': [
+                                'https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/cpc_6_10_day_outlk/MapServer/export?' +
+                                'bbox={bbox-epsg-3857}' +
+                                '&bboxSR=3857' +
+                                '&layers=show:1' +
+                                '&layerDefs=' +
+                                '&size=' +
+                                '&imageSR=3857' +
+                                '&historicMoment=' +
+                                '&format=png' +
+                                '&transparent=false' +
+                                '&dpi=' +
+                                '&time=' +
+                                '&timeRelation=esriTimeRelationOverlaps' +
+                                '&layerTimeOptions=' +
+                                '&dynamicLayers=' +
+                                '&gdbVersion=' +
+                                '&mapScale=' +
+                                '&rotation=' +
+                                '&datumTransformations=' +
+                                '&layerParameterValues=' +
+                                '&mapRangeValues=' +
+                                '&layerRangeValues=' +
+                                '&clipping=' +
+                                '&spatialFilter=' +
+                                '&f=Image'
+                            ]
+                        }
+                    })
 
-                                                map.current.addLayer({
-                                                    id: tag,
-                                                    type: 'circle',
-                                                    source: tag,
-                                                    paint: paint
-                                                })
 
-                                                const popup = new mapboxgl.Popup({
-                                                    closeButton: false,
-                                                    closeOnClick: false
-                                                })
 
-                                                map.current.on('mouseenter', tag, function (e) {
-
-                                                    map.current.getCanvas().style.cursor = 'pointer';
-                                                    const coordinates = e.features[0].geometry.coordinates.slice();
-                                                    const atype = toNameCase(e.features[0].properties.atype)
-
-                                                    const html= `<div class="popup">
-<table class="table-sm table-bordered">
-<tr><td class="popup-td">Name</td><td>${e.features[0].properties.name}</td></tr>
-<tr><td class="popup-td">Type</td><td>${atype}</td></tr>
-<tr><td class="popup-td">Score</td><td>${e.features[0].properties.score.toFixed(2)}</td></tr>
-</table></div>`
-                                                    popup.setLngLat(coordinates)
-                                                        .setHTML(html)
-                                                        .addTo(map.current);
-
-                                                    setHoverActive(e.features[0].properties.name)
-                                                })
-
-                                                map.current.on('mouseleave', tag, function () {
-                                                    map.current.getCanvas().style.cursor = '';
-                                                    popup.remove();
-                                                })
-                                            })
-                            }) // end forEach
-                        })
+//                     api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
+//                         .then(data=> {
+//                             console.log('geojson', data)
+//                             let items =[[STREAM_GAUGE, streamgauge_image],
+//                                 [CONTINUOUS_GROUNDWATER,gwell_image],
+//                                 [CONTINUOUS_RAIN_GAUGE, raingauge_image]]
+//                             items.forEach((item)=>{
+//                                             let tag = item[0]
+//                                             let image = item[1]
+//
+//                                             let fc = make_fc(data, tag)
+//                                             console.log(fc)
+//                                             map.current.addSource(tag, {type: 'geojson',
+//                                                 data: fc}) ;
+//                                             map.current.loadImage(image, function(error, image) {
+//                                                 map.current.addImage(tag + '_image', image, {sdf: false})
+//                                                 layout['icon-image'] = tag + '_image'
+//                                                 map.current.addLayer({
+//                                                     id: tag + '_symbol',
+//                                                     source: tag,
+//                                                     type: 'symbol',
+//                                                     layout: layout
+//                                                 })
+//
+//                                                 map.current.addLayer({
+//                                                     id: tag,
+//                                                     type: 'circle',
+//                                                     source: tag,
+//                                                     paint: paint
+//                                                 })
+//
+//                                                 const popup = new mapboxgl.Popup({
+//                                                     closeButton: false,
+//                                                     closeOnClick: false
+//                                                 })
+//
+//                                                 map.current.on('mouseenter', tag, function (e) {
+//
+//                                                     map.current.getCanvas().style.cursor = 'pointer';
+//                                                     const coordinates = e.features[0].geometry.coordinates.slice();
+//                                                     const atype = toNameCase(e.features[0].properties.atype)
+//
+//                                                     const html= `<div class="popup">
+// <table class="table-sm table-bordered">
+// <tr><td class="popup-td">Name</td><td>${e.features[0].properties.name}</td></tr>
+// <tr><td class="popup-td">Type</td><td>${atype}</td></tr>
+// <tr><td class="popup-td">Score</td><td>${e.features[0].properties.score.toFixed(2)}</td></tr>
+// </table></div>`
+//                                                     popup.setLngLat(coordinates)
+//                                                         .setHTML(html)
+//                                                         .addTo(map.current);
+//
+//                                                     setHoverActive(e.features[0].properties.name)
+//                                                 })
+//
+//                                                 map.current.on('mouseleave', tag, function () {
+//                                                     map.current.getCanvas().style.cursor = '';
+//                                                     popup.remove();
+//                                                 })
+//                                             })
+//                             }) // end forEach
+//                         })
                 })
             })
     }
@@ -565,7 +633,9 @@ export default function Dashboard({auth, setAuth}) {
                             <h4>Map</h4>
                         </div>
                         <div>
-                            <div ref={mapContainer} className="map-container" />
+                            <div ref={mapContainer} className="map-container">
+                                <NWSLegend legend={legend} />
+                            </div>
                         </div>
                     </div>
                 </div>
