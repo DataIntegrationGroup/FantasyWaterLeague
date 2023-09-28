@@ -297,6 +297,12 @@ export default function Dashboard({auth, setAuth}) {
     const [legend, setLegend] = useState([])
     const [hover_active, setHoverActive] = useState(null)
     const [sorting, setSorting] = useState([])
+    const [opacity, setOpacity] = useState(0.5)
+
+
+    const wrapSetOpacity= (o)=>{
+        map.current.setPaintProperty('precip', 'raster-opacity', Number(o)/100)
+    }
 
     const roster_columns = useMemo(()=>[
             {accessorKey: 'source_slug',
@@ -441,26 +447,7 @@ export default function Dashboard({auth, setAuth}) {
         getJson('https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/cpc_6_10_day_outlk/MapServer/legend?f=pjson')
             .then( data=>{
                     const precip = data.layers[1].legend
-                    console.log('legend', precip)
-
                     setLegend(precip)
-                    // const legend = document.getElementById('legend');
-
-                    // precip.forEach((layer, i) => {
-                    //     // const color = colors[i];
-                    //     const item = document.createElement('div');
-                    //     const key = document.createElement('span');
-                    //     key.className = 'legend-key';
-                    //     // key.style.backgroundColor = color;
-                    //
-                    //     const value = document.createElement('span');
-                    //     value.innerHTML = `${layer}`;
-                    //     item.appendChild(key);
-                    //     item.appendChild(value);
-                    //     legend.appendChild(item);
-                    // });
-
-
                 }
             )
 
@@ -498,7 +485,7 @@ export default function Dashboard({auth, setAuth}) {
                     map.current.addLayer({
                         'id': 'precip',
                         'type': 'raster',
-                        'paint': {'raster-opacity': 0.5},
+                        'paint': {'raster-opacity': opacity},
                         'source': {
                             'type': 'raster',
                             'tileSize': 256,
@@ -632,10 +619,14 @@ export default function Dashboard({auth, setAuth}) {
                         <div className={'card card-dashboard'}>
                             <h4>Map</h4>
                         </div>
+
+
                         <div>
                             <div ref={mapContainer} className="map-container">
-                                <NWSLegend legend={legend} />
+                                <NWSLegend legend={legend} setOpacity={wrapSetOpacity}/>
+
                             </div>
+
                         </div>
                     </div>
                 </div>
