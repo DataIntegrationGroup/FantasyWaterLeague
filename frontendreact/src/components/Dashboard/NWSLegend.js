@@ -17,11 +17,13 @@ export default function NWSLegend(props){
                 <span className={'legend-label'} >{label.label}</span>
             </div>
     })
-
     return (
-        <div className={'nwslegend map-overlay top'}>
+        <div className={'nwslegend map-overlay top '+
+
+            (props.layersVisible['cpc6'] ==='visible'|| props.layersVisible['qpf7'] ==='visible' ?'visible': 'invisible')
+        }>
             <div className={'row'}>
-                <div className={'col'}>
+                <div className={'col ' + (props.layersVisible['cpc6'] ==='visible' ? 'visible': 'invisible')}>
                     <div className="map-overlay-inner">
                         <input id="slider" type="range" min="0" max="100" step="0"
                                onChange={(e) => props.setOpacity(e.target.value)}/>
@@ -29,7 +31,7 @@ export default function NWSLegend(props){
                     <h6>6-10 Day Precip. Forecast</h6>
                     {labels6_10}
                 </div>
-                <div className={'col'}>
+                <div className={'col '+ (props.layersVisible['qpf7']==='visible' ? 'visible': 'invisible')}>
                     <div className="map-overlay-inner">
                         <input id="slider" type="range" min="0" max="100" step="0"
                                onChange={(e) => props.setQPFOpacity(e.target.value)}/>

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState, useMemo} from 'react';
+import React, {useEffect, useRef, useState, useMemo, useReducer} from 'react';
 import Plot from 'react-plotly.js';
 import {getCoreRowModel, flexRender, useReactTable, getSortedRowModel} from '@tanstack/react-table'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -17,6 +17,7 @@ import usgs_image from '../../img/usgs.png'
 
 import {forEach} from "react-bootstrap/ElementChildren";
 import NWSLegend from "./NWSLegend";
+import ControlPanel from "./ControlPanel";
 
 const STREAM_GAUGE = 'stream_gauge'
 const CONTINUOUS_GROUNDWATER = 'continuous_groundwater'
@@ -309,13 +310,28 @@ export default function Dashboard({auth, setAuth}) {
     const [QPF7legend, setQPF7Legend] = useState([])
     const [hover_active, setHoverActive] = useState(null)
     const [sorting, setSorting] = useState([])
-
+    const [layersVisible, setLayersVisible] = useReducer(
+        (state, newState) => ({...state, ...newState}),
+        {})
 
     const setOpacity= (o)=>{
         map.current.setPaintProperty('cpc_6_10_day_outlk', 'raster-opacity', Number(o)/100)
     }
     const setQPFOpacity= (o)=>{
         map.current.setPaintProperty('wpc_qpf', 'raster-opacity', Number(o)/100)
+    }
+
+    function handleLayerVisibility(visibilityState) {
+        if (map.current===null){
+            return;
+        }
+        console.log('state', visibilityState)
+
+        map.current.setLayoutProperty('cpc_6_10_day_outlk',
+                                        'visibility', visibilityState['cpc6']);
+        map.current.setLayoutProperty('wpc_qpf',
+                                        'visibility', visibilityState['qpf7']);
+        setLayersVisible(visibilityState)
     }
 
     const roster_columns = useMemo(()=>[
@@ -681,8 +697,10 @@ export default function Dashboard({auth, setAuth}) {
 
                         <div>
                             <div ref={mapContainer} className="map-container">
+                                <ControlPanel onChange={handleLayerVisibility} />
                                 <NWSLegend cpc6legend={CPC6legend}
                                            qpf7legend={QPF7legend}
+                                           layersVisible={layersVisible}
                                            setQPFOpacity={setQPFOpacity}
                                            setOpacity={setOpacity}/>
 
