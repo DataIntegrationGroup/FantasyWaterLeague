@@ -516,10 +516,21 @@ export default function Dashboard({auth, setAuth}) {
                         'icon-offset': [0, -200],
                 }
                 map.current.on('load', function () {
+
+                    map.current.addSource('mapbox-dem', {
+                        'type': 'raster-dem',
+                        'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                        'tileSize': 512,
+                        'maxzoom': 14
+                    });
+                    // add the DEM source as a terrain layer with exaggerated height
+                    map.current.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 3 });
+
                     map.current.addLayer({
                         'id': 'wpc_qpf',
                         'type': 'raster',
                         'paint': {'raster-opacity': 0.5},
+                        'layout': {'visibility': 'none'},
                         'source': {
                             'type': 'raster',
                             'tileSize': 256,
@@ -560,6 +571,7 @@ export default function Dashboard({auth, setAuth}) {
                         'id': 'cpc_6_10_day_outlk',
                         'type': 'raster',
                         'paint': {'raster-opacity': 0.5},
+                        'layout': {'visibility': 'none'},
                         'source': {
                             'type': 'raster',
                             'tileSize': 256,
