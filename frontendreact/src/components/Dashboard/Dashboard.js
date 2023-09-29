@@ -159,6 +159,17 @@ function GraphButton({row, setSelectedAsset,
                    style={{background: '#0b82d9'}}
                    onClick={handleClick}>Graph</button>
 }
+function SourceButton({row}){
+    const handleClick = () => {
+        console.log('source', row)
+        window.open(row.original.source_landing_url, '_blank')
+    }
+    return <button
+        className='rowbutton'
+        style={{background: '#e87d43'}}
+        onClick={handleClick}>Source</button>
+}
+
 function MapButton({map, row}){
     const handleClick = () => {
         console.log('map', row)
@@ -390,6 +401,7 @@ export default function Dashboard({auth, setAuth}) {
                                                     setPlotData={setPlotData}
                                                     auth={auth}>Graph</GraphButton>
                                     <MapButton map={map} row={cell.row}>Map</MapButton>
+                                    <SourceButton row={cell.row} >Source</SourceButton>
             </div>
             )
         },
@@ -591,7 +603,7 @@ export default function Dashboard({auth, setAuth}) {
                                                     layout: layout
                                                 })
 
-                                                map.current.addLayer({
+                                                const lay = map.current.addLayer({
                                                     id: tag,
                                                     type: 'circle',
                                                     source: tag,
@@ -603,7 +615,7 @@ export default function Dashboard({auth, setAuth}) {
                                                     closeOnClick: false
                                                 })
 
-                                                map.current.on('mouseenter', tag, function (e) {
+                                                lay.on('mouseenter', tag, function (e) {
 
                                                     map.current.getCanvas().style.cursor = 'pointer';
                                                     const coordinates = e.features[0].geometry.coordinates.slice();

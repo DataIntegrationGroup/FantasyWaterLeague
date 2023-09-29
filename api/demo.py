@@ -174,23 +174,27 @@ async def setup_demo():
                 active=False))
 
     db.add(Source(slug='usgs_nwis_gageheight', name='UGSS-NWIS-GageHeight',
+                  landing_url='https://waterdata.usgs.gov/monitoring-location/{source_id:}/#parameterCode=00065&period'
+                              '=P7D&showMedian=true',
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'
                            'parameterCd=00065'
                            '&format=json'))
     db.add(Source(slug='usgs_nwis_depthtowater', name='UGSS-NWIS-DepthToWater',
+                  landing_url='https://waterdata.usgs.gov/monitoring-location/'
+                              '{source_id:}/#parameterCode=72019&period=P7D&showMedian=true',
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'
                            'parameterCd=72019'
                            '&format=json'))
     db.add(Source(slug='usgs_nwis_rain_gauge', name='UGSS-NWIS-RainGauge',
+                    landing_url='https://waterdata.usgs.gov/monitoring-location/'
+                                '{source_id:}/#parameterCode=00045&period=P7D&showMedian=true',
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'
                             'parameterCd=00045'
                             '&format=json'))
     db.add(Source(slug='nws', name='National Weather Service',
+                  landing_url='https://api.weather.gov/stations/{source_id:}/observations',
                   base_url='https://api.weather.gov/stations/{source_id:}/observations'))
 
-    db.add(Source(slug='test',
-                  name='Test',
-                  base_url='https://foo.test.com'))
     db.commit()
     db.flush()
 

@@ -78,6 +78,10 @@ class Asset(Base, Slugged):
     #     return f"{self.source.base_url}{self.source_identifier}"
 
     @property
+    def source_landing_url(self):
+        return self.source.landing_url.format(source_id=self.source_identifier)
+
+    @property
     def geometry(self):
         point = to_shape(self.location)
         return {"coordinates": [float(point.x), float(point.y)], "type": "Point"}
@@ -93,6 +97,7 @@ class Asset(Base, Slugged):
 
 class Source(Base, Slugged):
     base_url = Column(String(128), nullable=False)
+    landing_url = Column(String(128), nullable=False)
 
 
 class AssetType(Base, Slugged):
