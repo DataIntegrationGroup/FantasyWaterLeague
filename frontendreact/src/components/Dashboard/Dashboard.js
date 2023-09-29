@@ -294,14 +294,17 @@ export default function Dashboard({auth, setAuth}) {
     const [plotData, setPlotData] = useState(null)
     const [plotLayout, setPlotLayout] = useState(null)
     const [selectedAsset, setSelectedAsset] = useState(null)
-    const [legend, setLegend] = useState([])
+    const [CPC6legend, setCPS6Legend] = useState([])
+    const [QPF7legend, setQPF7Legend] = useState([])
     const [hover_active, setHoverActive] = useState(null)
     const [sorting, setSorting] = useState([])
-    const [opacity, setOpacity] = useState(0.5)
 
 
-    const wrapSetOpacity= (o)=>{
-        map.current.setPaintProperty('precip', 'raster-opacity', Number(o)/100)
+    const setOpacity= (o)=>{
+        map.current.setPaintProperty('cpc_6_10_day_outlk', 'raster-opacity', Number(o)/100)
+    }
+    const setQPFOpacity= (o)=>{
+        map.current.setPaintProperty('wpc_qpf', 'raster-opacity', Number(o)/100)
     }
 
     const roster_columns = useMemo(()=>[
@@ -447,7 +450,12 @@ export default function Dashboard({auth, setAuth}) {
         getJson('https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/cpc_6_10_day_outlk/MapServer/legend?f=pjson')
             .then( data=>{
                     const precip = data.layers[1].legend
-                    setLegend(precip)
+                    setCPS6Legend(precip)
+                }
+            )
+        getJson('https://mapservices.weather.noaa.gov/vector/rest/services/precip/wpc_qpf/MapServer/legend?f=pjson')
+            .then( data=>{
+                    setQPF7Legend(data.layers[9].legend)
                 }
             )
 
@@ -480,12 +488,50 @@ export default function Dashboard({auth, setAuth}) {
                         'icon-offset': [0, -200],
                 }
                 map.current.on('load', function () {
+                    map.current.addLayer({
+                        'id': 'wpc_qpf',
+                        'type': 'raster',
+                        'paint': {'raster-opacity': 0.5},
+                        'source': {
+                            'type': 'raster',
+                            'tileSize': 256,
+                            'tiles': [
+                                'https://mapservices.weather.noaa.gov/vector/rest/services/' +
+                                'precip/wpc_qpf/MapServer/export?' +
+                                'bbox={bbox-epsg-3857}' +
+                                '&bboxSR=3857' +
+                                '&layers=show:11' +
+                                '&layerDefs=' +
+                                '&size=' +
+                                '&imageSR=3857' +
+                                '&historicMoment=' +
+                                '&format=png' +
+                                '&transparent=false' +
+                                '&dpi=' +
+                                '&time=' +
+                                '&timeRelation=esriTimeRelationOverlaps' +
+                                '&layerTimeOptions=' +
+                                '&dynamicLayers=' +
+                                '&gdbVersion=' +
+                                '&mapScale=' +
+                                '&rotation=' +
+                                '&datumTransformations=' +
+                                '&layerParameterValues=' +
+                                '&mapRangeValues=' +
+                                '&layerRangeValues=' +
+                                '&clipping=' +
+                                '&spatialFilter=' +
+                                '&f=image'
+                                ]
+                        }
+                    })
+
 
                     //add precip layer
                     map.current.addLayer({
-                        'id': 'precip',
+                        'id': 'cpc_6_10_day_outlk',
                         'type': 'raster',
-                        'paint': {'raster-opacity': opacity},
+                        'paint': {'raster-opacity': 0.5},
                         'source': {
                             'type': 'raster',
                             'tileSize': 256,
@@ -623,7 +669,10 @@ export default function Dashboard({auth, setAuth}) {
 
                         <div>
                             <div ref={mapContainer} className="map-container">
-                                <NWSLegend legend={legend} setOpacity={wrapSetOpacity}/>
+                                <NWSLegend cpc6legend={CPC6legend}
+                                           qpf7legend={QPF7legend}
+                                           setQPFOpacity={setQPFOpacity}
+                                           setOpacity={setOpacity}/>
 
                             </div>
 
