@@ -209,7 +209,9 @@ function MapButton({map, row}){
         onClick={handleClick}>Map</button>
 }
 
-function ActiveRowButton({props, updateTable,
+function ActiveRowButton({props,
+                             enabled,
+                             updateTable,
                              setLineup,
                              setScore, roster_slug, gameData, updateMap}){
     const handleClick = () => {
@@ -223,10 +225,11 @@ function ActiveRowButton({props, updateTable,
             setScore,
             updateMap)
     }
-
-    return <button
-        className={'rowbutton rowbutton_' + (props.original.active ? 'active' : 'inactive')}
-        onClick={handleClick}>{props.original.active ? 'Active' : 'Inactive'}</button>
+    if (enabled===true){
+        return <button
+            className={'rowbutton rowbutton_' + (props.original.active ? 'inactive' : 'active')}
+            onClick={handleClick}>{props.original.active ? 'Deactivate' : 'Activate'}</button>
+    }
 }
 // function InactiveRowButton({props, updateTable,
 //                                setLineup,
@@ -313,6 +316,13 @@ export default function Dashboard({auth, setAuth}) {
     const [layersVisible, setLayersVisible] = useReducer(
         (state, newState) => ({...state, ...newState}),
         {})
+    const [displayPlayer, setDisplayPlayer] = useState(null)
+
+    const setDisplayPlayerManual = (slug) => {
+        setDisplayPlayer(slug)
+        fetchRosterData(slug)
+        updateMap(slug)
+    }
 
     const setOpacity= (o)=>{
         map.current.setPaintProperty('cpc_6_10_day_outlk', 'raster-opacity', Number(o)/100)
@@ -404,6 +414,7 @@ export default function Dashboard({auth, setAuth}) {
                 width: 400
             },
             cell: ({cell}) => (<div><ActiveRowButton props={cell.row}
+                                                     enabled={displayPlayer === auth.slug || displayPlayer === null}
                                                      roster_slug={auth.slug+'.main'}
                                                      updateTable={fetchRosterData}
                                                      setLineup={setLineup}
@@ -440,10 +451,18 @@ export default function Dashboard({auth, setAuth}) {
         getSortedRowModel: getSortedRowModel(),
         getCoreRowModel: getCoreRowModel()})
 
-    const fetchRosterData = () => {
-        if (auth.slug !== undefined){
+    const fetchRosterData = (displayPlayer=null) => {
+        console.log('fetching roster data', displayPlayer)
+        if (displayPlayer !== null){
+            api_getJson(settings.BASE_API_URL+'/roster/'+displayPlayer+'.main/')
+                .then(data=> {
+                    console.log('player data', data)
+                    setRosterData(data)
+                })
+        }
+        else if (auth.slug !== undefined){
             console.log('fetching roster data for', auth.slug)
-            api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main', auth)
+            api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main')
                 .then(data=> setRosterData(data))
         }
 
@@ -454,8 +473,17 @@ export default function Dashboard({auth, setAuth}) {
             setGameData(data)
         })
     }
-    const updateMap = () => {
-        api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
+    const updateMap = (displayPlayer) => {
+        let slug = auth.slug;
+        if (displayPlayer !== null){
+            slug = displayPlayer
+        }
+
+        if (slug === undefined || slug === null){
+            return;
+        }
+        console.log('setting up map for', slug)
+        api_getJson(settings.BASE_API_URL+'/roster/'+slug+'.main/geojson')
             .then(data=> {
                 [STREAM_GAUGE, CONTINUOUS_GROUNDWATER, CONTINUOUS_RAIN_GAUGE].forEach((tag)=>{
                     map.current.getSource(tag).setData(make_fc(data, tag))
@@ -607,7 +635,7 @@ export default function Dashboard({auth, setAuth}) {
 
 
 
-                    api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson', auth)
+                    api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson')
                         .then(data=> {
                             console.log('geojson', data)
                             let items =[[STREAM_GAUGE, streamgauge_image],
@@ -686,7 +714,9 @@ export default function Dashboard({auth, setAuth}) {
             <div className='row'>
                 <div className={'col-lg-6'}>
                     <div className={'pane'}>
-                        <Leaderboard />
+                        <Leaderboard
+                            displayPlayer={displayPlayer}
+                            setDisplayPlayer={setDisplayPlayerManual}/>
                     </div>
                 </div>
                 <div className={'col-lg-6'}>
@@ -724,7 +754,7 @@ export default function Dashboard({auth, setAuth}) {
                 <div className='col-6 '>
                     <div className={'pane'}>
                         <div className={'card card-dashboard'}>
-                            <h4>Roster</h4>
+                            <h4>Roster: {displayPlayer===null ? auth.slug: displayPlayer}</h4>
                         </div>
                         <div id={'graphContainer'}>
                                 <button id={'graphbutton'} onClick={(event) =>

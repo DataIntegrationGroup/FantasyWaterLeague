@@ -16,7 +16,7 @@ function nameCell(info) {
 }
 
 
-export default function Leaderboard() {
+export default function Leaderboard(props) {
     const [data, setData] = React.useState([])
 
     const columns = [{accessorKey: 'name',
@@ -35,6 +35,15 @@ export default function Leaderboard() {
 
     const table = useReactTable({ data: data, columns: columns ,
         getCoreRowModel: getCoreRowModel(),
+        meta: {getRowStyles: (row) => {
+                console.log('asdf', row.original.slug, props.displayPlayer)
+                if (row.original.slug === props.displayPlayer){
+                    return {backgroundColor: '#85b7e8'}
+                } else {
+                    return {backgroundColor: '#ffffff'}
+                }
+            }
+        }
 
     })
     useEffect(() => {
@@ -72,6 +81,12 @@ export default function Leaderboard() {
                 <tbody>
                 {table.getRowModel().rows.map(row => (
                     <tr key={row.id}
+                        onDoubleClick={() => {
+                            console.log(row.original)
+                            props.setDisplayPlayer(row.original.slug)
+                            // window.open('/teams/view/' + row.original.team_id, '_blank')
+                        }}
+                        style={table.options.meta?.getRowStyles(row)}
                     >
                         {row.getVisibleCells().map(cell => (
                             <td key={cell.id}>
