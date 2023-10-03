@@ -14,6 +14,8 @@ import raingauge_image from '../../img/raingauge.png'
 import gwell_image from '../../img/gwell.png'
 import nws_image from '../../img/nws.png'
 import usgs_image from '../../img/usgs.png'
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 import {forEach} from "react-bootstrap/ElementChildren";
 import NWSLegend from "./NWSLegend";
@@ -528,6 +530,12 @@ export default function Dashboard({auth, setAuth}) {
                     maxZoom: 15
                 });
 
+                map.current.addControl(new MapboxGeocoder({ accessToken: mapboxgl.accessToken ,
+                                                            mapboxgl: mapboxgl,
+                                                            flyTo: {zoom: 10},
+                }));
+
+                map.current.addControl(new mapboxgl.NavigationControl());
                 const paint = {
                     'circle-radius': 5,
                     'circle-color': ['match', ['get', 'active'],

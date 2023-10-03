@@ -38,14 +38,32 @@ export default function () {
                 score = 20 * (min_depth - start_depth)
             </pre>
 
-            <img src={depth_to_water_example}/>
+            <img  style={{width: '50%'}} src={depth_to_water_example}/>
 
 
             <h2>Sources</h2>
             <p>
+                FantasyWaterLeague uses data from the following sources:
                 <ul>
                     <li><a href='https://waterdata.usgs.gov/nm/nwis/rt'>USGS NWIS</a></li>
                     <li><a href='https://www.weather.gov/documentation/services-web-api'>National Weather Service</a></li>
+                </ul>
+
+                Additional forecasting data comes from NOAA
+                <ul>
+                    <li><a href='https://mapservices.weather.noaa.gov/vector/rest/services/precip/wpc_qpf/MapServer'>Quantitative Precipitation Forecasts (QPFs) for up to 7 days.
+                        </a>
+                        <br/>
+                        <a href='https://www.wpc.ncep.noaa.gov/'>Weather Prediction Center</a>
+                    </li>
+                    <li>
+                        <a href='https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/cpc_6_10_day_outlk/MapServer>'>
+                            6-10 Day Outlook
+                        </a>
+                        <br/>
+                        <a href='https://www.cpc.ncep.noaa.gov/'>Climate Prediction Center </a>
+                    </li>
+
                 </ul>
             </p>
         </div>

@@ -36,7 +36,6 @@ export default function Leaderboard(props) {
     const table = useReactTable({ data: data, columns: columns ,
         getCoreRowModel: getCoreRowModel(),
         meta: {getRowStyles: (row) => {
-                console.log('asdf', row.original.slug, props.displayPlayer)
                 if (row.original.slug === props.displayPlayer){
                     return {backgroundColor: '#85b7e8'}
                 } else {

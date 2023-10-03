@@ -75,7 +75,7 @@ def extract_nws_data(data):
     def extract(fi):
         props = fi["properties"]["precipitationLast3Hours"]
         v = props["value"] or 0
-        return {"value": v * 25.4 if props["unitCode"] == "wmoUnit:mm" else v}
+        return {"value": v / 25.4 if props["unitCode"] == "wmoUnit:mm" else v}
 
     return [extract(f) for f in features]
 
