@@ -10,14 +10,24 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import nmwdi_logo from '../../img/nmwdi_logo.png'
 
-function AppNavbar({setToken}) {
+function AppNavbar(props) {
 
     const handleLogout = () => {
 
         sessionStorage.removeItem('token')
         sessionStorage.removeItem('user')
-        setToken(null)
+        props.setToken(null)
 
+    }
+
+    let adminbutton;
+    console.log('AppNavbar:', props.auth.user)
+    if (props.auth.user.is_superuser) {
+        adminbutton =<Nav>
+            <Nav.Link href="admin">Admin</Nav.Link>
+        </Nav>
+    }else{
+        adminbutton = null
     }
 
     return (
@@ -61,11 +71,13 @@ function AppNavbar({setToken}) {
                     <Navbar.Brand href="/">Fantasy Water League</Navbar.Brand>
                     <Nav.Link href="dashboard">Dashboard</Nav.Link>
                     <Nav.Link href="documentation">Documentation</Nav.Link>
+                    <Nav.Link href="analytics">Analytics</Nav.Link>
+                    <Nav.Link href="discovery">Discovery</Nav.Link>
                 </Nav>
             </Container>
-            <Nav>
-                <Nav.Link href="admin">Admin</Nav.Link>
-            </Nav>
+
+            {adminbutton}
+
             <Form inline="true">
                 <Row>
                     <Col xs="auto">

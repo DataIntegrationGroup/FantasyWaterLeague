@@ -38,25 +38,40 @@ api.interceptors.response.use((response)=>{
     return response;
 }, inteceptorError);
 
-export function api_getJson(url) {
+export async function api_getJson(url, token = null) {
     // get auth from session storage
-    let token = null
-    try {
-        token = JSON.parse(sessionStorage.getItem('token'));
-    } catch (e) {
-        console.log('api_getJson error:', e)
+    // let token = null
+    const headers = makeHeaders(token)
+
+    const response = await api.get(url, {headers: headers});
+    return response.data;
+}
+
+function makeHeaders(token=null) {
+    if (token===null){
+        try {
+            token = JSON.parse(sessionStorage.getItem('token'));
+        } catch (e) {
+            console.log('api_getJson error:', e)
+        }
     }
 
     let headers = {}
     if (token !== null) {
         headers['Authorization'] = `Bearer ` + token.access_token
     }
-
-    return api.get(url, {headers: headers}).then(response => response.data)
+    return headers
 }
 
-export function getJson(url) {
-    return fetch(url).then(response => response.json())
+export async function api_PatchJson(url, data, token = null) {
+    const headers = makeHeaders(token)
+    const response = await api.patch(url, data, {headers: headers});
+    return response.data;
+}
+
+export async function getJson(url) {
+    const response = await fetch(url);
+    return await response.json();
 }
 
 

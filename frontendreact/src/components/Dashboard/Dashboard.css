@@ -2,7 +2,10 @@
 .map-container {
     height: 80vh;
 }
-
+.roster-container {
+    height: 80vh;
+    overflow: auto;
+}
 
 .rowbutton {
     appearance: none;
@@ -88,7 +91,7 @@
     white-space: nowrap;
 }
 #graphContainer {
-    position: absolute;
+    position: fixed;
     display: none;
     top: 10%;
     left: 10%;

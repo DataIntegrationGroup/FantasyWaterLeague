@@ -3,29 +3,31 @@ import { useState } from 'react';
 export default function useAuth() {
     const getAuth = () => {
 
-        const userstr = sessionStorage.getItem('user');
-        if (userstr==='null'){
+        const playerstr = sessionStorage.getItem('player');
+        if (playerstr==='null'){
             return {}
         }
 
-        const user = JSON.parse(userstr);
+        const player = JSON.parse(playerstr);
         const token = JSON.parse(sessionStorage.getItem('token'));
         const credentials = JSON.parse(sessionStorage.getItem('credentials'));
-        return {'slug': user?.slug,
+        return {'slug': player?.slug,
                 'token': token,
-                'credentials': credentials}
+                'credentials': credentials,
+                'user': JSON.parse(sessionStorage.getItem('user'))}
     };
 
     const [auth, setAuth] = useState(getAuth());
 
-    const saveAuth= (user, token, username, password) => {
+    const saveAuth= (player, token, username, password, user) => {
         const credentials = {'username': username, 'password': password};
         sessionStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('player', JSON.stringify(player));
         sessionStorage.setItem('token', JSON.stringify(token));
         sessionStorage.setItem('credentials', JSON.stringify(credentials));
 
 
-        setAuth({'slug': user?.slug, 'token': token, 'credentials': credentials});
+        setAuth({'slug': player?.slug, 'token': token, 'credentials': credentials, 'user': user});
     };
     return {auth, setAuth: saveAuth}
 }

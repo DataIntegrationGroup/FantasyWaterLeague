@@ -53,11 +53,11 @@ app.include_router(
     prefix="/auth/jwt",
     tags=["auth"],
 )
-app.include_router(
-    fastapi_users.get_auth_router(cookie_auth_backend),
-    prefix="/auth/cookie",
-    tags=["auth"],
-)
+# app.include_router(
+#     fastapi_users.get_auth_router(cookie_auth_backend),
+#     prefix="/auth/cookie",
+#     tags=["auth"],
+# )
 
 # app.include_router(
 #     fastapi_users.get_register_router(UserRead, UserCreate),
@@ -71,14 +71,14 @@ app.include_router(
 # )
 # app.include_router(
 #     fastapi_users.get_verify_router(UserRead),
-#     prefix="/auth",
+#     prefix="/auth/verify",
 #     tags=["auth"],
 # )
-# app.include_router(
-#     fastapi_users.get_users_router(UserRead, UserUpdate),
-#     prefix="/users",
-#     tags=["users"],
-# )
+app.include_router(
+    fastapi_users.get_users_router(UserRead, UserUpdate),
+    prefix="/users",
+    tags=["users"],
+)
 
 
 # @app.get("/authenticated-route")

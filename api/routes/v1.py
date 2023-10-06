@@ -99,10 +99,11 @@ async def get_leaderboard(db=Depends(get_db)):
     return sorted(players, key=lambda x: x.score, reverse=True)
 
 
-@router.get("/user/{username}")
-async def get_user(username, db=Depends(get_db)):
+@router.get("/player/{username}")
+async def get_player(username, db=Depends(get_db)):
     user = retrieve_player_by_user(db, username)
     return user
+
 
 
 # validation

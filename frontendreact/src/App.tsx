@@ -10,6 +10,7 @@ import AppNavbar from "./components/Navbar/Navbar";
 import useAuth from "./components/App/useAuth";
 import Admin from "./components/Admin/Admin";
 import Documentation from "./components/App/Documentation.js";
+import Analytics from "./components/Analytics/Analytics.js";
 
 
 function Home(){
@@ -27,7 +28,7 @@ function Footer(){
                 </div>
 
                 <div className={'text-center p-3'}>
-                    <p>© 2021 Fantasy Water League</p>
+                    <p>© 2023 Fantasy Water League</p>
                 </div>
 
             </footer>
@@ -46,20 +47,19 @@ function App() {
     }
 
     return (
-      <div className="wrapper">
-
-        <AppNavbar setToken={setAuth}/>
-
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />}/>
-            <Route path="/dashboard" element={<Dashboard auth={auth} setAuth={setAuth}/>}/>
-            {/*<Route path="/preferences" element={<Preferences />}/>*/}
-            <Route path="/admin" element={<Admin auth={auth}/>}/>
-            <Route path="/documentation" element={<Documentation />}/>
-          </Routes>
-        </BrowserRouter>
-          <Footer />
+        <div className="wrapper">
+            <AppNavbar auth={auth} setToken={setAuth}/>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/" element={<Home />}/>
+                        <Route path="/dashboard" element={<Dashboard auth={auth} setAuth={setAuth}/>}/>
+                    {/*<Route path="/preferences" element={<Preferences />}/>*/}
+                        <Route path="/admin" element={<Admin auth={auth}/>}/>
+                        <Route path="/documentation" element={<Documentation />}/>
+                        <Route path="/analytics" element={<Analytics />}/>
+                    </Routes>
+                </BrowserRouter>
+            <Footer />
       </div>
   );
 }

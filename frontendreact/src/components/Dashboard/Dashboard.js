@@ -774,49 +774,51 @@ export default function Dashboard({auth, setAuth}) {
                                 layout={plotLayout}
                             />
                         </div>
+                        <div className={'roster-container'}>
+                            <table className={'table-sm table-bordered display-table'}>
+                                <thead>
+                                {roster_table.getHeaderGroups().map(headerGroup => (
+                                    <tr key={headerGroup.id}>
+                                        {headerGroup.headers.map(header => (
+                                            <th key={header.id}
+                                                style={{height: '10px' ,
+                                                    width: header.column.columnDef.meta?.width}}
+                                            >
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    :
+                                                    <div {...{className:
+                                                            header.column.getCanSort()?
+                                                                'cursor-pointer': '',
+                                                        onClick: header.column.getToggleSortingHandler()}}>
+                                                        {flexRender(
+                                                            header.column.columnDef.header,
+                                                            header.getContext(),
 
-                        <table className={'table-sm table-bordered display-table'}>
-                            <thead>
-                            {roster_table.getHeaderGroups().map(headerGroup => (
-                                <tr key={headerGroup.id}>
-                                    {headerGroup.headers.map(header => (
-                                        <th key={header.id}
-                                        style={{height: '10px' ,
-                                            width: header.column.columnDef.meta?.width}}
-                                        >
-                                            {header.isPlaceholder
-                                                ? null
-                                                :
-                                                <div {...{className:
-                                                        header.column.getCanSort()?
-                                                            'cursor-pointer': '',
-                                                onClick: header.column.getToggleSortingHandler()}}>
-                                                    {flexRender(
-                                                        header.column.columnDef.header,
-                                                        header.getContext(),
+                                                        )}
 
-                                                    )}
+                                                    </div>
+                                                }
+                                            </th>
+                                        ))}
+                                    </tr>
+                                ))}
+                                </thead>
+                                <tbody>
+                                {roster_table.getRowModel().rows.map(row => (
+                                    <tr key={row.id}
+                                        style={roster_table.options.meta.getRowStyles(row)}>
+                                        {row.getVisibleCells().map(cell => (
+                                            <td key={cell.id}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
 
-                                                </div>
-                                            }
-                                        </th>
-                                    ))}
-                                </tr>
-                            ))}
-                            </thead>
-                            <tbody>
-                            {roster_table.getRowModel().rows.map(row => (
-                                <tr key={row.id}
-                                    style={roster_table.options.meta.getRowStyles(row)}>
-                                    {row.getVisibleCells().map(cell => (
-                                        <td key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>

@@ -77,6 +77,13 @@ def make_nws_sites(db):
         # print(props['name'], props['stationIdentifier'])
         # print(feature['geometry']['coordinates'])
         source_id = props['stationIdentifier']
+
+        # make observations api returns data for this station
+        resp = requests.get(f'https://api.weather.gov/stations/{source_id}/observations/latest')
+        if resp.status_code != 200:
+            print(f'skipping = {source_id}')
+            continue
+
         name = props['name']
         slug = f"{name.replace(' ', '_').lower()}-{source_id}"
         atype = 'continuous_rain_gauge'

@@ -1,4 +1,4 @@
-import {getJson} from "../../util";
+import {api_PatchJson, getJson} from "../../util";
 import {settings} from "../../settings";
 import axios from "axios";
 
@@ -15,9 +15,8 @@ export default function Admin({auth}) {
     }
     const toggleGameStatus = (state) => {
         console.log('Game active: ', state)
-        axios.patch(settings.BASE_API_URL+'/admin/game_status',
+        api_PatchJson(settings.BASE_API_URL+'/admin/game_status',
             {'active': state},
-            {headers: {'Authorization': `Bearer ` + auth['token']?.access_token}}
             )
     }
 
