@@ -200,7 +200,7 @@ async def get_game(db=Depends(get_db)):
     game = retrieve_game(db)
     return {
         "start": game.start.isoformat(),
-        "end": (game.start + timedelta(days=7)).isoformat(),
+        "end": (game.start + timedelta(days=5)).isoformat(),
         "active": game.active,
     }
 

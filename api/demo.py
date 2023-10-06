@@ -72,7 +72,8 @@ def make_nws_sites(db):
     url = 'https://api.weather.gov/stations?limit=500&state=NM'
     features = rget_features(url)
     rows = []
-    for feature in features:
+    n = len(features)
+    for i, feature in enumerate(features):
         props = feature['properties']
         # print(props['name'], props['stationIdentifier'])
         # print(feature['geometry']['coordinates'])
@@ -81,9 +82,10 @@ def make_nws_sites(db):
         # make observations api returns data for this station
         resp = requests.get(f'https://api.weather.gov/stations/{source_id}/observations/latest')
         if resp.status_code != 200:
-            print(f'skipping = {source_id}')
+            print(f'{i}/{n} skipping = {source_id}')
             continue
-
+        else:
+            print(f'{i}/{n} using = {source_id}')
         name = props['name']
         slug = f"{name.replace(' ', '_').lower()}-{source_id}"
         atype = 'continuous_rain_gauge'
