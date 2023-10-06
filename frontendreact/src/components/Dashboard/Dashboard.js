@@ -407,7 +407,7 @@ export default function Dashboard({auth, setAuth}) {
             meta: {
                 width: 100,
             },
-            cell: info =>(info.row.original.active&&lineup.lineup&&gameData.active) ? info.getValue().toFixed(2) : '',
+            cell: info =>(lineup.lineup&&gameData.active) ? info.getValue().toFixed(2) : '',
         },
         {accessorKey: '',
             header: 'Action',

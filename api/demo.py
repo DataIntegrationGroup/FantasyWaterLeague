@@ -57,6 +57,7 @@ def make_usgs_rain_gauge_sites(db):
                            'usgs_nwis_rain_gauge',
                            url)
 
+
 def rget_features(url):
     print('getting', url)
     resp = requests.get(url)
@@ -78,7 +79,20 @@ def make_nws_sites(db):
         # print(props['name'], props['stationIdentifier'])
         # print(feature['geometry']['coordinates'])
         source_id = props['stationIdentifier']
+        if source_id.startswith('COOP'):
+            continue
 
+        if source_id in ('45171', '45179', '45211', 'A1039', 'A1041', 'A1042', 'A1045', 'A1047', 'A1048',
+                         'A1049', 'A1051', 'A1052', 'A1053', 'A1054', 'A1055', 'A1059', 'A1060', 'A1062', 'A1064',
+                         'A1065', 'A1067', 'A1068', 'A1069', 'A1070', 'A1072', 'A1073', 'A1076', 'A1077', 'A1080',
+                         'A1082', 'A1083', 'A1084', 'A1085', 'A1086', 'A3616', 'A3633', 'A3668', 'A4018', 'A4019',
+                         'A4020', 'A4021', 'A4022', 'AN317', 'AN319', 'AN814', 'AP132', 'AV695', 'Av250', 'C2125',
+                         'C2615', 'C9703', 'CRNM4', 'CROM4', 'CRRM4', 'CSPM4', 'CYGM4', 'DEAM4', 'E5817', 'F7967',
+                         'F9940', 'G2782', 'GDRM4', 'HUMM4', 'IONM4', 'LGOM4', 'MC110', 'MEEM4', 'MI010', 'MI016',
+                         'MI110', 'MI145', 'MI200', 'MI210', 'MI220', 'MI230', 'MI240', 'MI250', 'MI257', 'MSQM4',
+                         'NJNM4', 'PAUM4', 'PLGM4', 'PORM4', 'PRIM4', 'RKLM4', 'SBLM4', 'SLVM4', 'SNWM4', 'SPTM4',
+                         'STRM4', 'SZCM4', 'TAPM4', 'TAWM4', 'TRRM4', 'TT199', 'WFPM4', 'WINM4'):
+            continue
         # make observations api returns data for this station
         resp = requests.get(f'https://api.weather.gov/stations/{source_id}/observations/latest')
         if resp.status_code != 200:
@@ -174,8 +188,8 @@ async def setup_demo():
     now = datetime.now()
 
     # the game starts the following monday at 5pm
-    gamestart = now - timedelta(days=now.weekday()-7, hours=now.hour-17,
-                                         minutes=now.minute, seconds=now.second, microseconds=now.microsecond)
+    gamestart = now - timedelta(days=now.weekday() - 7, hours=now.hour - 17,
+                                minutes=now.minute, seconds=now.second, microseconds=now.microsecond)
 
     db.add(Game(slug='game1',
                 name='Game 1',
@@ -184,7 +198,7 @@ async def setup_demo():
 
     db.add(Game(slug='game0',
                 name='Game 0',
-                start=now - timedelta(days=now.weekday()+7),
+                start=now - timedelta(days=now.weekday() + 7),
                 active=False))
 
     db.add(Source(slug='usgs_nwis_gageheight', name='UGSS-NWIS-GageHeight',
@@ -200,11 +214,11 @@ async def setup_demo():
                            'parameterCd=72019'
                            '&format=json'))
     db.add(Source(slug='usgs_nwis_rain_gauge', name='UGSS-NWIS-RainGauge',
-                    landing_url='https://waterdata.usgs.gov/monitoring-location/'
-                                '{source_id:}/#parameterCode=00045&period=P7D&showMedian=true',
+                  landing_url='https://waterdata.usgs.gov/monitoring-location/'
+                              '{source_id:}/#parameterCode=00045&period=P7D&showMedian=true',
                   base_url='https://waterservices.usgs.gov/nwis/iv/?'
-                            'parameterCd=00045'
-                            '&format=json'))
+                           'parameterCd=00045'
+                           '&format=json'))
     db.add(Source(slug='nws', name='National Weather Service',
                   landing_url='https://api.weather.gov/stations/{source_id:}/observations',
                   base_url='https://api.weather.gov/stations/{source_id:}/observations'))

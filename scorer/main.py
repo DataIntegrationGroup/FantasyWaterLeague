@@ -109,6 +109,9 @@ def score_stream_gauge(data):
 
 def score_continuous_groundwater(data):
     vs = array([float(d["value"]) for d in data])
+    # filter out 0 depth to water values
+    vs = vs[vs > 0]
+
     score = vs[0] - min(vs)
     return 20 * score
 
