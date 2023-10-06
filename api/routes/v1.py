@@ -105,7 +105,6 @@ async def get_player(username, db=Depends(get_db)):
     return user
 
 
-
 # validation
 @router.get("/roster/{roster_slug}/validate")
 async def get_validate_team(roster_slug, db=Depends(get_db)):
