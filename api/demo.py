@@ -172,7 +172,7 @@ async def setup_demo():
     now = datetime.now()
 
     # the game starts the following monday at 5pm
-    gamestart = now - datetime.timedelta(days=now.weekday()-7, hours=now.hour-17,
+    gamestart = now - timedelta(days=now.weekday()-7, hours=now.hour-17,
                                          minutes=now.minute, seconds=now.second, microseconds=now.microsecond)
 
     db.add(Game(slug='game1',
