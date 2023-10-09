@@ -211,8 +211,12 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
     asset = retrieve_asset(db, asset_slug)
     source_id = asset.source_identifier
 
-    prev_start_dt = (game.start - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
-    start_dt = game.start.isoformat(timespec="seconds") + "Z"
+    # convert to UTC
+    utcstart = game.start.utcnow()
+
+    prev_start_dt = (utcstart - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
+    start_dt = utcstart.isoformat(timespec="seconds") + "Z"
+
     if asset.source.slug.startswith("usgs"):
         request_url = f"{asset.source.base_url}&site={source_id}&period=P7D"
         prev_url = (
