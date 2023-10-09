@@ -1,0 +1,18 @@
+# fastapi
+# sqlalchemy
+# geoalchemy2[shapely]
+# uvicorn
+# psycopg
+# scikit-learn
+# pyproj
+# jinja2
+requests
+# numpy
+pandas
+apscheduler
+# openpyxl
+# uncertainties
+# jsbeautifier
+# plotly
+
+

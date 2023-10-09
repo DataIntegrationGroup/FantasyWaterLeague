@@ -8,6 +8,16 @@ services:
 #     - ./frontendreact:/frontend
 #    ports:
 #      - 3000:3000
+  gameplay:
+    build:
+        context: ./gameplay
+        dockerfile: ./Dockerfile
+    command: bash -c "
+        python -m main
+        "
+    depends_on:
+        - api
+        - scorer
 
   scorer:
     build:

@@ -64,7 +64,7 @@ class GamePayload(BaseModel):
 async def post_game_status(payload: GamePayload, db=Depends(get_db)):
     print(payload)
     game = retrieve_game(db)
-    game.active = payload.active == "true"
+    game.active = payload.active.lower() == "true"
     db.commit()
     return {"status": "ok"}
 

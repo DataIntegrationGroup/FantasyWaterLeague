@@ -10,6 +10,17 @@ services:
     ports:
       - 80:80
 
+  gameplay:
+    build:
+      context: ./gameplay
+      dockerfile: ./Dockerfile
+    command: bash -c "
+      python -m main
+      "
+    depends_on:
+      - api
+      - scorer
+
   scorer:
     build:
       context: ./scorer
