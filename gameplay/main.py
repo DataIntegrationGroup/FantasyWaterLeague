@@ -31,54 +31,64 @@ def setup_demo():
     now = datetime.now()
 
     # the game starts the following monday at 5pm
-    gamestart = now - timedelta(days=now.weekday() - 7, hours=now.hour - 17,
-                                minutes=now.minute, seconds=now.second, microseconds=now.microsecond)
+    gamestart = now - timedelta(
+        days=now.weekday() - 7,
+        hours=now.hour - 17,
+        minutes=now.minute,
+        seconds=now.second,
+        microseconds=now.microsecond,
+    )
 
-    url = f'{HOST}/api/v1/games'
-    requests.post(url, json=dict(slug='game1',
-                                 name='Game 1',
-                                 start=gamestart,
-                                 active=False))
+    url = f"{HOST}/api/v1/games"
+    requests.post(
+        url, json=dict(slug="game1", name="Game 1", start=gamestart, active=False)
+    )
 
 
 def setup_rosters():
-    with open('data/rosterasset.csv', 'r') as rfile:
+    with open("data/rosterasset.csv", "r") as rfile:
         for row in csv.reader(rfile):
             i, roster, asset, active = row
-            url = f'{HOST}/api/v1/rosterasset'
-            requests.post(url, json=dict(
-                roster_slug=roster,
-                asset_slug=asset,
-                active=active.lower() == 'true'))
+            url = f"{HOST}/api/v1/rosterasset"
+            requests.post(
+                url,
+                json=dict(
+                    roster_slug=roster,
+                    asset_slug=asset,
+                    active=active.lower() == "true",
+                ),
+            )
 
 
 # run every minute
-@sched.scheduled_job("cron", year='*', month='*', day='*', hour='*', minute='*', second='0')
+@sched.scheduled_job(
+    "cron", year="*", month="*", day="*", hour="*", minute="*", second="0"
+)
 def game_clock():
-    print('game clock')
+    print("game clock")
     # run every minute
     # get the active game
-    url = f'{HOST}/api/v1/game'
+    url = f"{HOST}/api/v1/game"
     resp = requests.get(url)
     print(resp.status_code)
     if resp.ok:
         # if the game is active deactivate it
         # if the current time is greater than the game end time
         game = resp.json()
-        print('current game', game)
-        if game['active']:
-            end = datetime.strptime(game['end'], '%Y-%m-%dT%H:%M:%S')
+        print("current game", game)
+        if game["active"]:
+            end = datetime.strptime(game["end"], "%Y-%m-%dT%H:%M:%S")
             if datetime.now() > end:
-                url = f'{HOST}/api/v1/game_status'
-                requests.patch(url, json={'active': 'false'})
-                print('game over')
+                url = f"{HOST}/api/v1/game_status"
+                requests.patch(url, json={"active": "false"})
+                print("game over")
         else:
             # if the game is not active check if the current time is greater than the game start time
-            start = datetime.strptime(game['start'], '%Y-%m-%dT%H:%M:%S')
+            start = datetime.strptime(game["start"], "%Y-%m-%dT%H:%M:%S")
             if datetime.now() > start:
-                url = f'{HOST}/api/v1/game_status'
-                requests.patch(url, json={'active': 'true'})
-                print('game started')
+                url = f"{HOST}/api/v1/game_status"
+                requests.patch(url, json={"active": "true"})
+                print("game started")
 
 
 def main():
@@ -90,7 +100,5 @@ def main():
     sched.start()
 
 
-
 if __name__ == "__main__":
     main()
-
