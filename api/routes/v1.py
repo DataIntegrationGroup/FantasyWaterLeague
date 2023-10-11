@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 from fastapi import APIRouter, Depends
@@ -211,11 +211,16 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
     asset = retrieve_asset(db, asset_slug)
     source_id = asset.source_identifier
 
+    def totimestr(dt):
+        sdt = dt.astimezone(timezone.utc)
+        return sdt.strftime('%Y-%m-%dT%H:%M:%SZ')
     # convert to UTC
-    utcstart = game.start.utcnow()
-
-    prev_start_dt = (utcstart - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
-    start_dt = utcstart.isoformat(timespec="seconds") + "Z"
+    # utcstart = game.start
+    # sutc.strftime('%Y-%m-%dT%H:%M:%SZ')
+    # prev_start_dt = (utcstart - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
+    # start_dt = utcstart.isoformat(timespec="seconds") + "Z"
+    prev_start_dt = totimestr(game.start - timedelta(days=7))
+    start_dt = totimestr(game.start)
 
     if asset.source.slug.startswith("usgs"):
         request_url = f"{asset.source.base_url}&site={source_id}&period=P7D"
