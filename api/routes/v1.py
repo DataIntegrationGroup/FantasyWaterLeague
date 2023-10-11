@@ -213,7 +213,8 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
 
     def totimestr(dt):
         sdt = dt.astimezone(timezone.utc)
-        return sdt.strftime('%Y-%m-%dT%H:%M:%SZ')
+        return sdt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
     # convert to UTC
     # utcstart = game.start
     # sutc.strftime('%Y-%m-%dT%H:%M:%SZ')
