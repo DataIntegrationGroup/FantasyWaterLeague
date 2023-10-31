@@ -21,7 +21,7 @@ services:
       - api
       - scorer
     env_file:
-      - ./api/.env.local
+      - ./api/.env
 
   scorer:
     build:
