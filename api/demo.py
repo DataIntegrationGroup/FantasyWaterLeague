@@ -74,7 +74,7 @@ def make_nws_sites(db):
     features = rget_features(url)
     rows = []
     n = len(features)
-    for i, feature in enumerate(features[:10]):
+    for i, feature in enumerate(features[:100]):
         props = feature['properties']
         # print(props['name'], props['stationIdentifier'])
         # print(feature['geometry']['coordinates'])
