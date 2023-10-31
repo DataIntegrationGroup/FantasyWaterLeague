@@ -41,7 +41,10 @@ def setup_demo():
 
     url = f"{HOST}/api/v1/game"
     requests.post(
-        url, json=dict(slug="game1", name="Game 1", start=gamestart.isoformat(), active=False)
+        url,
+        json=dict(
+            slug="game1", name="Game 1", start=gamestart.isoformat(), active=False
+        ),
     )
 
 
@@ -91,14 +94,13 @@ def game_clock():
 
 
 def main():
-
     if os.environ.get("SETUP_DEMO", "0") == "0":
         print("skipping demo setup")
     else:
         print("setup demo")
         while 1:
             try:
-                requests.get(f'{HOST}/api/v1/health')
+                requests.get(f"{HOST}/api/v1/health")
                 break
             except requests.ConnectionError:
                 time.sleep(1)
