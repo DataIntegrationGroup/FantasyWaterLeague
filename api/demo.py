@@ -74,7 +74,7 @@ def make_nws_sites(db):
     features = rget_features(url)
     rows = []
     n = len(features)
-    for i, feature in enumerate(features[:5]):
+    for i, feature in enumerate(features[:10]):
         props = feature['properties']
         # print(props['name'], props['stationIdentifier'])
         # print(feature['geometry']['coordinates'])
@@ -153,6 +153,7 @@ def make_usgs_sites(db, atype, source_slug, url):
                 wfile.write(f'{slug},{name},{source_id},{lon},{lat}\n')
 
     for slug, name, source_id, lon, lat in rows:
+        print('adding', slug, name)
         db.add(Asset(slug=slug,
                      name=name,
                      atype=atype,
@@ -182,20 +183,21 @@ async def setup_demo():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
+
     print('setting up demo')
     db = next(get_db())
 
     now = datetime.now()
 
     # the game starts the following monday at 5pm
-    gamestart = now - timedelta(days=now.weekday() - 7, hours=now.hour - 17,
-                                minutes=now.minute, seconds=now.second, microseconds=now.microsecond)
+    # gamestart = now - timedelta(days=now.weekday() - 7, hours=now.hour - 17,
+    #                             minutes=now.minute, seconds=now.second, microseconds=now.microsecond)
 
-    db.add(Game(slug='game1',
-                name='Game 1',
-                start=gamestart,
-                active=False))
-
+    # db.add(Game(slug='game1',
+    #             name='Game 1',
+    #             start=gamestart,
+    #             active=False))
+    #
     db.add(Game(slug='game0',
                 name='Game 0',
                 start=now - timedelta(days=now.weekday() + 7),
@@ -248,13 +250,14 @@ async def setup_demo():
     get_user_db_context = contextlib.asynccontextmanager(get_user_db)
 
     players = (('jake', 'Jake Ross', 'Leroy Flyers'),
-               ('ethan', 'Ethan', 'Melody Lane Packers'),
+               ('ethan', 'Ethan', 'Melody Station Packers'),
                ('marissa', 'Marissa', 'Bevilacqua'),
                ('nels', 'Nels', 'Shedland Builders'),
                # ('mattz', 'Mattz', 'PartyBoy Dancers'),
                ('rachel', 'Rachel', 'Socorro Managers'),
                ('chriscox', 'Chris Cox', 'Sandia Sonics'),
                ('crismorton', 'Cris Morton', 'South Valley Mechanics'),
+               ('danlavery', 'Dan Lavery', '3D Modelers'),
                )
     for slug, name, team in players:
         async with get_async_session_context() as session:
@@ -276,6 +279,7 @@ async def setup_demo():
         db.add(roster)
     db.commit()
     db.flush()
+
     nplayers = len(players)
 
     for n, assets, nactive in ((5, gws, 3),

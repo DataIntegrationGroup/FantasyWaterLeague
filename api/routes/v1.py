@@ -20,6 +20,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from api import schemas
+from api.models import RosterAsset
 from api.models.assets import Asset
 from api.database import get_db
 from api.crud import (
@@ -35,6 +36,7 @@ from api.crud import (
     add_roster_score,
     retrieve_games,
 )
+from api.models.game import Game
 from api.rules import (
     validate_team,
     validate_lineup,
@@ -269,6 +271,41 @@ async def get_all_assets(db=Depends(get_db)):
     return q.all()
 
 
+# POST ===============================================================================
+class NewGamePayload(BaseModel):
+    start: datetime
+    active: bool
+    name: str
+    slug: str
+
+
+@router.post("/game")
+def post_game(payload: NewGamePayload, db=Depends(get_db)):
+    # game = retrieve_game(db)
+    # game.active = payload.active.lower() == "true"
+    # db.commit()
+
+    game = Game(**payload.model_dump())
+    db.add(game)
+    db.commit()
+    return {"status": "ok"}
+
+
+class NewRosterAssetPayload(BaseModel):
+    roster_slug: str
+    asset_slug: str
+    active: bool
+
+
+@router.post('/rosterasset')
+def post_rosterasset(payload: NewRosterAssetPayload, db=Depends(get_db)):
+    rasset = RosterAsset(**payload.model_dump())
+    db.add(rasset)
+    db.commit()
+
+    return {"status": "ok"}
+
+
 # PUT ===============================================================================
 class AssetPayload(BaseModel):
     active: bool
@@ -281,7 +318,7 @@ class ScorePayload(BaseModel):
 
 @router.put("/roster/{roster_slug}/{asset_slug}")
 async def put_roster_asset(
-    roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
+        roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
 ):
     update_roster_asset(db, roster_slug, asset_slug, payload)
     return {"slug": asset_slug, "active": payload.active}
@@ -297,6 +334,5 @@ async def put_asset_score(asset_slug: str, payload: ScorePayload, db=Depends(get
 async def put_player_score(roster_slug: str, payload: ScorePayload, db=Depends(get_db)):
     add_roster_score(db, roster_slug, payload)
     return {"slug": roster_slug, "score": payload.score, "game_slug": payload.game_slug}
-
 
 # ============= EOF =============================================

@@ -39,9 +39,9 @@ def setup_demo():
         microseconds=now.microsecond,
     )
 
-    url = f"{HOST}/api/v1/games"
+    url = f"{HOST}/api/v1/game"
     requests.post(
-        url, json=dict(slug="game1", name="Game 1", start=gamestart, active=False)
+        url, json=dict(slug="game1", name="Game 1", start=gamestart.isoformat(), active=False)
     )
 
 
@@ -70,7 +70,6 @@ def game_clock():
     # get the active game
     url = f"{HOST}/api/v1/game"
     resp = requests.get(url)
-    print(resp.status_code)
     if resp.ok:
         # if the game is active deactivate it
         # if the current time is greater than the game end time
@@ -92,11 +91,21 @@ def game_clock():
 
 
 def main():
-    if os.environ.get("SETUP_DEMO", "0") != "0":
-        print("setup db")
-        setup_demo()
-    else:
+
+    if os.environ.get("SETUP_DEMO", "0") == "0":
         print("skipping demo setup")
+    else:
+        print("setup demo")
+        while 1:
+            try:
+                requests.get(f'{HOST}/api/v1/health')
+                break
+            except requests.ConnectionError:
+                time.sleep(1)
+
+        setup_demo()
+        # setup_rosters()
+
     sched.start()
 
 
