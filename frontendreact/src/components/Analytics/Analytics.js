@@ -5,6 +5,7 @@ import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-load
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import {Hourglass, Oval} from "react-loader-spinner";
 
 export default function Analytics(){
     const mapContainer = useRef(null);
@@ -13,6 +14,7 @@ export default function Analytics(){
     const [lat, setLat] = useState(34.35);
     const [zoom, setZoom] = useState(6.1);
 
+    const [loading, setLoading] = useState(true)
 
     const setupMap = () => {
         api_getJson(settings.BASE_API_URL+'/mapboxtoken')
@@ -47,10 +49,12 @@ export default function Analytics(){
                     // add the DEM source as a terrain layer with exaggerated height
                     map.current.setTerrain({'source': 'mapbox-dem', 'exaggeration': 3});
 
+
+
                     const locations = await retrieveItems('https://st2.newmexicowaterdata.org/FROST-Server/v1.1/Locations')
 
                     const paint = {
-                        'circle-radius': 5,
+                        'circle-radius': 2,
                         'circle-color': ['match', ['get', 'active'],
                             1, '#64B976',
                             0, '#B07D6E',
@@ -73,7 +77,7 @@ export default function Analytics(){
                             source: 'st2'
                         }
                     )
-
+                    setLoading(false)
 
                 });
             });
@@ -86,14 +90,20 @@ export default function Analytics(){
     return (
         <div>
             <h1>Analytics</h1>
+            <Hourglass
+                height={80}
+                width={80}
+                color="#4fa94d"
+                wrapperStyle={{}}
+                wrapperClass="map-loading"
+                visible={loading}
+                ariaLabel='oval-loading'
+                secondaryColor="#4fa94d"
+                strokeWidth={2}
+                strokeWidthSecondary={2}
+            />
             <div ref={mapContainer} className="map-container">
-                <div className="map-overlay"></div>
             </div>
-
-
-
-
-
 
         </div>
     )
