@@ -79,14 +79,14 @@ def game_clock():
         game = resp.json()
         print("current game", game)
         if game["active"]:
-            end = datetime.strptime(game["end"], "%Y-%m-%dT%H:%M:%S.%f")
+            end = datetime.strptime(game["end"], "%Y-%m-%dT%H:%M:%S")
             if datetime.now() > end:
                 url = f"{HOST}/api/v1/game_status"
                 requests.patch(url, json={"active": "false"})
                 print("game over")
         else:
             # if the game is not active check if the current time is greater than the game start time
-            start = datetime.strptime(game["start"], "%Y-%m-%dT%H:%M:%S.%f")
+            start = datetime.strptime(game["start"], "%Y-%m-%dT%H:%M:%S")
             if datetime.now() > start:
                 url = f"{HOST}/api/v1/game_status"
                 requests.patch(url, json={"active": "true"})
