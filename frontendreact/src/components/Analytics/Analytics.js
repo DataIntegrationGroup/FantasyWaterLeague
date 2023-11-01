@@ -112,8 +112,16 @@ export default function Analytics(){
                         const datastream = things[0].Datastreams[0]
                         console.log('da', datastream)
                         if (datastream !== undefined){
+                            // setLoading(true)
+                            console.log('afsasfdasdf')
                             setSelected({'name': name, 'datastream': datastream})
+                            // setLoading(false)
+                        } else{
+                            console.log('fffffffffrrrfrafsasfdasdf')
+                        setSelected(null)
                         }
+
+
                         popup.setLngLat(coordinates).setHTML(name).addTo(map.current);
                     })
                     setLoading(false)
@@ -129,25 +137,29 @@ export default function Analytics(){
     return (
         <div>
             <h1>Analytics</h1>
-            <Hourglass
-                height={80}
-                width={80}
-                color="#4fa94d"
-                wrapperStyle={{}}
-                wrapperClass="map-loading"
-                visible={loading}
-                ariaLabel='oval-loading'
-                secondaryColor="#4fa94d"
-                strokeWidth={2}
-                strokeWidthSecondary={2}
-            />
             <div className="row">
-                <div className={"col-6"}>
-                    <div ref={mapContainer} className="map-container">
+                <div className={"col-7"}>
+                    <Hourglass
+                        height={80}
+                        width={80}
+                        color="#4fa94d"
+                        wrapperStyle={{}}
+                        wrapperClass="map-loading"
+                        visible={loading}
+                        ariaLabel='oval-loading'
+                        secondaryColor="#4fa94d"
+                        strokeWidth={2}
+                        strokeWidthSecondary={2}
+                    />
+                    <div className={'pane'}>
+                        <div ref={mapContainer} className="map-container">
+                    </div>
                     </div>
                 </div>
-                <div className={"col-6"}>
-                    <Hydrograph  selected={selected} />
+                <div className={"col-5"}>
+                    <div className={"pane"}>
+                        <Hydrograph  selected={selected} />
+                    </div>
                 </div>
             </div>
 

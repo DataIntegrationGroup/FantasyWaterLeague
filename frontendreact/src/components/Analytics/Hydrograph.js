@@ -5,6 +5,7 @@ import {retrieveItems} from "../../util";
 export default function Hydrograph(props) {
     const [data, setData] = useState(null)
     const [layout, setLayout] = useState({title: 'Hydrograph',
+            width: 600,
             xaxis: {title: 'Date'},
             yaxis: {title: 'Depth to Water (ft bgs)',
                     autorange: 'reversed'}
