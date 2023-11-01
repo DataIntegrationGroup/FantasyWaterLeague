@@ -6,6 +6,7 @@ import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import {Hourglass, Oval} from "react-loader-spinner";
+import Hydrograph from "./Hydrograph";
 
 export default function Analytics(){
     const mapContainer = useRef(null);
@@ -15,6 +16,7 @@ export default function Analytics(){
     const [zoom, setZoom] = useState(6.1);
 
     const [loading, setLoading] = useState(true)
+    const [selected, setSelected] = useState(null)
 
     const setupMap = () => {
         api_getJson(settings.BASE_API_URL+'/mapboxtoken')
@@ -51,10 +53,12 @@ export default function Analytics(){
 
 
 
-                    const locations = await retrieveItems('https://st2.newmexicowaterdata.org/FROST-Server/v1.1/Locations')
+                    const locations = await retrieveItems('https://st2.newmexicowaterdata.org/FROST-Server/v1.1/Locations?$expand=Things/Datastreams',
+                        [], 1000
+                        )
 
                     const paint = {
-                        'circle-radius': 2,
+                        'circle-radius': 4,
                         'circle-color': ['match', ['get', 'active'],
                             1, '#64B976',
                             0, '#B07D6E',
@@ -66,10 +70,13 @@ export default function Analytics(){
                         'type': 'geojson',
                         'data': {'type': 'FeatureCollection',
                         'features': locations.map((location) => {
-                            return {'geometry': location['location']}
+                            return {'geometry': location['location'],
+                                    'properties': {'name': location['name'],
+                                                   'Things': location['Things'],
+                                                }}
                         })}})
 
-                    map.current.addLayer(
+                    const st2layer = map.current.addLayer(
                         {
                             id: 'st2',
                             type: 'circle',
@@ -77,6 +84,38 @@ export default function Analytics(){
                             source: 'st2'
                         }
                     )
+
+                    const popup = new mapboxgl.Popup({
+                        closeButton: false,
+                        closeOnClick: false
+                    })
+
+                    map.current.on('mouseenter', 'st2', (e) => {
+                        map.current.getCanvas().style.cursor = 'pointer';
+                        // const coordinates = e.features[0].geometry.coordinates.slice();
+                        // const description = e.features[0].properties.name;
+                        // popup.setLngLat(coordinates).setHTML(description).addTo(map.current);
+                    })
+                    map.current.on('mouseleave', 'st2', () => {
+                        map.current.getCanvas().style.cursor = '';
+                        popup.remove();
+                    })
+                    map.current.on('click', 'st2', (e) => {
+                        const coordinates = e.features[0].geometry.coordinates.slice();
+
+                        console.log('click', e.features)
+                        const properties = e.features[0].properties
+                        const name = properties.name;
+                        console.log('properties', properties)
+                        const things = JSON.parse(properties.Things)
+                        console.log('th,ings', things)
+                        const datastream = things[0].Datastreams[0]
+                        console.log('da', datastream)
+                        if (datastream !== undefined){
+                            setSelected({'name': name, 'datastream': datastream})
+                        }
+                        popup.setLngLat(coordinates).setHTML(name).addTo(map.current);
+                    })
                     setLoading(false)
 
                 });
@@ -102,7 +141,14 @@ export default function Analytics(){
                 strokeWidth={2}
                 strokeWidthSecondary={2}
             />
-            <div ref={mapContainer} className="map-container">
+            <div className="row">
+                <div className={"col-6"}>
+                    <div ref={mapContainer} className="map-container">
+                    </div>
+                </div>
+                <div className={"col-6"}>
+                    <Hydrograph  selected={selected} />
+                </div>
             </div>
 
         </div>

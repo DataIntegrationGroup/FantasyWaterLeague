@@ -111,12 +111,16 @@ export function indexOfMaximumValue(my_array) {
 }
 
 
-export async function retrieveItems(url, items=[]){
+export async function retrieveItems(url, items=[], maxitems= null){
+    if (maxitems!=null && items.length>=maxitems){
+        return items
+    }
+
     const newData = await fetch(url)
     const data = await newData.json()
-
+    console.log('resadfas', data)
     if (data['@iot.nextLink']!=null){
-        return retrieveItems(data['@iot.nextLink'], items.concat(data.value))
+        return retrieveItems(data['@iot.nextLink'], items.concat(data.value), maxitems)
     }else{
         return items.concat(data.value)
     }

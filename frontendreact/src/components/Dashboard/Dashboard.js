@@ -149,8 +149,23 @@ function GraphButton({row, setSelectedAsset,
                                 height: '100%',
                                 title: {text: row.original.name + '  '+ row.original.atype},
                                 showlegend: false}
-                        layout = {...layout, ...score_layout}
 
+                        let title = 'Depth To Groundwater (ft bgs)'
+                        if (row.original.atype ==='continuous_rain_gauge'){
+                            title = 'Rainfall (in)'
+                        } else if (row.original.atype ==='stream_gauge'){
+                            title = 'Gage Height (ft)'
+                        }
+
+
+                        layout = {...layout, ...score_layout}
+                        if ('yaxis' in layout) {
+                            layout['yaxis']['title'] = title
+                        }else{
+                            layout['yaxis'] = {'title': title}
+                        }
+
+                        console.log('layout', layout)
                         setPlotLayout(layout)
                         console.log('selected', row.original.name)
                         document.getElementById('graphContainer').style.display = 'block'
