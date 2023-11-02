@@ -30,4 +30,6 @@ class Match(Base, Slugged):
 
     final_score_a = Column(Float, nullable=True)
     final_score_b = Column(Float, nullable=True)
+
+
 # ============= EOF =============================================
