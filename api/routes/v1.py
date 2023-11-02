@@ -36,7 +36,7 @@ from api.crud import (
     add_roster_score,
     retrieve_games,
 )
-from api.models.game import Game
+from api.models.game import Game, Match
 from api.rules import (
     validate_team,
     validate_lineup,
@@ -44,7 +44,7 @@ from api.rules import (
     validate_stream_gauge,
     validate_rain_gauge,
 )
-from api.users import current_active_user
+from api.users import current_active_user, current_super_user
 
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
 auth_router = APIRouter(
@@ -53,20 +53,49 @@ auth_router = APIRouter(
 admin_router = APIRouter(
     prefix="/api/v1/admin",
     tags=["API V1 Admin"],
-    dependencies=[Depends(current_active_user)],
+    dependencies=[Depends(current_super_user)],
 )
 
 
-class GamePayload(BaseModel):
+class GameStatusPayload(BaseModel):
     active: str
+
+
+class NewGamePayload(BaseModel):
+    start: datetime
+
+
+class NewMatchPayload(BaseModel):
+    player_a: str
+    player_b: str
+    game_slug: str
 
 
 # admin
 @admin_router.patch("/game_status")
-async def post_game_status(payload: GamePayload, db=Depends(get_db)):
-    print(payload)
+async def patch_game_status(payload: GameStatusPayload, db=Depends(get_db)):
     game = retrieve_game(db)
     game.active = payload.active.lower() == "true"
+    db.commit()
+    return {"status": "ok"}
+
+
+@admin_router.post("/game")
+async def post_game(payload: NewGamePayload, db=Depends(get_db)):
+    game = retrieve_game(db)
+    game.active = False
+    db.commit()
+
+    new_game = Game(start=payload.start, active=True)
+    db.add(new_game)
+    db.commit()
+    return {"status": "ok"}
+
+
+@admin_router.post("/match")
+async def post_match(payload: NewMatchPayload, db=Depends(get_db)):
+    match = Match(player_a=payload.player_a, player_b=payload.player_b, game=payload.game_slug)
+    db.add(match)
     db.commit()
     return {"status": "ok"}
 

@@ -20,6 +20,7 @@ import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import {forEach} from "react-bootstrap/ElementChildren";
 import NWSLegend from "./NWSLegend";
 import ControlPanel from "./ControlPanel";
+import Match from "../Match/Match";
 
 const STREAM_GAUGE = 'stream_gauge'
 const CONTINUOUS_GROUNDWATER = 'continuous_groundwater'
@@ -734,6 +735,9 @@ export default function Dashboard({auth, setAuth}) {
 
     return(
         <div className='container-fluid'>
+            <div className='row'>
+                <Match />
+            </div>
             <div className='row'>
                 <div className={'col-lg-6'}>
                     <div className={'pane'}>

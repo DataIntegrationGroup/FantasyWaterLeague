@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
-from sqlalchemy import DateTime, Column, Boolean
+from sqlalchemy import DateTime, Column, Boolean, String, ForeignKey, Float
 
 from api.database import Slugged, Base
 
@@ -23,4 +23,11 @@ class Game(Base, Slugged):
     active = Column(Boolean, default=False)
 
 
+class Match(Base, Slugged):
+    player_a = Column(String(128), ForeignKey("player.slug"))
+    player_b = Column(String(128), ForeignKey("player.slug"))
+    game = Column(String(128), ForeignKey("game.slug"))
+
+    final_score_a = Column(Float, nullable=True)
+    final_score_b = Column(Float, nullable=True)
 # ============= EOF =============================================
