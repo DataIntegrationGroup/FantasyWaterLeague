@@ -56,7 +56,7 @@ function App() {
                     {/*<Route path="/preferences" element={<Preferences />}/>*/}
                         <Route path="/admin" element={<Admin auth={auth}/>}/>
                         <Route path="/documentation" element={<Documentation />}/>
-                        <Route path="/analytics" element={<Analytics />}/>
+                        <Route path="/analytics" element={<Analytics auth={auth}/>}/>
                     </Routes>
                 </BrowserRouter>
             <Footer />

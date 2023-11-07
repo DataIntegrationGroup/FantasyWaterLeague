@@ -47,7 +47,15 @@ def retrieve_games(db, limit=2):
     q = db.query(Game)
     q = q.order_by(Game.start.desc())
     q = q.limit(limit)
-    return q.all()
+    games = q.all()
+    game1, game0 = None, None
+    if games:
+        if len(games) == 2:
+            game1, game0 = games
+        else:
+            game0 = games[0]
+
+    return game1, game0
 
 
 def retrieve_game(db):

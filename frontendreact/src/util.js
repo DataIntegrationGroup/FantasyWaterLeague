@@ -126,6 +126,12 @@ export async function retrieveItems(url, items=[], maxitems= null){
     }
 }
 
+export function toNameCase(txt){
+    // replace underscores with spaces and capitalize first letter of each word
+    return txt.replace(/_/g, ' ').replace(/\w\S*/g,
+        function(txt){return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();});
+}
+
 // export function retrieveItems(url, maxitems, callback) {
 //     new Promise((resolve, reject) => {
 //         getItems(url, maxitems, 0, [], resolve, reject)}).then(callback)

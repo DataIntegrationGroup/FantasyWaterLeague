@@ -27,7 +27,7 @@ services:
       dockerfile: ./Dockerfile
     command: bash -c "
       while !</dev/tcp/db/5432; do sleep 1; done;
-      sleep 20;
+      sleep 120;
       python -m main
       "
     depends_on:
@@ -44,10 +44,10 @@ services:
       alembic upgrade head;
       uvicorn api.main:app
       --host 0.0.0.0
-      --port 8080
+      --port 8081
       "
     ports:
-      - "8080:8080"
+      - "8081:8081"
     volumes:
       - ./api:/api
     depends_on:

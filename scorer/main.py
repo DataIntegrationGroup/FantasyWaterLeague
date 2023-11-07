@@ -21,7 +21,9 @@ import requests
 from numpy import array
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-HOST = "http://api:8080"
+host = os.environ.get("API_HOST", "api")
+port = os.environ.get("API_PORT", "8080")
+HOST = f"http://{host}:{port}"
 
 
 def get_json(url, access_token=None):

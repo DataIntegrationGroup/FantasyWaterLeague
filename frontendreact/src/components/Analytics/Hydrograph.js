@@ -19,20 +19,39 @@ export default function Hydrograph(props) {
             return await retrieveItems(url, [])
         }
 
-        if (props.selected !== undefined && props.selected !== null) {
-            const url = props.selected['datastream']['@iot.selfLink']+'/Observations'
-            fetchdata(url).then(data => {
-                const x = data.map((item) => {
-                    return item.phenomenonTime
-                })
-                const y = data.map((item) => {
-                    return item.result
-                })
-                setData([{x: x, y: y, mode: 'lines+markers'}])
+        const get_datastream_url = (ds_name) => {
+            if (props.selected !== undefined && props.selected !== null) {
 
-                layout['title'] = 'Hydrograph '+ props.selected['name']
+                // for (const ui of [ds_name, 'Groundwater Levels']){
+                for (const ds of props.selected['datastreams']){
+                    if (ds.name === ds_name){
+                        return ds['@iot.selfLink']+'/Observations?$orderby=phenomenonTime asc'
+                    }
+                }
 
-                setLayout(layout)
+            }
+        }
+
+        const get_ds_data = async (name, url) => {
+            const data = await fetchdata(url)
+            const x = data.map((item) => {
+                return item.phenomenonTime
+            })
+            const y = data.map((item) => {
+                return item.result
+            })
+            return {x: x, y: y, mode: 'lines+markers', 'name': name}
+        }
+        if (props.selected != null) {
+            let series = []
+            let ds_name = props.selected['ds_name']
+            get_ds_data('Continuous',  get_datastream_url(ds_name)).then(data => {
+                series.push(data)
+                ds_name = 'Groundwater Levels'
+                get_ds_data('Manual', get_datastream_url(ds_name)).then(data => {
+                    series.push(data)
+                    setData(series)
+                })
             })
         }
 

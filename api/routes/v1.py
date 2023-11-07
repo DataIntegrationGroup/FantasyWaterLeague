@@ -349,7 +349,7 @@ class ScorePayload(BaseModel):
 
 @router.put("/roster/{roster_slug}/{asset_slug}")
 async def put_roster_asset(
-    roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
+        roster_slug, asset_slug, payload: AssetPayload, db=Depends(get_db)
 ):
     update_roster_asset(db, roster_slug, asset_slug, payload)
     return {"slug": asset_slug, "active": payload.active}
@@ -365,6 +365,5 @@ async def put_asset_score(asset_slug: str, payload: ScorePayload, db=Depends(get
 async def put_player_score(roster_slug: str, payload: ScorePayload, db=Depends(get_db)):
     add_roster_score(db, roster_slug, payload)
     return {"slug": roster_slug, "score": payload.score, "game_slug": payload.game_slug}
-
 
 # ============= EOF =============================================

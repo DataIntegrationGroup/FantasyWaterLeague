@@ -21,10 +21,7 @@ import {forEach} from "react-bootstrap/ElementChildren";
 import NWSLegend from "./NWSLegend";
 import ControlPanel from "./ControlPanel";
 import Match from "../Match/Match";
-
-const STREAM_GAUGE = 'stream_gauge'
-const CONTINUOUS_GROUNDWATER = 'continuous_groundwater'
-const CONTINUOUS_RAIN_GAUGE = 'continuous_rain_gauge'
+import add_roster_to_map, {make_fc} from "../../mapping";
 
 
 function GraphButton({row, setSelectedAsset,
@@ -305,11 +302,7 @@ function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore
     )
 }
 
-function toNameCase(txt){
-    // replace underscores with spaces and capitalize first letter of each word
-    return txt.replace(/_/g, ' ').replace(/\w\S*/g,
-        function(txt){return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();});
-}
+
 
 export default function Dashboard({auth, setAuth}) {
     const [roster_data, setRosterData] = React.useState([])
@@ -503,7 +496,8 @@ export default function Dashboard({auth, setAuth}) {
         console.log('setting up map for', slug)
         api_getJson(settings.BASE_API_URL+'/roster/'+slug+'.main/geojson')
             .then(data=> {
-                [STREAM_GAUGE, CONTINUOUS_GROUNDWATER, CONTINUOUS_RAIN_GAUGE].forEach((tag)=>{
+                [settings.STREAM_GAUGE,
+                    settings.CONTINUOUS_GROUNDWATER, settings.CONTINUOUS_RAIN_GAUGE].forEach((tag)=>{
                     map.current.getSource(tag).setData(make_fc(data, tag))
                 })
 
@@ -511,10 +505,7 @@ export default function Dashboard({auth, setAuth}) {
 
     }
 
-    const make_fc = (data, tag) => {
-        return {'type': 'FeatureCollection',
-                'features': data['features'].filter(d=>d.properties.atype===tag)}
-    }
+
 
     const setUpMap = () => {
         if (auth.slug === undefined){
@@ -552,21 +543,7 @@ export default function Dashboard({auth, setAuth}) {
                 }));
 
                 map.current.addControl(new mapboxgl.NavigationControl());
-                const paint = {
-                    'circle-radius': 5,
-                    'circle-color': ['match', ['get', 'active'],
-                        1, '#64B976',
-                        0, '#B07D6E',
-                        '#d5633a'],
-                    'circle-stroke-color': 'black',
-                    'circle-stroke-width': 1,
-                }
 
-                let layout = {
-                        'icon-size': 0.065,
-                        'icon-allow-overlap': true,
-                        'icon-offset': [0, -200],
-                }
                 map.current.on('load', function () {
 
                     map.current.addSource('mapbox-dem', {
@@ -657,70 +634,8 @@ export default function Dashboard({auth, setAuth}) {
                         }
                     })
 
+                    add_roster_to_map(map, auth, setHoverActive)
 
-
-                    api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson')
-                        .then(data=> {
-                            console.log('geojson', data)
-                            let items =[[STREAM_GAUGE, streamgauge_image],
-                                [CONTINUOUS_GROUNDWATER,gwell_image],
-                                [CONTINUOUS_RAIN_GAUGE, raingauge_image]]
-                            items.forEach((item)=>{
-                                            let tag = item[0]
-                                            let image = item[1]
-
-                                            let fc = make_fc(data, tag)
-                                            console.log(fc)
-                                            map.current.addSource(tag, {type: 'geojson',
-                                                data: fc}) ;
-                                            map.current.loadImage(image, function(error, image) {
-                                                map.current.addImage(tag + '_image', image, {sdf: false})
-                                                layout['icon-image'] = tag + '_image'
-                                                map.current.addLayer({
-                                                    id: tag + '_symbol',
-                                                    source: tag,
-                                                    type: 'symbol',
-                                                    layout: layout
-                                                })
-
-                                                const lay = map.current.addLayer({
-                                                    id: tag,
-                                                    type: 'circle',
-                                                    source: tag,
-                                                    paint: paint
-                                                })
-
-                                                const popup = new mapboxgl.Popup({
-                                                    closeButton: false,
-                                                    closeOnClick: false
-                                                })
-
-                                                lay.on('mouseenter', tag, function (e) {
-
-                                                    map.current.getCanvas().style.cursor = 'pointer';
-                                                    const coordinates = e.features[0].geometry.coordinates.slice();
-                                                    const atype = toNameCase(e.features[0].properties.atype)
-
-                                                    const html= `<div class="popup">
-<table class="table-sm table-bordered">
-<tr><td class="popup-td">Name</td><td>${e.features[0].properties.name}</td></tr>
-<tr><td class="popup-td">Type</td><td>${atype}</td></tr>
-<tr><td class="popup-td">Score</td><td>${e.features[0].properties.score.toFixed(2)}</td></tr>
-</table></div>`
-                                                    popup.setLngLat(coordinates)
-                                                        .setHTML(html)
-                                                        .addTo(map.current);
-
-                                                    setHoverActive(e.features[0].properties.name)
-                                                })
-
-                                                map.current.on('mouseleave', tag, function () {
-                                                    map.current.getCanvas().style.cursor = '';
-                                                    popup.remove();
-                                                })
-                                            })
-                            }) // end forEach
-                        })
                 })
             })
     }

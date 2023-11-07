@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {api_getJson, retrieveItems} from "../../util";
 import {settings} from "../../settings";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
@@ -7,8 +7,38 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import {Hourglass, Oval} from "react-loader-spinner";
 import Hydrograph from "./Hydrograph";
+import add_roster_to_map from "../../mapping";
+import ControlPanel from "../Dashboard/ControlPanel";
 
-export default function Analytics(){
+function LayerControl({name, handleVisibilityChange}) {
+    return (
+        <div>
+            <label>
+                <input type="checkbox" id={name} name={name} defaultChecked={true}
+                onChange={(e) => {
+                    console.log('change', e.target.checked)
+                    handleVisibilityChange(name, e.target.checked)
+                }}
+
+                />
+                <span style={{'margin-left': '10px'}}>{name}</span>
+            </label>
+        </div>
+    )
+}
+
+function LayerControlPanel({handleVisibilityChange}) {
+    return (
+        <div className="control-panel">
+            <h3>Layers</h3>
+            <LayerControl name="st2_manual" handleVisibilityChange={handleVisibilityChange}/>
+            <LayerControl name="st2_pressure" handleVisibilityChange={handleVisibilityChange}/>
+            <LayerControl name="st2_acoustic" handleVisibilityChange={handleVisibilityChange}/>
+        </div>
+    )
+}
+
+export default function Analytics({auth}){
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [lng, setLng] = useState(-106.5);
@@ -18,6 +48,80 @@ export default function Analytics(){
     const [loading, setLoading] = useState(true)
     const [selected, setSelected] = useState(null)
 
+    function add_ds_layer(map, tag, color, ds_name) {
+        const base_url = 'https://st2.newmexicowaterdata.org/FROST-Server/v1.1'
+
+        const filter_str = '&$filter=Things/Datastreams/name eq \''+ds_name+'\''
+        const url = base_url+'/Locations?$expand=Things/Datastreams'+filter_str
+        retrieveItems(url,
+            [], 1000
+        ).then(locations => {
+
+        const paint = {
+            'circle-radius': 4,
+            'circle-color': color,
+            'circle-stroke-color': 'black',
+            'circle-stroke-width': 1,
+        }
+        map.current.addSource(tag, {
+            'type': 'geojson',
+            'data': {'type': 'FeatureCollection',
+                'features': locations.map((location) => {
+                    return {'geometry': location['location'],
+                        'properties': {'name': location['name'],
+                            'Things': location['Things'],
+                        }}
+                })}})
+
+        map.current.addLayer(
+            {
+                id: tag,
+                type: 'circle',
+                paint: paint,
+                source: tag
+            }
+        )
+        const popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false
+        })
+
+        map.current.on('mouseenter', tag, (e) => {
+            map.current.getCanvas().style.cursor = 'pointer';
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const description = e.features[0].properties.name;
+            popup.setLngLat(coordinates).setHTML(description).addTo(map.current);
+        })
+        map.current.on('mouseleave', tag, () => {
+            map.current.getCanvas().style.cursor = '';
+            popup.remove();
+        })
+        map.current.on('click', tag, (e) => {
+            // const coordinates = e.features[0].geometry.coordinates.slice();
+            const properties = e.features[0].properties
+            const name = properties.name;
+            const things = JSON.parse(properties.Things)
+            setSelected({name: name, datastreams: things[0].Datastreams, ds_name: ds_name})
+            // for (const ds of things[0].Datastreams){
+            //     if (ds.name === ds_name){
+            //         setSelected({'name': name, 'datastream': ds})
+            //     }
+            // }
+            // const datastream = things[0].Datastreams[0]
+            // if (datastream !== undefined){
+            //     setSelected({'name': name, 'datastream': datastream})
+            // } else{
+            //     console.log('fffffffffrrrfrafsasfdasdf')
+            //     setSelected(null)
+            // }
+
+            // popup.setLngLat(coordinates).setHTML(name).addTo(map.current);
+            })
+        })
+    }
+    const handleLayerVisibility = (name, checked) => {
+        map.current.setLayoutProperty(name,'visibility', checked?'visible':'none')
+    }
     const setupMap = () => {
         api_getJson(settings.BASE_API_URL+'/mapboxtoken')
             .then(data=> {
@@ -42,6 +146,9 @@ export default function Analytics(){
 
                 map.current.on('load', async () => {
 
+                    // add the roster assets
+                    add_roster_to_map(map, auth)
+
                     map.current.addSource('mapbox-dem', {
                         'type': 'raster-dem',
                         'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
@@ -51,79 +158,13 @@ export default function Analytics(){
                     // add the DEM source as a terrain layer with exaggerated height
                     map.current.setTerrain({'source': 'mapbox-dem', 'exaggeration': 3});
 
+                    add_ds_layer(map, 'st2_manual', '#ecd24b',
+                        'Groundwater Levels')
+                    add_ds_layer(map, 'st2_pressure', '#224bb4',
+                              'Groundwater Levels(Pressure)')
+                    add_ds_layer(map, 'st2_acoustic', '#d5633a',
+                              'Groundwater Levels(Acoustic)')
 
-
-                    const locations = await retrieveItems('https://st2.newmexicowaterdata.org/FROST-Server/v1.1/Locations?$expand=Things/Datastreams',
-                        [], 1000
-                        )
-
-                    const paint = {
-                        'circle-radius': 4,
-                        'circle-color': ['match', ['get', 'active'],
-                            1, '#64B976',
-                            0, '#B07D6E',
-                            '#d5633a'],
-                        'circle-stroke-color': 'black',
-                        'circle-stroke-width': 1,
-                    }
-                    map.current.addSource('st2', {
-                        'type': 'geojson',
-                        'data': {'type': 'FeatureCollection',
-                        'features': locations.map((location) => {
-                            return {'geometry': location['location'],
-                                    'properties': {'name': location['name'],
-                                                   'Things': location['Things'],
-                                                }}
-                        })}})
-
-                    const st2layer = map.current.addLayer(
-                        {
-                            id: 'st2',
-                            type: 'circle',
-                            paint: paint,
-                            source: 'st2'
-                        }
-                    )
-
-                    const popup = new mapboxgl.Popup({
-                        closeButton: false,
-                        closeOnClick: false
-                    })
-
-                    map.current.on('mouseenter', 'st2', (e) => {
-                        map.current.getCanvas().style.cursor = 'pointer';
-                        // const coordinates = e.features[0].geometry.coordinates.slice();
-                        // const description = e.features[0].properties.name;
-                        // popup.setLngLat(coordinates).setHTML(description).addTo(map.current);
-                    })
-                    map.current.on('mouseleave', 'st2', () => {
-                        map.current.getCanvas().style.cursor = '';
-                        popup.remove();
-                    })
-                    map.current.on('click', 'st2', (e) => {
-                        const coordinates = e.features[0].geometry.coordinates.slice();
-
-                        console.log('click', e.features)
-                        const properties = e.features[0].properties
-                        const name = properties.name;
-                        console.log('properties', properties)
-                        const things = JSON.parse(properties.Things)
-                        console.log('th,ings', things)
-                        const datastream = things[0].Datastreams[0]
-                        console.log('da', datastream)
-                        if (datastream !== undefined){
-                            // setLoading(true)
-                            console.log('afsasfdasdf')
-                            setSelected({'name': name, 'datastream': datastream})
-                            // setLoading(false)
-                        } else{
-                            console.log('fffffffffrrrfrafsasfdasdf')
-                        setSelected(null)
-                        }
-
-
-                        popup.setLngLat(coordinates).setHTML(name).addTo(map.current);
-                    })
                     setLoading(false)
 
                 });
@@ -153,6 +194,7 @@ export default function Analytics(){
                     />
                     <div className={'pane'}>
                         <div ref={mapContainer} className="map-container">
+                            <LayerControlPanel handleVisibilityChange={handleLayerVisibility} />
                     </div>
                     </div>
                 </div>
