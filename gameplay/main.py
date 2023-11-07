@@ -44,7 +44,6 @@ def setup_demo():
         microseconds=now.microsecond,
     )
 
-
     url = f"{HOST}/api/v1/game"
     requests.post(
         url,
@@ -52,7 +51,6 @@ def setup_demo():
             slug="game1", name="Game 1", start=gamestart.isoformat(), active=False
         ),
     )
-
 
 
 def setup_rosters():
