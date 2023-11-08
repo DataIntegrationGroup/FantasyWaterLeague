@@ -9,35 +9,70 @@ import {Hourglass, Oval} from "react-loader-spinner";
 import Hydrograph from "./Hydrograph";
 import add_roster_to_map from "../../mapping";
 import ControlPanel from "../Dashboard/ControlPanel";
+import './Analytics.css'
+import Button from "react-bootstrap/Button";
 
-function LayerControl({name, handleVisibilityChange}) {
+function LayerControl({name, label, color, handleVisibilityChange, checked}) {
     return (
         <div>
             <label>
-                <input type="checkbox" id={name} name={name} defaultChecked={true}
+                <input type="checkbox" id={name} name={name}
+                       checked={checked}
                 onChange={(e) => {
                     console.log('change', e.target.checked)
                     handleVisibilityChange(name, e.target.checked)
                 }}
-
+                style={{'marginRight': '5px'}}
                 />
-                <span style={{'margin-left': '10px'}}>{name}</span>
+                <div className="layer-key" style={{'backgroundColor': color}}></div>{label}
             </label>
         </div>
     )
 }
 
-function LayerControlPanel({handleVisibilityChange}) {
+function LayerControlPanel({handleVisibilityChange, checked}) {
     return (
         <div className="control-panel">
             <h3>Layers</h3>
-            <LayerControl name="st2_manual" handleVisibilityChange={handleVisibilityChange}/>
-            <LayerControl name="st2_pressure" handleVisibilityChange={handleVisibilityChange}/>
-            <LayerControl name="st2_acoustic" handleVisibilityChange={handleVisibilityChange}/>
+            <LayerControl name="st2_manual"
+                          label={"Groundwater Levels (Manual)"}
+                          color="#ecd24b"
+                          handleVisibilityChange={handleVisibilityChange}
+                          checked={checked['st2_manual']}
+            />
+            <LayerControl name="st2_pressure"
+                            label={"Groundwater Levels (Pressure)"}
+                          color="#224bb4"
+                          checked={checked['st2_pressure']}
+                          handleVisibilityChange={handleVisibilityChange}/>
+            <LayerControl name="st2_acoustic"
+                          label={"Groundwater Levels (Acoustic)"}
+                          color="#d5633a"
+                          checked={checked['st2_acoustic']}
+                          handleVisibilityChange={handleVisibilityChange}/>
+            <LayerControl name="search"
+                          label={"Filtered Results"}
+                          color="#e36d9e"
+                          checked={checked['search']}
+                          handleVisibilityChange={handleVisibilityChange}/>
         </div>
     )
 }
 
+function SearchPanel({onClick}){
+    return (
+        <div className="search-panel">
+            <h3>Search</h3>
+            <div className="search-panel-inner">
+                <input id="search" type="text" placeholder="Search" />
+
+                <Button variant="primary" size="sm" className="search-button"
+                onClick={() => onClick(document.getElementById('search').value)}
+                >Search</Button>
+            </div>
+        </div>
+    )
+}
 export default function Analytics({auth}){
     const mapContainer = useRef(null);
     const map = useRef(null);
@@ -47,12 +82,35 @@ export default function Analytics({auth}){
 
     const [loading, setLoading] = useState(true)
     const [selected, setSelected] = useState(null)
+    const [manual_checked, setManualChecked] = useState(true)
+    const [pressure_checked, setPressureChecked] = useState(true)
+    const [acoustic_checked, setAcousticChecked] = useState(true)
+
+    const [checked, setChecked] = useState({'st2_manual': true,
+        'st2_pressure': true,'st2_acoustic': true, 'search': false})
+
+    function add_popup(tag, ds_name=null){
+        const popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false
+        })
+
+        map.current.on('mouseenter', tag, (e) => {
+            map.current.getCanvas().style.cursor = 'pointer';
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const description = e.features[0].properties.name;
+            popup.setLngLat(coordinates).setHTML(description).addTo(map.current);
+        })
+        map.current.on('mouseleave', tag, () => {
+            map.current.getCanvas().style.cursor = '';
+            popup.remove();
+        })
+
+    }
 
     function add_ds_layer(map, tag, color, ds_name) {
-        const base_url = 'https://st2.newmexicowaterdata.org/FROST-Server/v1.1'
-
         const filter_str = '&$filter=Things/Datastreams/name eq \''+ds_name+'\''
-        const url = base_url+'/Locations?$expand=Things/Datastreams'+filter_str
+        const url = settings.ST2_API_URL+'/Locations?$expand=Things/Datastreams'+filter_str
         retrieveItems(url,
             [], 1000
         ).then(locations => {
@@ -81,46 +139,78 @@ export default function Analytics({auth}){
                 source: tag
             }
         )
-        const popup = new mapboxgl.Popup({
-            closeButton: false,
-            closeOnClick: false
-        })
-
-        map.current.on('mouseenter', tag, (e) => {
-            map.current.getCanvas().style.cursor = 'pointer';
-            const coordinates = e.features[0].geometry.coordinates.slice();
-            const description = e.features[0].properties.name;
-            popup.setLngLat(coordinates).setHTML(description).addTo(map.current);
-        })
-        map.current.on('mouseleave', tag, () => {
-            map.current.getCanvas().style.cursor = '';
-            popup.remove();
-        })
+        add_popup(tag, ds_name)
         map.current.on('click', tag, (e) => {
             // const coordinates = e.features[0].geometry.coordinates.slice();
             const properties = e.features[0].properties
             const name = properties.name;
             const things = JSON.parse(properties.Things)
             setSelected({name: name, datastreams: things[0].Datastreams, ds_name: ds_name})
-            // for (const ds of things[0].Datastreams){
-            //     if (ds.name === ds_name){
-            //         setSelected({'name': name, 'datastream': ds})
-            //     }
-            // }
-            // const datastream = things[0].Datastreams[0]
-            // if (datastream !== undefined){
-            //     setSelected({'name': name, 'datastream': datastream})
-            // } else{
-            //     console.log('fffffffffrrrfrafsasfdasdf')
-            //     setSelected(null)
-            // }
-
-            // popup.setLngLat(coordinates).setHTML(name).addTo(map.current);
             })
         })
     }
-    const handleLayerVisibility = (name, checked) => {
-        map.current.setLayoutProperty(name,'visibility', checked?'visible':'none')
+
+    const handleSearch = (search_txt) => {
+        console.log('search text', search_txt)
+
+        map.current.setLayoutProperty('st2_manual','visibility', 'none')
+        map.current.setLayoutProperty('st2_pressure','visibility', 'none')
+        map.current.setLayoutProperty('st2_acoustic','visibility', 'none')
+
+        const url = settings.ST2_API_URL+'/Locations?'
+        const expand = '$expand=Things/Datastreams'
+        const filter = '$filter=substringof(\''+search_txt+'\',name)'
+
+        // setManualChecked(false)
+        // setPressureChecked(false)
+        // setAcousticChecked(false)
+
+
+        retrieveItems(url+expand+'&'+filter,[], 10000)
+            .then(locations => {
+                console.log('locations', locations)
+
+                const data = {'type': 'FeatureCollection',
+                    'features': locations.map((location) => {
+                    return {'geometry': location['location'],
+                        'properties': {'name': location['name'],
+                            'Things': location['Things'],
+                        }}
+                    })
+                }
+                map.current.getSource('search').setData(data)
+                setChecked({'st2_manual': false,
+                    'st2_pressure': false,
+                    'st2_acoustic': false,
+                    'search': true})
+                // const popup = new mapboxgl.Popup({
+                //     closeButton: false,
+                //     closeOnClick: false
+                // })
+                //
+                // map.current.on('mouseenter', 'search', (e) => {
+                //     map.current.getCanvas().style.cursor = 'pointer';
+                //     const coordinates = e.features[0].geometry.coordinates.slice();
+                //     const description = e.features[0].properties.name;
+                //     popup.setLngLat(coordinates).setHTML(description).addTo(map.current);
+                // })
+                // map.current.on('mouseleave', 'search', () => {
+                //     map.current.getCanvas().style.cursor = '';
+                //     popup.remove();
+                // })
+
+            })
+    }
+    const handleLayerVisibility = (name, state) => {
+        map.current.setLayoutProperty(name,'visibility', state?'visible':'none')
+        setChecked({...checked, [name]: state})
+        // if (name === 'st2_manual'){
+        //     setManualChecked(checked)
+        // } else if (name ==='st2_pressure'){
+        //     setPressureChecked(checked)
+        // } else if (name === 'st2_acoustic'){
+        //     setAcousticChecked(checked)
+        // }
     }
     const setupMap = () => {
         api_getJson(settings.BASE_API_URL+'/mapboxtoken')
@@ -165,6 +255,35 @@ export default function Analytics({auth}){
                     add_ds_layer(map, 'st2_acoustic', '#d5633a',
                               'Groundwater Levels(Acoustic)')
 
+                    // add a search layer
+                    map.current.addSource('search', {
+                        'type': 'geojson',
+                    })
+
+                    add_popup('search')
+                    map.current.on('click', 'search', (e) => {
+                        // const coordinates = e.features[0].geometry.coordinates.slice();
+                        const properties = e.features[0].properties
+                        const name = properties.name;
+                        const things = JSON.parse(properties.Things)
+                        setSelected({name: name,
+                            datastreams: things[0].Datastreams,
+                        })
+                        // for (const ds of things
+                    })
+                    map.current.addLayer(
+                        {
+                            id: 'search',
+                            type: 'circle',
+                            paint: {
+                                'circle-radius': 4,
+                                'circle-color': '#e36d9e',
+                                'circle-stroke-color': 'black',
+                                'circle-stroke-width': 1,
+                            },
+                            source: 'search'
+                        }
+                    )
                     setLoading(false)
 
                 });
@@ -178,6 +297,13 @@ export default function Analytics({auth}){
     return (
         <div>
             <h1>Analytics</h1>
+            <div className={'row'}>
+                <div className={'col-12'}>
+                    <div className={'pane'}>
+                        <SearchPanel onClick={handleSearch}/>
+                    </div>
+                </div>
+            </div>
             <div className="row">
                 <div className={"col-7"}>
                     <Hourglass
@@ -194,7 +320,9 @@ export default function Analytics({auth}){
                     />
                     <div className={'pane'}>
                         <div ref={mapContainer} className="map-container">
-                            <LayerControlPanel handleVisibilityChange={handleLayerVisibility} />
+                            <LayerControlPanel handleVisibilityChange={handleLayerVisibility}
+                                                checked = {checked}
+                            />
                     </div>
                     </div>
                 </div>

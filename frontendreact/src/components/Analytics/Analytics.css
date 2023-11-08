@@ -1,0 +1,10 @@
+.layer-key {
+    display: inline-block;
+    border: #2c974b solid 1px;
+    border-radius: 6px;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    margin-bottom: 1px;
+    margin-top: 1px;
+}
