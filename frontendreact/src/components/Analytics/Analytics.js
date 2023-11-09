@@ -7,7 +7,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import {Hourglass, Oval} from "react-loader-spinner";
 import Hydrograph from "./Hydrograph";
-import add_roster_to_map, {add_county_layer, add_rgis_wms} from "../../mapping";
+import add_roster_to_map, {add_county_layer, add_rgis_geojson, add_rgis_wms} from "../../mapping";
 import ControlPanel from "../Dashboard/ControlPanel";
 import './Analytics.css'
 import Button from "react-bootstrap/Button";
@@ -37,6 +37,16 @@ function LayerControlPanel({handleVisibilityChange, checked}) {
     return (
         <div className="control-panel">
             <h3>Layers</h3>
+            <LayerControl name="huc-6"
+                          label={"HUC-6"}
+                          color="black"
+                          handleVisibilityChange={handleVisibilityChange}
+                          checked={checked['huc-6']}/>
+            <LayerControl name="huc-8"
+                          label={"HUC-8"}
+                          color="black"
+                          handleVisibilityChange={handleVisibilityChange}
+                          checked={checked['huc-8']}/>
             <LayerControl name="counties"
                           label={"Counties"}
                           color="black"
@@ -97,6 +107,8 @@ export default function Analytics({auth}){
     const [selected, setSelected] = useState(null)
 
     const [checked, setChecked] = useState({
+        'huc-6': true,
+        'huc-8': true,
         'counties': true,
         'acequias': true,
         'st2_manual': true,
@@ -257,6 +269,11 @@ export default function Analytics({auth}){
                     const dataset = '07c4688e-21a2-4211-9f07-f4940af5188b'
                     const layers='Acequias'
                     add_rgis_wms(map, dataset, layers, 'acequias')
+
+                    add_rgis_geojson(map, '932e5ab8-09d7-4624-913b-7630e0973a22', 'wbdhu6_a_nm', 'huc-6')
+
+                    add_rgis_geojson(map, 'cae16e7f-c3d1-4264-b14b-f1c6db755a88', 'wbdhu8_a_nm', 'huc-8')
+
 
                     // add county layer
                     add_county_layer(map)

@@ -4,6 +4,7 @@ import streamgauge_image from "./img/streamgauge.png";
 import gwell_image from "./img/gwell.png";
 import raingauge_image from "./img/raingauge.png";
 import mapboxgl from "mapbox-gl";
+import JSZip from "jszip";
 
 
 
@@ -12,6 +13,21 @@ export const make_fc = (data, tag) => {
         'features': data['features'].filter(d=>d.properties.atype===tag)}
 }
 
+export function add_rgis_geojson(map, dataset, name, tag){
+    const url = 'http://gstore.unm.edu/apps/rgis/datasets/'+dataset+'/'+name+'.derived.geojson'
+    fetch(url, ).then(data=>{
+        return data.blob()
+    }).then(data=>{
+        var arc = new JSZip();
+        arc.loadAsync(data).then(function (zip) {
+            zip['files'][name+'.geojson'].async('string').then(function (data) {
+                const fc = JSON.parse(data)
+                add_feature_collection(map, fc, tag , {'fill-color': '#224bb4', 'fill-opacity': 0.25})
+            })
+        })
+    })
+
+}
 export function add_rgis_wms(map, dataset, layers, tag='wms'){
 
     const url = 'http://gstore.unm.edu/apps/rgis/datasets/'+ dataset +
@@ -39,6 +55,14 @@ export function add_rgis_wms(map, dataset, layers, tag='wms'){
     })
 }
 
+export function add_feature_collection(map, fc, tag, paint){
+    map.current.addSource(tag, {type: 'geojson',
+        data: fc})
+    map.current.addLayer({id: tag, source: tag,
+        type: 'fill',
+        paint: paint
+    })
+}
 
 export function add_county_layer(map, tag='counties'){
 
@@ -47,12 +71,7 @@ export function add_county_layer(map, tag='counties'){
     const url ='https://newmexico-s3-bucket.s3.amazonaws.com/newmexico-s3-bucket/resources/184a9ff9-05e1-4d50-9a13-260883eb0a78/tl_2018_nm_county.geojson'
     getJson(url).then(data=>{
         console.log('county data', data)
-        map.current.addSource(tag, {type: 'geojson',
-            data: data})
-        map.current.addLayer({id: tag, source: tag,
-            type: 'fill',
-            paint: {'fill-color': '#088', 'fill-opacity': 0.25}
-        })
+        add_feature_collection(map, data, tag , {'fill-color': '#088', 'fill-opacity': 0.25})
         map.current.addLayer({id: tag+'_borders', source: tag,
             type: 'line',
         })
