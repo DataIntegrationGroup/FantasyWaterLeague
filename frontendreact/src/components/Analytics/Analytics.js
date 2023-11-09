@@ -7,10 +7,13 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import {Hourglass, Oval} from "react-loader-spinner";
 import Hydrograph from "./Hydrograph";
-import add_roster_to_map from "../../mapping";
+import add_roster_to_map, {add_county_layer, add_rgis_wms} from "../../mapping";
 import ControlPanel from "../Dashboard/ControlPanel";
 import './Analytics.css'
 import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
+import InputGroup from "react-bootstrap/InputGroup";
+import {ButtonGroup, ButtonToolbar} from "react-bootstrap";
 
 function LayerControl({name, label, color, handleVisibilityChange, checked}) {
     return (
@@ -34,12 +37,21 @@ function LayerControlPanel({handleVisibilityChange, checked}) {
     return (
         <div className="control-panel">
             <h3>Layers</h3>
+            <LayerControl name="counties"
+                          label={"Counties"}
+                          color="black"
+                          handleVisibilityChange={handleVisibilityChange}
+                          checked={checked['counties']}/>
+            <LayerControl name="acequias"
+                          label={"Acequias"}
+                          color="black"
+                          handleVisibilityChange={handleVisibilityChange}
+                          checked={checked['acequias']}/>
             <LayerControl name="st2_manual"
                           label={"Groundwater Levels (Manual)"}
                           color="#ecd24b"
                           handleVisibilityChange={handleVisibilityChange}
-                          checked={checked['st2_manual']}
-            />
+                          checked={checked['st2_manual']}/>
             <LayerControl name="st2_pressure"
                             label={"Groundwater Levels (Pressure)"}
                           color="#224bb4"
@@ -59,20 +71,21 @@ function LayerControlPanel({handleVisibilityChange, checked}) {
     )
 }
 
-function SearchPanel({onClick}){
+function SearchPanel({onClick}) {
     return (
         <div className="search-panel">
             <h3>Search</h3>
-            <div className="search-panel-inner">
-                <input id="search" type="text" placeholder="Search" />
+                <Form.Control id='search' type="text" placeholder="Enter search text" />
+                <Button variant="primary"
+                            type="submit"
+                            onClick={() => onClick(document.getElementById('search').value)}>
+                        Submit
+                </Button>
 
-                <Button variant="primary" size="sm" className="search-button"
-                onClick={() => onClick(document.getElementById('search').value)}
-                >Search</Button>
-            </div>
         </div>
     )
 }
+
 export default function Analytics({auth}){
     const mapContainer = useRef(null);
     const map = useRef(null);
@@ -82,12 +95,13 @@ export default function Analytics({auth}){
 
     const [loading, setLoading] = useState(true)
     const [selected, setSelected] = useState(null)
-    const [manual_checked, setManualChecked] = useState(true)
-    const [pressure_checked, setPressureChecked] = useState(true)
-    const [acoustic_checked, setAcousticChecked] = useState(true)
 
-    const [checked, setChecked] = useState({'st2_manual': true,
-        'st2_pressure': true,'st2_acoustic': true, 'search': false})
+    const [checked, setChecked] = useState({
+        'counties': true,
+        'acequias': true,
+        'st2_manual': true,
+        'st2_pressure': true,
+        'st2_acoustic': true, 'search': false})
 
     function add_popup(tag, ds_name=null){
         const popup = new mapboxgl.Popup({
@@ -203,6 +217,10 @@ export default function Analytics({auth}){
     }
     const handleLayerVisibility = (name, state) => {
         map.current.setLayoutProperty(name,'visibility', state?'visible':'none')
+        if (name ==='counties'){
+            map.current.setLayoutProperty('counties_borders','visibility', state?'visible':'none')
+        }
+
         setChecked({...checked, [name]: state})
         // if (name === 'st2_manual'){
         //     setManualChecked(checked)
@@ -235,7 +253,13 @@ export default function Analytics({auth}){
                 map.current.addControl(new mapboxgl.NavigationControl());
 
                 map.current.on('load', async () => {
+                    // add acequias layer
+                    const dataset = '07c4688e-21a2-4211-9f07-f4940af5188b'
+                    const layers='Acequias'
+                    add_rgis_wms(map, dataset, layers, 'acequias')
 
+                    // add county layer
+                    add_county_layer(map)
                     // add the roster assets
                     add_roster_to_map(map, auth)
 
