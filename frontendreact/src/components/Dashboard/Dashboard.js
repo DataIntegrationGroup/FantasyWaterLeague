@@ -20,7 +20,7 @@ import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import {forEach} from "react-bootstrap/ElementChildren";
 import NWSLegend from "./NWSLegend";
 import ControlPanel from "./ControlPanel";
-import Match from "../Match/Match";
+// import Match from "../Match/Match";
 import add_roster_to_map, {make_fc} from "../../mapping";
 
 
@@ -127,7 +127,7 @@ function GraphButton({row, setSelectedAsset,
 
     const handleClick = () => {
         console.log('graph', row)
-        api_getJson(settings.BASE_API_URL+'/asset/'+row.original.slug+'/data_url')
+        api_getJson('/asset/'+row.original.slug+'/data_url')
         .then(asset_data=> {
             getJson(asset_data.prev_url)
             .then(data =>{
@@ -465,7 +465,7 @@ export default function Dashboard({auth, setAuth}) {
     const fetchRosterData = (displayPlayer=null) => {
         console.log('fetching roster data', displayPlayer)
         if (displayPlayer !== null){
-            api_getJson(settings.BASE_API_URL+'/roster/'+displayPlayer+'.main/')
+            api_getJson('/roster/'+displayPlayer+'.main/')
                 .then(data=> {
                     console.log('player data', data)
                     setRosterData(data)
@@ -473,13 +473,13 @@ export default function Dashboard({auth, setAuth}) {
         }
         else if (auth.slug !== undefined){
             console.log('fetching roster data for', auth.slug)
-            api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main')
+            api_getJson('/roster/'+auth.slug+'.main')
                 .then(data=> setRosterData(data))
         }
 
     }
     const setUpGame = () =>{
-        api_getJson(settings.BASE_API_URL+'/game', {}).then(data =>{
+        api_getJson('/game', {}).then(data =>{
             console.log('game', data)
             setGameData(data)
         })
@@ -494,7 +494,7 @@ export default function Dashboard({auth, setAuth}) {
             return;
         }
         console.log('setting up map for', slug)
-        api_getJson(settings.BASE_API_URL+'/roster/'+slug+'.main/geojson')
+        api_getJson('/roster/'+slug+'.main/geojson')
             .then(data=> {
                 [settings.STREAM_GAUGE,
                     settings.CONTINUOUS_GROUNDWATER, settings.CONTINUOUS_RAIN_GAUGE].forEach((tag)=>{
@@ -524,7 +524,7 @@ export default function Dashboard({auth, setAuth}) {
                 }
             )
 
-        api_getJson(settings.BASE_API_URL+'/mapboxtoken', auth)
+        api_getJson('/mapboxtoken', auth)
             .then(data=> {
                 mapboxgl.accessToken = data.token
                 if (map.current) return; // initialize map only once
@@ -650,9 +650,9 @@ export default function Dashboard({auth, setAuth}) {
 
     return(
         <div className='container-fluid'>
-            <div className='row'>
-                <Match />
-            </div>
+            {/*<div className='row'>*/}
+            {/*    <Match />*/}
+            {/*</div>*/}
             <div className='row'>
                 <div className={'col-lg-6'}>
                     <div className={'pane'}>

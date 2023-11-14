@@ -34,9 +34,9 @@ from api.crud import (
     retrieve_game,
     retrieve_player_by_user,
     add_roster_score,
-    retrieve_games,
+    retrieve_games, retrieve_match,
 )
-from api.models.game import Game, Match
+from api.models.game import Game
 from api.rules import (
     validate_team,
     validate_lineup,
@@ -57,49 +57,9 @@ admin_router = APIRouter(
 )
 
 
-class GameStatusPayload(BaseModel):
-    active: str
 
 
-class NewGamePayload(BaseModel):
-    start: datetime
 
-
-class NewMatchPayload(BaseModel):
-    player_a: str
-    player_b: str
-    game_slug: str
-
-
-# admin
-@admin_router.patch("/game_status")
-async def patch_game_status(payload: GameStatusPayload, db=Depends(get_db)):
-    game = retrieve_game(db)
-    game.active = payload.active.lower() == "true"
-    db.commit()
-    return {"status": "ok"}
-
-
-@admin_router.post("/game")
-async def post_game(payload: NewGamePayload, db=Depends(get_db)):
-    game = retrieve_game(db)
-    game.active = False
-    db.commit()
-
-    new_game = Game(start=payload.start, active=True)
-    db.add(new_game)
-    db.commit()
-    return {"status": "ok"}
-
-
-@admin_router.post("/match")
-async def post_match(payload: NewMatchPayload, db=Depends(get_db)):
-    match = Match(
-        player_a=payload.player_a, player_b=payload.player_b, game=payload.game_slug
-    )
-    db.add(match)
-    db.commit()
-    return {"status": "ok"}
 
 
 # GET ===============================================================================
@@ -303,23 +263,19 @@ async def get_all_assets(db=Depends(get_db)):
 
 
 # POST ===============================================================================
-class NewGamePayload(BaseModel):
-    start: datetime
-    active: bool
-    name: str
-    slug: str
 
 
-@router.post("/game")
-def post_game(payload: NewGamePayload, db=Depends(get_db)):
-    # game = retrieve_game(db)
-    # game.active = payload.active.lower() == "true"
-    # db.commit()
 
-    game = Game(**payload.model_dump())
-    db.add(game)
-    db.commit()
-    return {"status": "ok"}
+# @router.post("/game")
+# def post_game(payload: NewGamePayload, db=Depends(get_db)):
+#     # game = retrieve_game(db)
+#     # game.active = payload.active.lower() == "true"
+#     # db.commit()
+#
+#     game = Game(**payload.model_dump())
+#     db.add(game)
+#     db.commit()
+#     return {"status": "ok"}
 
 
 class NewRosterAssetPayload(BaseModel):
@@ -364,6 +320,18 @@ async def put_asset_score(asset_slug: str, payload: ScorePayload, db=Depends(get
 @auth_router.put("/score/roster/{roster_slug}")
 async def put_player_score(roster_slug: str, payload: ScorePayload, db=Depends(get_db)):
     add_roster_score(db, roster_slug, payload)
+
+    # update match score
+    match = retrieve_match(db, roster_slug)
+    print('fffffff', roster_slug == match.roster_a, match, roster_slug, payload.score, match.roster_a, match.roster_b, )
+    if roster_slug == match.roster_a:
+        match.score_a = payload.score
+    else:
+        match.score_b = payload.score
+
+    db.add(match)
+    db.commit()
+
     return {"slug": roster_slug, "score": payload.score, "game_slug": payload.game_slug}
 
 

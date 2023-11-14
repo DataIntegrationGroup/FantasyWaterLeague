@@ -243,7 +243,7 @@ export default function Analytics({auth}){
         // }
     }
     const setupMap = () => {
-        api_getJson(settings.BASE_API_URL+'/mapboxtoken')
+        api_getJson('/mapboxtoken')
             .then(data=> {
                 mapboxgl.accessToken = data.token
                 if (map.current) return; // initialize map only once

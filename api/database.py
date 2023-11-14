@@ -30,9 +30,9 @@ database = os.environ.get("POSTGRES_DB")
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{user}:{password}@{host}/{database}"
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine,
+                            )
 
 Base = declarative_base()
 

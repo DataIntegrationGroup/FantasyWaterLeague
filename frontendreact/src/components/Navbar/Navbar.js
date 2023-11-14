@@ -73,7 +73,7 @@ function AppNavbar(props) {
                     <Nav.Link href="documentation">Documentation</Nav.Link>
                     <Nav.Link href="analytics">Analytics</Nav.Link>
                     <Nav.Link href="discovery">Discovery</Nav.Link>
-                    <Nav.Link href="match">Matches</Nav.Link>
+                    <Nav.Link href="matches">Matches</Nav.Link>
                 </Nav>
             </Container>
 

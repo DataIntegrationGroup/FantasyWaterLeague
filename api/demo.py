@@ -74,7 +74,7 @@ def make_nws_sites(db):
     features = rget_features(url)
     rows = []
     n = len(features)
-    for i, feature in enumerate(features[:100]):
+    for i, feature in enumerate(features[:10]):
         props = feature['properties']
         # print(props['name'], props['stationIdentifier'])
         # print(feature['geometry']['coordinates'])
@@ -266,7 +266,7 @@ async def setup_demo():
                     user = await user_manager.create(UserCreate(
                         email=f'{slug}@foo.com',
                         password='foobar1234',
-                        is_superuser=False
+                        is_superuser=slug=='jake'
                     ))
 
             db.add(Player(slug=slug, name=name, team_name=team, user_id=user.id))

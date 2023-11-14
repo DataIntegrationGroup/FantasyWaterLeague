@@ -14,7 +14,9 @@
 # limitations under the License.
 # ===============================================================================
 import csv
+import itertools
 import os
+import random
 import time
 import traceback
 from datetime import datetime, timedelta
@@ -22,7 +24,6 @@ from datetime import datetime, timedelta
 import requests
 from numpy import array
 from apscheduler.schedulers.blocking import BlockingScheduler
-
 
 host = os.environ.get("API_HOST", "api")
 port = os.environ.get("API_PORT", "8080")
@@ -44,28 +45,69 @@ def setup_demo():
         microseconds=now.microsecond,
     )
 
-    url = f"{HOST}/api/v1/game"
-    requests.post(
-        url,
-        json=dict(
-            slug="game1", name="Game 1", start=gamestart.isoformat(), active=False
-        ),
-    )
+    post_json('admin/game', dict(
+        slug="game1", name="Game 1", start=gamestart.isoformat(), active=False))
 
 
-def setup_rosters():
-    with open("data/rosterasset.csv", "r") as rfile:
-        for row in csv.reader(rfile):
-            i, roster, asset, active = row
-            url = f"{HOST}/api/v1/rosterasset"
-            requests.post(
-                url,
-                json=dict(
-                    roster_slug=roster,
-                    asset_slug=asset,
-                    active=active.lower() == "true",
-                ),
-            )
+def setup_matches():
+    # get random pairings
+    players = get_json('players')
+    pairs = list(itertools.combinations_with_replacement(players, 2))
+    random.shuffle(pairs)
+
+    playing = []
+    for i, (a, b) in enumerate(pairs):
+        if a['name'] == b['name']:
+            continue
+        if a['name'] in playing or b['name'] in playing:
+            continue
+
+        playing.append(a['name'])
+        playing.append(b['name'])
+        print('setup match', a['name'], b['name'])
+        post_json('admin/match', dict(roster_a=f"{a['slug']}.main",
+                                      roster_b=f"{b['slug']}.main",
+                                      game_slug="game1"))
+
+
+ACCESS_TOKEN = None
+
+
+def get_access_token():
+    global ACCESS_TOKEN
+    user = os.environ.get("API_USER", "admin")
+    pwd = os.environ.get("API_PASSWORD", "admin")
+    if ACCESS_TOKEN is None:
+        resp = requests.post(
+            f"{HOST}/auth/jwt/login",
+            data={"username": user, "password": pwd},
+        )
+
+        ACCESS_TOKEN = resp.json()["access_token"]
+    return ACCESS_TOKEN
+
+
+def post_json(path, data):
+    return auth_request(path, data, "post")
+
+
+def get_json(path):
+    return auth_request(path)
+
+
+def patch_json(path, data):
+    return auth_request(path, data, "patch")
+
+
+def auth_request(path, data=None, method='get'):
+    func = getattr(requests, method)
+    resp = func(make_url(path), json=data, headers={"Authorization": f"Bearer {get_access_token()}"})
+    if resp.ok:
+        return resp.json()
+
+
+def make_url(path):
+    return f"{HOST}/api/v1/{path}"
 
 
 # run every minute
@@ -76,41 +118,39 @@ def game_clock():
     print("game clock")
     # run every minute
     # get the active game
-    url = f"{HOST}/api/v1/game"
-    resp = requests.get(url)
-    if resp.ok:
+
+    game = get_json('game')
+    if game:
         # if the game is active deactivate it
         # if the current time is greater than the game end time
-        game = resp.json()
         print("current game", game)
         if game["active"]:
             end = datetime.strptime(game["end"], "%Y-%m-%dT%H:%M:%S")
             if datetime.now() > end:
-                url = f"{HOST}/api/v1/game_status"
-                requests.patch(url, json={"active": "false"})
+                patch_json("admin/game_status", dict(active=False))
                 print("game over")
         else:
             # if the game is not active check if the current time is greater than the game start time
             start = datetime.strptime(game["start"], "%Y-%m-%dT%H:%M:%S")
-            if datetime.now() > start:
-                url = f"{HOST}/api/v1/game_status"
-                requests.patch(url, json={"active": "true"})
+            if datetime.now() > start or 1:
+                patch_json("admin/game_status", dict(active=True))
                 print("game started")
 
 
 def main():
-    if os.environ.get("SETUP_DEMO", "0") == "0":
+    if os.environ.get("SETUP_GAMEPLAY_DEMO", "0") == "0":
         print("skipping demo setup")
     else:
         print("setup demo")
         while 1:
             try:
-                requests.get(f"{HOST}/api/v1/health")
+                get_json("health")
                 break
             except requests.ConnectionError:
                 time.sleep(1)
 
         setup_demo()
+        setup_matches()
         # setup_rosters()
 
     sched.start()
@@ -118,3 +158,18 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# ============= EOF =============================================
+# def setup_rosters():
+#     with open("data/rosterasset.csv", "r") as rfile:
+#         for row in csv.reader(rfile):
+#             i, roster, asset, active = row
+#             url = f"{HOST}/api/v1/rosterasset"
+#             requests.post(
+#                 url,
+#                 json=dict(
+#                     roster_slug=roster,
+#                     asset_slug=asset,
+#                     active=active.lower() == "true",
+#                 ),
+#             )

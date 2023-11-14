@@ -11,6 +11,7 @@ import useAuth from "./components/App/useAuth";
 import Admin from "./components/Admin/Admin";
 import Documentation from "./components/App/Documentation.js";
 import Analytics from "./components/Analytics/Analytics.js";
+import Matches from "./components/Match/Matches.tsx";
 
 
 function Home(){
@@ -54,9 +55,11 @@ function App() {
                         <Route path="/" element={<Home />}/>
                         <Route path="/dashboard" element={<Dashboard auth={auth} setAuth={setAuth}/>}/>
                     {/*<Route path="/preferences" element={<Preferences />}/>*/}
+
                         <Route path="/admin" element={<Admin auth={auth}/>}/>
                         <Route path="/documentation" element={<Documentation />}/>
                         <Route path="/analytics" element={<Analytics auth={auth}/>}/>
+                        <Route path="/matches" element={<Matches />}/>
                     </Routes>
                 </BrowserRouter>
             <Footer />

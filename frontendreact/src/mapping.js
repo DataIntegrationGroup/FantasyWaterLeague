@@ -120,7 +120,7 @@ export default function add_roster_to_map(map, auth, setHoverActive=null){
         'icon-offset': [0, -200],
     }
 
-    api_getJson(settings.BASE_API_URL+'/roster/'+auth.slug+'.main/geojson')
+    api_getJson('/roster/'+auth.slug+'.main/geojson')
         .then(data=> {
             console.log('geojson', data)
             let items =[[settings.STREAM_GAUGE, streamgauge_image],

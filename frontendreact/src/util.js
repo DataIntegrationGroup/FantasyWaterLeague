@@ -38,12 +38,17 @@ api.interceptors.response.use((response)=>{
     return response;
 }, inteceptorError);
 
-export async function api_getJson(url, token = null) {
+export async function api_getJson(url, token = null, root=null) {
+    if (root === null){
+        root = settings.BASE_API_URL
+    }
+
+
     // get auth from session storage
     // let token = null
     const headers = makeHeaders(token)
 
-    const response = await api.get(url, {headers: headers});
+    const response = await api.get(root+url, {headers: headers});
     return response.data;
 }
 

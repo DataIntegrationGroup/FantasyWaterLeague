@@ -15,9 +15,10 @@
 # ===============================================================================
 
 from numpy import array
+from sqlalchemy import or_
 
 from api.database import get_db
-from api.models.game import Game
+from api.models.game import Game, Match
 from api.models.players import Roster, Player, RosterAsset, RosterScore
 from api.models.assets import Asset, Score
 import requests
@@ -110,6 +111,13 @@ def retrieve_rosters(db, player_slug):
     return q.all()
 
 
+def retrieve_match(db, roster_slug):
+    q = db.query(Match)
+    q = q.filter(or_(Match.roster_a == roster_slug, Match.roster_b == roster_slug))
+    print('retrieve match', roster_slug, q)
+    return q.one()
+
+
 # update ===============================================================================
 def update_roster_asset(db, roster_slug, asset_slug, payload):
     roster_asset = retrieve_roster_asset(db, roster_slug, asset_slug)
@@ -132,6 +140,5 @@ def add_roster_score(db, roster_slug, payload):
         )
     )
     db.commit()
-
 
 # ============= EOF =============================================

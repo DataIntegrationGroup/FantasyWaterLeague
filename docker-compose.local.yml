@@ -27,7 +27,7 @@ services:
       dockerfile: ./Dockerfile
     command: bash -c "
       while !</dev/tcp/db/5432; do sleep 1; done;
-      sleep 120;
+      sleep 30;
       python -m main
       "
     depends_on:

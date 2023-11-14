@@ -9,10 +9,10 @@ import {api_getJson, loginUser} from "../../util";
 
 export function saveAuthentication(setAuth, token, username, password) {
 
-    api_getJson(settings.BASE_URL+'/users/me', token.data)
+    api_getJson('/users/me', token.data, settings.BASE_URL)
         .then(user => {
             console.log('auth data', user)
-            api_getJson(settings.BASE_API_URL+'/player/'+username)
+            api_getJson('/player/'+username)
                 .then(data => {
                     console.log('saveAuthentication:', data, token, username, password)
                     setAuth(data, token.data, username, password, user);

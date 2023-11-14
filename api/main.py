@@ -20,7 +20,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from api.models.players import Player
-from api.routes import v1
+from api.routes import v1, match, game
 from api.schemas import UserRead, UserCreate, UserUpdate
 from api.users import (
     current_active_user,
@@ -89,7 +89,10 @@ app.include_router(
 app.include_router(v1.router)
 app.include_router(v1.auth_router)
 app.include_router(v1.admin_router)
+app.include_router(match.admin_router)
+app.include_router(match.router)
 
+app.include_router(game.admin_router)
 
 @app.on_event("startup")
 async def startup():
