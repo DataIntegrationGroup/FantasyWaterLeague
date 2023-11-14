@@ -33,7 +33,12 @@ HOST = f"http://{host}:{port}"
 sched = BlockingScheduler()
 
 
-def setup_demo():
+def new_game(slug, name):
+    start = calc_game_start()
+    post_json('admin/game', dict(slug=slug, name=name, start=start.isoformat(), active=False))
+
+
+def calc_game_start():
     now = datetime.now()
 
     # the game starts the following monday at 5pm
@@ -44,9 +49,14 @@ def setup_demo():
         seconds=now.second,
         microseconds=now.microsecond,
     )
+    return gamestart
 
-    post_json('admin/game', dict(
-        slug="game1", name="Game 1", start=gamestart.isoformat(), active=False))
+def setup_demo():
+    # create a game
+    new_game("game:1", "Game 1")
+    # gamestart = calc_game_start()
+    # post_json('admin/game', dict(
+    #     slug="game:1", name="Game 1", start=gamestart.isoformat(), active=False))
 
 
 def setup_matches():
@@ -126,13 +136,26 @@ def game_clock():
         print("current game", game)
         if game["active"]:
             end = datetime.strptime(game["end"], "%Y-%m-%dT%H:%M:%S")
-            if datetime.now() > end:
+            now = datetime.now()
+
+            for count in [30, 20, 10, 5, 2, 1]:
+                if now > end - timedelta(minutes=count):
+                    print(f"game ending in {count} minutes")
+                    break
+
+            if now > end:
                 patch_json("admin/game_status", dict(active=False))
                 print("game over")
+
+                # create a new game
+                idx = int(game['slug'].split(':')[1]) + 1
+                slug = f"game:{idx}"
+                name = f"Game {idx}"
+                new_game(slug, name)
         else:
             # if the game is not active check if the current time is greater than the game start time
             start = datetime.strptime(game["start"], "%Y-%m-%dT%H:%M:%S")
-            if datetime.now() > start or 1:
+            if datetime.now() > start:
                 patch_json("admin/game_status", dict(active=True))
                 print("game started")
 

@@ -36,7 +36,6 @@ class GameStatusPayload(BaseModel):
 
 class NewGamePayload(BaseModel):
     start: datetime
-    start: datetime
     active: bool
     name: str
     slug: str
@@ -62,4 +61,5 @@ async def post_game(payload: NewGamePayload, db=Depends(get_db)):
     db.add(new_game)
     db.commit()
     return {"status": "ok"}
+
 # ============= EOF =============================================
