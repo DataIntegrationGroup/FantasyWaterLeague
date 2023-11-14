@@ -13,7 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
-from sqlalchemy import DateTime, Column, Boolean, String, ForeignKey, Float, TIMESTAMP, func
+from sqlalchemy import (
+    DateTime,
+    Column,
+    Boolean,
+    String,
+    ForeignKey,
+    Float,
+    TIMESTAMP,
+    func,
+)
 
 from api.database import Slugged, Base
 

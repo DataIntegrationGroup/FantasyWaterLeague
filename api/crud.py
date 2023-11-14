@@ -114,7 +114,7 @@ def retrieve_rosters(db, player_slug):
 def retrieve_match(db, roster_slug):
     q = db.query(Match)
     q = q.filter(or_(Match.roster_a == roster_slug, Match.roster_b == roster_slug))
-    print('retrieve match', roster_slug, q)
+    print("retrieve match", roster_slug, q)
     return q.one()
 
 
@@ -140,5 +140,6 @@ def add_roster_score(db, roster_slug, payload):
         )
     )
     db.commit()
+
 
 # ============= EOF =============================================

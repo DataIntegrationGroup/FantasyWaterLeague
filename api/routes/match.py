@@ -23,9 +23,8 @@ from api.users import current_active_user, current_super_user
 admin_router = APIRouter(
     prefix=f"/api/v1/admin", tags=["API V1"], dependencies=[Depends(current_super_user)]
 )
-router = APIRouter(
-    prefix=f"/api/v1", tags=["API V1"]
-)
+router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
+
 
 # post ===============================================================================
 class NewMatchPayload(BaseModel):
@@ -37,9 +36,11 @@ class NewMatchPayload(BaseModel):
 @admin_router.post("/match")
 async def post_match(payload: NewMatchPayload, db=Depends(get_db)):
     match = Match(
-        roster_a=payload.roster_a, roster_b=payload.roster_b, game=payload.game_slug,
-        name=f'{payload.roster_a} vs {payload.roster_b}',
-        slug=f'{payload.roster_a}-{payload.roster_b}-{payload.game_slug}'
+        roster_a=payload.roster_a,
+        roster_b=payload.roster_b,
+        game=payload.game_slug,
+        name=f"{payload.roster_a} vs {payload.roster_b}",
+        slug=f"{payload.roster_a}-{payload.roster_b}-{payload.game_slug}",
     )
     db.add(match)
     db.commit()
@@ -50,5 +51,6 @@ async def post_match(payload: NewMatchPayload, db=Depends(get_db)):
 @router.get("/matches")
 async def get_match(db=Depends(get_db)):
     return db.query(Match).all()
+
 
 # ============= EOF =============================================

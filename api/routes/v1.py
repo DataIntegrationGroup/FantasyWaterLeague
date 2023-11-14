@@ -34,7 +34,8 @@ from api.crud import (
     retrieve_game,
     retrieve_player_by_user,
     add_roster_score,
-    retrieve_games, retrieve_match,
+    retrieve_games,
+    retrieve_match,
 )
 from api.models.game import Game
 from api.rules import (
@@ -55,11 +56,6 @@ admin_router = APIRouter(
     tags=["API V1 Admin"],
     dependencies=[Depends(current_super_user)],
 )
-
-
-
-
-
 
 
 # GET ===============================================================================
@@ -265,7 +261,6 @@ async def get_all_assets(db=Depends(get_db)):
 # POST ===============================================================================
 
 
-
 # @router.post("/game")
 # def post_game(payload: NewGamePayload, db=Depends(get_db)):
 #     # game = retrieve_game(db)
@@ -323,7 +318,15 @@ async def put_player_score(roster_slug: str, payload: ScorePayload, db=Depends(g
 
     # update match score
     match = retrieve_match(db, roster_slug)
-    print('fffffff', roster_slug == match.roster_a, match, roster_slug, payload.score, match.roster_a, match.roster_b, )
+    print(
+        "fffffff",
+        roster_slug == match.roster_a,
+        match,
+        roster_slug,
+        payload.score,
+        match.roster_a,
+        match.roster_b,
+    )
     if roster_slug == match.roster_a:
         match.score_a = payload.score
     else:

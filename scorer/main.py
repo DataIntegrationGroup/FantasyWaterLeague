@@ -125,7 +125,7 @@ def score_continuous_rain_gauge(data):
 
 
 def update_roster_score(game_slug, roster_slug, score, access_token):
-    print('updating roster score', game_slug, roster_slug, score)
+    print("updating roster score", game_slug, roster_slug, score)
     resp = requests.put(
         f"{HOST}/api/v1/score/roster/{roster_slug}",
         json={"game_slug": game_slug, "score": round(float(score), 2)},

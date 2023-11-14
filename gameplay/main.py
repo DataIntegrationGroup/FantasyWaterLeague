@@ -35,7 +35,9 @@ sched = BlockingScheduler()
 
 def new_game(slug, name):
     start = calc_game_start()
-    post_json('admin/game', dict(slug=slug, name=name, start=start.isoformat(), active=False))
+    post_json(
+        "admin/game", dict(slug=slug, name=name, start=start.isoformat(), active=False)
+    )
 
 
 def calc_game_start():
@@ -51,6 +53,7 @@ def calc_game_start():
     )
     return gamestart
 
+
 def setup_demo():
     # create a game
     new_game("game:1", "Game 1")
@@ -61,23 +64,28 @@ def setup_demo():
 
 def setup_matches():
     # get random pairings
-    players = get_json('players')
+    players = get_json("players")
     pairs = list(itertools.combinations_with_replacement(players, 2))
     random.shuffle(pairs)
 
     playing = []
     for i, (a, b) in enumerate(pairs):
-        if a['name'] == b['name']:
+        if a["name"] == b["name"]:
             continue
-        if a['name'] in playing or b['name'] in playing:
+        if a["name"] in playing or b["name"] in playing:
             continue
 
-        playing.append(a['name'])
-        playing.append(b['name'])
-        print('setup match', a['name'], b['name'])
-        post_json('admin/match', dict(roster_a=f"{a['slug']}.main",
-                                      roster_b=f"{b['slug']}.main",
-                                      game_slug="game1"))
+        playing.append(a["name"])
+        playing.append(b["name"])
+        print("setup match", a["name"], b["name"])
+        post_json(
+            "admin/match",
+            dict(
+                roster_a=f"{a['slug']}.main",
+                roster_b=f"{b['slug']}.main",
+                game_slug="game1",
+            ),
+        )
 
 
 ACCESS_TOKEN = None
@@ -109,9 +117,13 @@ def patch_json(path, data):
     return auth_request(path, data, "patch")
 
 
-def auth_request(path, data=None, method='get'):
+def auth_request(path, data=None, method="get"):
     func = getattr(requests, method)
-    resp = func(make_url(path), json=data, headers={"Authorization": f"Bearer {get_access_token()}"})
+    resp = func(
+        make_url(path),
+        json=data,
+        headers={"Authorization": f"Bearer {get_access_token()}"},
+    )
     if resp.ok:
         return resp.json()
 
@@ -129,7 +141,7 @@ def game_clock():
     # run every minute
     # get the active game
 
-    game = get_json('game')
+    game = get_json("game")
     if game:
         # if the game is active deactivate it
         # if the current time is greater than the game end time
@@ -148,7 +160,7 @@ def game_clock():
                 print("game over")
 
                 # create a new game
-                idx = int(game['slug'].split(':')[1]) + 1
+                idx = int(game["slug"].split(":")[1]) + 1
                 slug = f"game:{idx}"
                 name = f"Game {idx}"
                 new_game(slug, name)

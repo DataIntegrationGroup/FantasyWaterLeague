@@ -62,4 +62,5 @@ async def post_game(payload: NewGamePayload, db=Depends(get_db)):
     db.commit()
     return {"status": "ok"}
 
+
 # ============= EOF =============================================

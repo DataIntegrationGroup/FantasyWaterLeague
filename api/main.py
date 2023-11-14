@@ -94,6 +94,7 @@ app.include_router(match.router)
 
 app.include_router(game.admin_router)
 
+
 @app.on_event("startup")
 async def startup():
     print("starting up")
