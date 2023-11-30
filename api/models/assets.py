@@ -96,8 +96,8 @@ class Asset(Base, Slugged):
 
 
 class Source(Base, Slugged):
-    base_url = Column(String(128), nullable=False)
-    landing_url = Column(String(128), nullable=False)
+    base_url = Column(String(300), nullable=False)
+    landing_url = Column(String(300), nullable=False)
 
 
 class AssetType(Base, Slugged):

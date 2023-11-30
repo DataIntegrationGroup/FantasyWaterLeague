@@ -65,10 +65,17 @@ def get_data(source, url):
         data = resp.json()
         if source.startswith("usgs"):
             d = extract_usgs_data(data)
+        elif source.startswith('cocorahs'):
+            d = extract_cocorahs_data(data)
         else:
             d = extract_nws_data(data)
 
     return d
+
+
+def extract_cocorahs_data(data):
+    reports = data['data']['reports']
+    return [{'value': r['totalpcpn']} for r in reports]
 
 
 def extract_nws_data(data):
@@ -155,12 +162,12 @@ def calculate_scores():
                 print("Exception calculating score for", asset["slug"])
                 continue
 
-            update_score(asset["slug"], score, "game1", access_token)
+            update_score(asset["slug"], score, "game:1", access_token)
             if asset["active"]:
                 player_score += score or 0
 
         update_roster_score(
-            "game1", f"{player['slug']}.main", player_score, access_token
+            "game:1", f"{player['slug']}.main", player_score, access_token
         )
 
     et = time.time() - st
@@ -193,7 +200,7 @@ def calculate_previous_scores():
                 traceback.print_exc()
                 continue
 
-            update_score(asset["slug"], score, "game0", access_token)
+            update_score(asset["slug"], score, "game:0", access_token)
 
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")

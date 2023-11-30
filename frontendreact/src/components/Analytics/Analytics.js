@@ -14,6 +14,8 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import {ButtonGroup, ButtonToolbar} from "react-bootstrap";
+import Download from "../Download/Download";
+import LocationsTable from "./LocationsTable";
 
 function LayerControl({name, label, color, handleVisibilityChange, checked}) {
     return (
@@ -102,10 +104,10 @@ export default function Analytics({auth}){
     const [lng, setLng] = useState(-106.5);
     const [lat, setLat] = useState(34.35);
     const [zoom, setZoom] = useState(6.1);
+    const [locations, setLocations] = useState([])
 
     const [loading, setLoading] = useState(true)
     const [selected, setSelected] = useState(null)
-
     const [checked, setChecked] = useState({
         'huc-6': true,
         'huc-8': true,
@@ -134,13 +136,16 @@ export default function Analytics({auth}){
 
     }
 
-    function add_ds_layer(map, tag, color, ds_name) {
+    async function add_ds_layer(map, tag, color, ds_name, before=null){
         const filter_str = '&$filter=Things/Datastreams/name eq \''+ds_name+'\''
         const url = settings.ST2_API_URL+'/Locations?$expand=Things/Datastreams'+filter_str
         retrieveItems(url,
-            [], 1000
-        ).then(locations => {
+            [], 2000
+        ).then(locs => {
 
+            let ls = [...locations, ...locs]
+            console.log('lasdfafdas', ls.length)
+        setLocations(ls)
         const paint = {
             'circle-radius': 4,
             'circle-color': color,
@@ -150,7 +155,7 @@ export default function Analytics({auth}){
         map.current.addSource(tag, {
             'type': 'geojson',
             'data': {'type': 'FeatureCollection',
-                'features': locations.map((location) => {
+                'features': locs.map((location) => {
                     return {'geometry': location['location'],
                         'properties': {'name': location['name'],
                             'Things': location['Things'],
@@ -163,7 +168,8 @@ export default function Analytics({auth}){
                 type: 'circle',
                 paint: paint,
                 source: tag
-            }
+            },
+            before
         )
         add_popup(tag, ds_name)
         map.current.on('click', tag, (e) => {
@@ -193,11 +199,11 @@ export default function Analytics({auth}){
 
 
         retrieveItems(url+expand+'&'+filter,[], 10000)
-            .then(locations => {
-                console.log('locations', locations)
-
+            .then(ls => {
+                console.log('locations', ls)
+                setLocations(ls)
                 const data = {'type': 'FeatureCollection',
-                    'features': locations.map((location) => {
+                    'features': ls.map((location) => {
                     return {'geometry': location['location'],
                         'properties': {'name': location['name'],
                             'Things': location['Things'],
@@ -289,12 +295,13 @@ export default function Analytics({auth}){
                     // add the DEM source as a terrain layer with exaggerated height
                     map.current.setTerrain({'source': 'mapbox-dem', 'exaggeration': 3});
 
-                    add_ds_layer(map, 'st2_manual', '#ecd24b',
-                        'Groundwater Levels')
+
                     add_ds_layer(map, 'st2_pressure', '#224bb4',
                               'Groundwater Levels(Pressure)')
                     add_ds_layer(map, 'st2_acoustic', '#d5633a',
                               'Groundwater Levels(Acoustic)')
+                    await add_ds_layer(map, 'st2_manual', '#ecd24b',
+                        "Groundwater Levels", 'st2_pressure')
 
                     // add a search layer
                     map.current.addSource('search', {
@@ -330,6 +337,12 @@ export default function Analytics({auth}){
                 });
             });
     }
+    const handleGraphButton = (locationname, ds) => {
+        console.log('asdf', ds)
+        setSelected({name: locationname,
+                           ds_name: ds['name'],
+                           datastreams: [ds]})
+    }
 
     useEffect(() => {
         setupMap();
@@ -339,10 +352,20 @@ export default function Analytics({auth}){
         <div>
             <h1>Analytics</h1>
             <div className={'row'}>
-                <div className={'col-12'}>
+                <div className={'col-8'}>
                     <div className={'pane'}>
                         <SearchPanel onClick={handleSearch}/>
                     </div>
+                </div>
+                <div className={'col-4'}>
+                    <div className={'pane'}>
+                        <Download />
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div className={'pane'}>
+                    <LocationsTable locations={locations} handleGraphButton={handleGraphButton}/>
                 </div>
             </div>
             <div className="row">

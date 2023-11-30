@@ -83,7 +83,7 @@ def setup_matches():
             dict(
                 roster_a=f"{a['slug']}.main",
                 roster_b=f"{b['slug']}.main",
-                game_slug="game1",
+                game_slug="game:1",
             ),
         )
 
@@ -126,6 +126,12 @@ def auth_request(path, data=None, method="get"):
     )
     if resp.ok:
         return resp.json()
+    elif resp.status_code == 401:
+
+        global ACCESS_TOKEN
+        ACCESS_TOKEN = None
+
+        return auth_request(path, data, method)
 
 
 def make_url(path):

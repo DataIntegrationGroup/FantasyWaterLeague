@@ -209,8 +209,10 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
     # sutc.strftime('%Y-%m-%dT%H:%M:%SZ')
     # prev_start_dt = (utcstart - timedelta(days=7)).isoformat(timespec="seconds") + "Z"
     # start_dt = utcstart.isoformat(timespec="seconds") + "Z"
-    prev_start_dt = totimestr(game.start - timedelta(days=7))
-    start_dt = totimestr(game.start)
+    start = game.start
+    prev_start = start - timedelta(days=7)
+    prev_start_dt = totimestr(prev_start)
+    start_dt = totimestr(start)
 
     if asset.source.slug.startswith("usgs"):
         request_url = f"{asset.source.base_url}&site={source_id}&period=P7D"
@@ -226,11 +228,17 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
     else:
         base_url = asset.source.base_url
         if "{" in base_url and "}" in base_url:
-            base_url = base_url.format(source_id=source_id)
+            if '?' in base_url:
+                now = datetime.now()
+                # base_url = base_url.format(source_id=source_id, start=prev_start_dt, end=start_dt)
+                prev_url = base_url.format(source_id=source_id, start=prev_start, end=start)
+                scoring_url = base_url.format(source_id=source_id, start=start, end=now)
+            else:
+                base_url = base_url.format(source_id=source_id)
+                prev_url = f"{base_url}?start={prev_start_dt}&end={start_dt}"
+                scoring_url = f"{base_url}?start={start_dt}"
 
         request_url = base_url
-        prev_url = f"{base_url}?start={prev_start_dt}&end={start_dt}"
-        scoring_url = f"{base_url}?start={start_dt}"
         # scoring_url = (
         #     f"{asset.source.base_url}"
         #     f"&sites={source_id}"
