@@ -65,7 +65,7 @@ def get_data(source, url):
         data = resp.json()
         if source.startswith("usgs"):
             d = extract_usgs_data(data)
-        elif source.startswith('cocorahs'):
+        elif source.startswith("cocorahs"):
             d = extract_cocorahs_data(data)
         else:
             d = extract_nws_data(data)
@@ -74,8 +74,8 @@ def get_data(source, url):
 
 
 def extract_cocorahs_data(data):
-    reports = data['data']['reports']
-    return [{'value': r['totalpcpn']} for r in reports]
+    reports = data["data"]["reports"]
+    return [{"value": r["totalpcpn"]} for r in reports]
 
 
 def extract_nws_data(data):

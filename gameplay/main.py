@@ -127,7 +127,6 @@ def auth_request(path, data=None, method="get"):
     if resp.ok:
         return resp.json()
     elif resp.status_code == 401:
-
         global ACCESS_TOKEN
         ACCESS_TOKEN = None
 

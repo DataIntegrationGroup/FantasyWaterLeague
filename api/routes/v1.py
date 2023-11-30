@@ -228,10 +228,12 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
     else:
         base_url = asset.source.base_url
         if "{" in base_url and "}" in base_url:
-            if '?' in base_url:
+            if "?" in base_url:
                 now = datetime.now()
                 # base_url = base_url.format(source_id=source_id, start=prev_start_dt, end=start_dt)
-                prev_url = base_url.format(source_id=source_id, start=prev_start, end=start)
+                prev_url = base_url.format(
+                    source_id=source_id, start=prev_start, end=start
+                )
                 scoring_url = base_url.format(source_id=source_id, start=start, end=now)
             else:
                 base_url = base_url.format(source_id=source_id)
