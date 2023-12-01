@@ -10,24 +10,47 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import nmwdi_logo from '../../img/nmwdi_logo.png'
 
-function AppNavbar(props) {
+function AppNavbar({auth, setToken}) {
 
+    const handleLogin = () => {
+
+    }
     const handleLogout = () => {
 
         sessionStorage.removeItem('token')
         sessionStorage.removeItem('user')
-        props.setToken(null)
+        setToken(null)
 
     }
 
     let adminbutton;
-    console.log('AppNavbar:', props.auth.user)
-    if (props.auth.user.is_superuser) {
+    console.log('AppNavbar:', auth.user)
+    if (auth.user?.is_superuser) {
         adminbutton =<Nav>
             <Nav.Link href="admin">Admin</Nav.Link>
         </Nav>
     }else{
         adminbutton = null
+    }
+    let loginout;
+
+    if (auth.user){
+        loginout = <Form inline="true">
+            <Row>
+                <Col xs="auto">
+                    <Button type="submit"
+                            style={{backgroundColor: "#2b2b2b",
+                                margin: '0px 10px 0px 10px',
+                                borderColor: "#2b2b2b"}}
+                            onClick={handleLogout}>Logout</Button>
+                </Col>
+            </Row>
+        </Form>
+    }else{
+        loginout = <Form inline="true">
+            <Nav.Link href="login">Login</Nav.Link>
+        </Form>
+
     }
 
     return (
@@ -78,18 +101,9 @@ function AppNavbar(props) {
             </Container>
 
             {adminbutton}
+            {loginout}
 
-            <Form inline="true">
-                <Row>
-                    <Col xs="auto">
-                        <Button type="submit"
-                                style={{backgroundColor: "#2b2b2b",
-                                        margin: '0px 10px 0px 10px',
-                                        borderColor: "#2b2b2b"}}
-                                onClick={handleLogout}>Logout</Button>
-                    </Col>
-                </Row>
-            </Form>
+
         </Navbar>
     );
 }

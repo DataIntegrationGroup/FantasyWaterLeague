@@ -59,11 +59,11 @@ app.include_router(
 #     tags=["auth"],
 # )
 
-# app.include_router(
-#     fastapi_users.get_register_router(UserRead, UserCreate),
-#     prefix="/auth",
-#     tags=["auth"],
-# )
+app.include_router(
+    fastapi_users.get_register_router(UserRead, UserCreate),
+    prefix="/register",
+    tags=["register"],
+)
 # app.include_router(
 #     fastapi_users.get_reset_password_router(),
 #     prefix="/auth",

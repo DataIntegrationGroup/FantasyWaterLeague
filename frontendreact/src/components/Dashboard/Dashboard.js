@@ -22,6 +22,7 @@ import NWSLegend from "./NWSLegend";
 import ControlPanel from "./ControlPanel";
 // import Match from "../Match/Match";
 import add_roster_to_map, {make_fc} from "../../mapping";
+import Login from "../Login/Login";
 
 
 function GraphButton({row, setSelectedAsset,
@@ -647,6 +648,11 @@ export default function Dashboard({auth, setAuth}) {
         updateScore(auth.slug+'.main', setLineup, setScore)
 
     }, [])
+
+    console.log('App auth:', auth)
+    if(!auth?.token) {
+        return <Login setAuth={setAuth}/>
+    }
 
     return(
         <div className='container-fluid'>

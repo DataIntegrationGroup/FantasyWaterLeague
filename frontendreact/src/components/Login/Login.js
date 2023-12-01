@@ -4,6 +4,8 @@ import axios from "axios";
 import './Login.css';
 import {settings} from "../../settings";
 import {api_getJson, loginUser} from "../../util";
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
 
 
 
@@ -26,8 +28,12 @@ export default function Login({ setAuth }) {
     const [username, setUserName] = useState();
     const [password, setPassword] = useState();
 
-    const handleSubmit = async e => {
-        e.preventDefault();
+    const [confirmPassword, setConfirmPassword] = useState();
+    const [name, setName] = useState();
+    const [affiliation, setAffiliation] = useState();
+    const [showsignup, setshowsignup] = useState(false);
+
+    const dologin = async () => {
         const token = await loginUser({
             username,
             password
@@ -35,22 +41,77 @@ export default function Login({ setAuth }) {
         saveAuthentication(setAuth, token, username, password);
     }
 
+    const handleLogin = async e => {
+        e.preventDefault();
+        dologin(username, password)
+    }
+
+    const handleSignup = async e => {
+        // e.preventDefault();
+        fetch(settings.BASE_URL+'/register', {method: 'POST',
+            body: JSON.stringify({email: username, password: password}
+            )}).then(res =>
+            {
+                if (res.status === 200) {
+                    console.log('success')
+                    dologin()
+                }
+            }
+        )
+    }
+
+    const handleShowSignup = async e => {
+        document.getElementById('login').style.display='none'
+        document.getElementById('signup').style.display='flex'
+    }
+
+    const handleShowLogin = async e => {
+        document.getElementById('login').style.display='flex'
+        document.getElementById('signup').style.display='none'
+    }
+
     return(
         <div className="login-wrapper">
-            <h1>Please Log In</h1>
-            <form onSubmit={handleSubmit}>
-                <label>
-                    <p>Username</p>
-                    <input type="text" onChange={e=>setUserName(e.target.value)}/>
-                </label>
-                <label>
-                    <p>Password</p>
-                    <input type="password" onChange={e =>setPassword(e.target.value)}/>
-                </label>
-                <div>
-                    <button type="submit">Submit</button>
-                </div>
-            </form>
+            <h1>Please Log In or Sign Up</h1>
+
+            <hr width={"50%"} color={"black"}/>
+
+            <div className={"buttons"}>
+                <Button onClick={handleShowLogin}>Login</Button>
+                <Button onClick={handleShowSignup}>Signup</Button>
+            </div>
+
+            <hr width={"50%"} color={"black"}/>
+
+            <div id="login" className={"login"}>
+                <Form>
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control type="text" onChange={e=>setUserName(e.target.value)}/>
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control type="password" onChange={e =>setPassword(e.target.value)}/>
+                    <Button variant="primary" type="submit" onClick={handleLogin}>
+                        Submit
+                    </Button>
+                </Form>
+            </div>
+            <div id="signup" className={"signup"}>
+                <Form>
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control type="text" onChange={e=>setName(e.target.value)}/>
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control type="text" onChange={e=>setUserName(e.target.value)}/>
+                    <Form.Label>Affiliation</Form.Label>
+                    <Form.Control type="text" onChange={e=>setAffiliation(e.target.value)}/>
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control type="password" onChange={e =>setPassword(e.target.value)}/>
+                    <Form.Label>Confirm Password</Form.Label>
+                    <Form.Control type="password" onChange={e =>setConfirmPassword(e.target.value)}/>
+                    <Button variant="primary" type="submit" onClick={handleSignup}>
+                        Sign Up
+                    </Button>
+                </Form>
+
+            </div>
         </div>
     )
 }
