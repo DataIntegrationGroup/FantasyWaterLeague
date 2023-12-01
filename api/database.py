@@ -27,8 +27,10 @@ password = os.environ.get("POSTGRES_PASSWORD")
 host = os.environ.get("POSTGRES_HOST")
 database = os.environ.get("POSTGRES_DB")
 
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{user}:{password}@{host}:5432/{database}"
-print('SQLALCHEMY_DATABASE_URL', SQLALCHEMY_DATABASE_URL)
+SQLALCHEMY_DATABASE_URL = (
+    f"postgresql+psycopg://{user}:{password}@{host}:5432/{database}"
+)
+print("SQLALCHEMY_DATABASE_URL", SQLALCHEMY_DATABASE_URL)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(
