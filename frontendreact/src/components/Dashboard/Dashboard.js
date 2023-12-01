@@ -17,7 +17,6 @@ import usgs_image from '../../img/usgs.png'
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
-import {forEach} from "react-bootstrap/ElementChildren";
 import NWSLegend from "./NWSLegend";
 import ControlPanel from "./ControlPanel";
 // import Match from "../Match/Match";
@@ -281,7 +280,9 @@ const updateScore = (roster_slug, setLineup, setScore,) => {
                     setScore(data.score)
                 })
             }
-        })
+        }).catch(error => {
+            console.log('error', error)
+    })
 }
 
 function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore, updateMap){
@@ -314,8 +315,8 @@ export default function Dashboard({auth, setAuth}) {
 
     const mapContainer = useRef(null);
     const map = useRef(null);
-    const [lng, setLng] = useState(-106.5);
-    const [lat, setLat] = useState(34.35);
+    // const [lng, setLng] = useState(-106.5);
+    // const [lat, setLat] = useState(34.35);
     const [zoom, setZoom] = useState(6.1);
 
     const [plotData, setPlotData] = useState(null)
@@ -532,7 +533,7 @@ export default function Dashboard({auth, setAuth}) {
                 map.current = new mapboxgl.Map({
                     container: mapContainer.current,
                     style: 'mapbox://styles/mapbox/streets-v12',
-                    center: [lng, lat],
+                    center: [-106.5, 34.35],
                     zoom: zoom,
                     minZoom: 5,
                     maxZoom: 15

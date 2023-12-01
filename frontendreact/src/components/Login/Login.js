@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import axios from "axios";
 import './Login.css';
@@ -25,6 +26,7 @@ export function saveAuthentication(setAuth, token, username, password) {
 
 
 export default function Login({ setAuth }) {
+    const [loggedIn, setLoggedIn] = useState(false);
     const [username, setUserName] = useState();
     const [password, setPassword] = useState();
 
@@ -39,11 +41,13 @@ export default function Login({ setAuth }) {
             password
         });
         saveAuthentication(setAuth, token, username, password);
+        setLoggedIn(true);
     }
 
     const handleLogin = async e => {
         e.preventDefault();
         dologin(username, password)
+
     }
 
     const handleSignup = async e => {
@@ -68,6 +72,10 @@ export default function Login({ setAuth }) {
     const handleShowLogin = async e => {
         document.getElementById('login').style.display='flex'
         document.getElementById('signup').style.display='none'
+    }
+
+    if (loggedIn) {
+        return <Navigate to="/" />;
     }
 
     return(

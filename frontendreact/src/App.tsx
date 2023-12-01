@@ -12,12 +12,24 @@ import Admin from "./components/Admin/Admin";
 import Documentation from "./components/App/Documentation.js";
 import Analytics from "./components/Analytics/Analytics.js";
 import Matches from "./components/Match/Matches";
+import riochama from "./img/riochama.png"
 
 
 function Home(){
-    return (<h2>Welcome to Fantasy Water League</h2>
+    return (<div className={'text-center'}>
+                <h2>Welcome to Fantasy Water League</h2>
+                <p>
+                    Fantasy Water League is a fantasy sports league based on water data.
+                    <br/>
 
+                    It is a game where you can draft a team of rain, stream and groundwater gauges and compete against your friends.
+                    <br/>
 
+                    The team with the most water wins!
+                    <br/>
+                    <img width={"50%"} src={riochama} alt={'groundwater'}/>
+                </p>
+        </div>
     );
 }
 
@@ -58,8 +70,6 @@ function App() {
                         <Route path="/" element={<Home />}/>
                         <Route path="/login" element={<Login setAuth={setAuth} />}/>
                         <Route path="/dashboard" element={<Dashboard auth={auth} setAuth={setAuth}/>}/>
-                    {/*<Route path="/preferences" element={<Preferences />}/>*/}
-
                         <Route path="/admin" element={<Admin auth={auth}/>}/>
                         <Route path="/documentation" element={<Documentation />}/>
                         <Route path="/analytics" element={<Analytics auth={auth}/>}/>

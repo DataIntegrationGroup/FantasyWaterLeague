@@ -8,7 +8,8 @@ import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import nmwdi_logo from '../../img/nmwdi_logo.png'
+// import nmwdi_logo from '../../img/nmwdi_logo.png'
+import nmwdi_logo from '../../img/nmwdi_logo11-23.png'
 
 function AppNavbar({auth, setToken}) {
 
@@ -47,14 +48,18 @@ function AppNavbar({auth, setToken}) {
             </Row>
         </Form>
     }else{
-        loginout = <Form inline="true">
-            <Nav.Link href="login">Login</Nav.Link>
-        </Form>
+        loginout = <Nav>
+            <Form inline="true">
+                <Nav.Item>
+                    <Nav.Link href="login">Login</Nav.Link>
+                </Nav.Item>
+            </Form>
+        </Nav>
 
     }
 
     return (
-        <Navbar style={{marginBottom: "10px", borderRadius: "10px"}}  className="fwl-navbar">
+        <Navbar>
 
             {/*<Container>*/}
             {/*    <Nav>*/}
@@ -86,17 +91,27 @@ function AppNavbar({auth, setToken}) {
             {/*</Container>*/}
             <Nav>
                 <Navbar.Brand href='https://newmexicowaterdata.org' >
-                    <img src={nmwdi_logo} height='60px'/>
+                    <img src={nmwdi_logo} height='100px' style={{padding: '5px'}}/>
                 </Navbar.Brand>
             </Nav>
             <Container>
                 <Nav>
                     <Navbar.Brand href="/">Fantasy Water League</Navbar.Brand>
-                    <Nav.Link href="dashboard">Dashboard</Nav.Link>
-                    <Nav.Link href="documentation">Documentation</Nav.Link>
-                    <Nav.Link href="analytics">Analytics</Nav.Link>
-                    <Nav.Link href="discovery">Discovery</Nav.Link>
-                    <Nav.Link href="matches">Matches</Nav.Link>
+                    <Nav.Item>
+                        <Nav.Link href="dashboard">Dashboard</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link href="documentation">Documentation</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link href="analytics">Analytics</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link href="discovery">Discovery</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link href="matches">Matches</Nav.Link>
+                    </Nav.Item>
                 </Nav>
             </Container>
 

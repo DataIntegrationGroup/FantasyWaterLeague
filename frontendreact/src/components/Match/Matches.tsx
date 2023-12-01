@@ -7,7 +7,7 @@ export default function Matches() {
     const [matches, setMatches] = useState([])
     useEffect(() => {
 
-        api_getJson('/admin/matches').then((data) => {
+        api_getJson('/matches').then((data) => {
             console.log('matches:', data)
             setMatches(data)
         })
@@ -36,8 +36,8 @@ export default function Matches() {
         getCoreRowModel: getCoreRowModel()})
 
     return (
-        <div>
-            <h1>Match</h1>
+        <div className={'content-container'}>
+            <h1>Matches</h1>
             <div>
                 <table className={'table-sm table-bordered display-table'}>
                     <thead>
