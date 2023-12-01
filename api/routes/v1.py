@@ -19,11 +19,11 @@ from typing import List
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from api import schemas
-from api.models import RosterAsset
-from api.models.assets import Asset
-from api.database import get_db
-from api.crud import (
+import schemas
+from models import RosterAsset
+from models.assets import Asset
+from database import get_db
+from crud import (
     retrieve_rosters,
     retrieve_asset,
     retrieve_players,
@@ -37,15 +37,15 @@ from api.crud import (
     retrieve_games,
     retrieve_match,
 )
-from api.models.game import Game
-from api.rules import (
+from models.game import Game
+from rules import (
     validate_team,
     validate_lineup,
     validate_groundwater,
     validate_stream_gauge,
     validate_rain_gauge,
 )
-from api.users import current_active_user, current_super_user
+from users import current_active_user, current_super_user
 
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
 auth_router = APIRouter(

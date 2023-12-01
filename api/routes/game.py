@@ -18,10 +18,10 @@ from datetime import datetime
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from api.crud import retrieve_game
-from api.database import get_db
-from api.models import Game
-from api.users import current_super_user
+from crud import retrieve_game
+from database import get_db
+from models import Game
+from users import current_super_user
 
 admin_router = APIRouter(
     prefix="/api/v1/admin",

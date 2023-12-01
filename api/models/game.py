@@ -24,7 +24,7 @@ from sqlalchemy import (
     func,
 )
 
-from api.database import Slugged, Base
+from database import Slugged, Base
 
 
 class Game(Base, Slugged):

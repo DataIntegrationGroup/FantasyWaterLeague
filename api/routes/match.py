@@ -16,9 +16,9 @@
 from fastapi import Depends, APIRouter
 from pydantic import BaseModel
 
-from api.database import get_db
-from api.models.game import Match
-from api.users import current_active_user, current_super_user
+from database import get_db
+from models.game import Match
+from users import current_active_user, current_super_user
 
 admin_router = APIRouter(
     prefix=f"/api/v1/admin", tags=["API V1"], dependencies=[Depends(current_super_user)]

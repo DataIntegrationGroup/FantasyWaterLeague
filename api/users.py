@@ -26,8 +26,8 @@ from fastapi_users.authentication import (
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
 
-from api.models.users import User, get_user_db
-from api.settings import settings
+from models.users import User, get_user_db
+from settings import settings
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):

@@ -19,10 +19,10 @@ from fastapi import FastAPI, Depends
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from api.models.players import Player
-from api.routes import v1, match, game
-from api.schemas import UserRead, UserCreate, UserUpdate
-from api.users import (
+from models.players import Player
+from routes import v1, match, game
+from schemas import UserRead, UserCreate, UserUpdate
+from users import (
     current_active_user,
     fastapi_users,
     bearer_auth_backend,

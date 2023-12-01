@@ -26,7 +26,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from api.database import Base, Slugged
+from database import Base, Slugged
 
 
 class Player(Base, Slugged):

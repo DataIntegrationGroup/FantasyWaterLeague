@@ -30,7 +30,7 @@ from sqlalchemy.orm import declared_attr, relationship
 from geoalchemy2.shape import to_shape
 from geoalchemy2 import Geometry
 
-from api.database import Base, Slugged
+from database import Base, Slugged
 
 
 class Score(Base):

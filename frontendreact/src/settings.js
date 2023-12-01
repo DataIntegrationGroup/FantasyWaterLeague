@@ -1,5 +1,6 @@
 
-const BASE_URL = 'http://localhost:8081';
+const BASE_URL = 'https://fwlapi.newmexicowaterdata.org';
+
 export const settings = {
     BASE_API_URL: BASE_URL+'/api/v1',
     AUTH_URL: BASE_URL+'/auth/jwt',

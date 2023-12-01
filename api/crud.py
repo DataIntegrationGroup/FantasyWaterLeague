@@ -17,13 +17,13 @@
 from numpy import array
 from sqlalchemy import or_
 
-from api.database import get_db
-from api.models.game import Game, Match
-from api.models.players import Roster, Player, RosterAsset, RosterScore
-from api.models.assets import Asset, Score
+from database import get_db
+from models.game import Game, Match
+from models.players import Roster, Player, RosterAsset, RosterScore
+from models.assets import Asset, Score
 import requests
 
-from api.models.users import User
+from models.users import User
 
 
 def retrieve_player_by_user(db, username):

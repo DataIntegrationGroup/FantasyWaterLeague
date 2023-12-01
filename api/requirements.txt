@@ -2,6 +2,7 @@ fastapi
 fastapi-users[sqlalchemy]
 sqlalchemy
 geoalchemy2[shapely]
+gunicorn
 uvicorn
 psycopg
 # scikit-learn
