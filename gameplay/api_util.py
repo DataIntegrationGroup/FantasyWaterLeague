@@ -22,16 +22,14 @@ ACCESS_TOKEN = None
 
 
 def get_access_token():
-    global ACCESS_TOKEN
-    user = os.environ.get("API_USER", "admin")
-    pwd = os.environ.get("API_PASSWORD", "admin")
-    if ACCESS_TOKEN is None:
-        resp = requests.post(
-            f"{settings.HOST}/auth/jwt/login",
-            data={"username": user, "password": pwd},
-        )
 
-        ACCESS_TOKEN = resp.json()["access_token"]
+    # use api_key to get access token
+    global ACCESS_TOKEN
+    url = 'http://fief.newmexicowaterdata.org/admin/api'
+    token = get_json(url)
+    if ACCESS_TOKEN is None:
+        ACCESS_TOKEN = token['access_token']
+
     return ACCESS_TOKEN
 
 
@@ -53,8 +51,13 @@ def put_json(path, data):
 
 def auth_request(path, data=None, method="get"):
     func = getattr(requests, method)
+    if path.startswith("http"):
+        url = path
+    else:
+        url = make_url(path)
+
     resp = func(
-        make_url(path),
+        url,
         json=data,
         headers={"Authorization": f"Bearer {get_access_token()}"},
     )

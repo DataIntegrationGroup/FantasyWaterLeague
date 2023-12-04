@@ -17,7 +17,6 @@ import os
 
 
 class Settings:
-    ACCESS_TOKEN_EXPIRE_MINUTES = 30  # in mins
 
     # PROJECT_NAME: str = "Job Board"
     # PROJECT_VERSION: str = "1.0.0"
@@ -31,12 +30,27 @@ class Settings:
     # )  # default postgres port is 5432
     # POSTGRES_DB: str = os.getenv("POSTGRES_DB", "tdd")
     # DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
-    #
-    SECRET_KEY: str = os.getenv("SECRET_KEY")
-    ALGORITHM = "HS256"
-    # ACCESS_TOKEN_EXPIRE_MINUTES = 30  # in mins
-    #
-    # TEST_USER_EMAIL = "test@example.com"
+
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30  # in mins
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    SQLALCHEMY_DATABASE_URL: str
+
+    def __init__(self):
+        self.SECRET_KEY = os.getenv("SECRET_KEY")
+
+        database_url = os.environ.get("DATABASE_URL")
+        if database_url:
+            self.SQLALCHEMY_DATABASE_URL = database_url
+        else:
+            user = os.environ.get("POSTGRES_USER")
+            password = os.environ.get("POSTGRES_PASSWORD")
+            host = os.environ.get("POSTGRES_HOST")
+            database = os.environ.get("POSTGRES_DB")
+
+            self.SQLALCHEMY_DATABASE_URL = (
+                f"postgresql+psycopg://{user}:{password}@{host}:5432/{database}"
+            )
 
 
 settings = Settings()

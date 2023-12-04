@@ -18,28 +18,23 @@ import os
 from sqlalchemy import create_engine, Column, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, declared_attr
+from settings import settings
 
-# SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
-# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
+print("SQLALCHEMY_DATABASE_URL", settings.SQLALCHEMY_DATABASE_URL)
 
-user = os.environ.get("POSTGRES_USER")
-password = os.environ.get("POSTGRES_PASSWORD")
-host = os.environ.get("POSTGRES_HOST")
-database = os.environ.get("POSTGRES_DB")
-
-SQLALCHEMY_DATABASE_URL = (
-    f"postgresql+psycopg://{user}:{password}@{host}:5432/{database}"
-)
-print("SQLALCHEMY_DATABASE_URL", SQLALCHEMY_DATABASE_URL)
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(
+engine = create_engine(settings.SQLALCHEMY_DATABASE_URL)
+session_factory = sessionmaker(
     autocommit=False,
     autoflush=False,
     bind=engine,
 )
 
 Base = declarative_base()
+
+
+def reset_database():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
 
 class Slugged:
@@ -59,11 +54,10 @@ class Slugged:
 
 
 def get_db():
-    db = SessionLocal()
+    db = session_factory()
     try:
         yield db
     finally:
         db.close()
-
 
 # ============= EOF =============================================

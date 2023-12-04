@@ -21,7 +21,8 @@ from datetime import datetime, timedelta
 
 import requests
 
-from database import Base, engine, get_db
+from sources import USGSGageHeight, USGSDepthToWater, USGSRainGauge, NWS, COCORAHS
+from database import Base, get_db, reset_database, session_factory
 from models.assets import Asset, Source, AssetType
 from models.game import Game
 from models.players import Player, Roster, RosterAsset
@@ -32,31 +33,24 @@ from users import get_user_manager
 
 
 def make_gw_sites(db):
-    url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=72019&siteStatus=active' \
-          '&modifiedSince=P2D'
-    return make_usgs_sites(db, "continuous_groundwater",
-                           'usgs_nwis_depthtowater', url)
-
-
-def make_usgs_discharge_sites(db):
-    url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00060&siteStatus=active'
-    return make_usgs_sites(db, 'stream_gauge',
-                           'usgs_nwis_discharge',
-                           url)
+    return make_usgs_sites(db,
+                           USGSDepthToWater.atype,
+                           USGSDepthToWater.slug,
+                           USGSDepthToWater.sites_url)
 
 
 def make_usgs_gageheight_sites(db):
-    url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00065&siteStatus=active'
-    return make_usgs_sites(db, 'stream_gauge',
-                           'usgs_nwis_gageheight',
-                           url)
+    return make_usgs_sites(db,
+                           USGSGageHeight.atype,
+                           USGSGageHeight.slug,
+                           USGSGageHeight.sites_url)
 
 
 def make_usgs_rain_gauge_sites(db):
-    url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&stateCd=nm&parameterCd=00045&siteStatus=active'
-    return make_usgs_sites(db, 'continuous_rain_gauge',
-                           'usgs_nwis_rain_gauge',
-                           url)
+    return make_usgs_sites(db,
+                           USGSRainGauge.atype,
+                           USGSRainGauge.slug,
+                           USGSRainGauge.sites_url)
 
 
 def rget_features(url):
@@ -262,12 +256,12 @@ def make_draft(assets):
             break
 
 
-def make_source(db, slug, name, landing_url, base_url):
+def make_source(db, definition):
     s = Source()
-    s.slug = slug
-    s.name = name
-    s.landing_url = landing_url
-    s.base_url = base_url
+    s.slug = definition.slug
+    s.name = definition.name
+    s.landing_url = definition.landing_url
+    s.base_url = definition.base_url
 
     db.add(s)
     db.commit()
@@ -277,65 +271,24 @@ async def setup_demo():
     # if os.environ.get('SETUP_DEMO', '0') == '0':
     #     return
     print("setting up db")
-
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    reset_database()
 
     print('setting up demo')
-    db = next(get_db())
+    db = session_factory()
 
     now = datetime.now()
 
-    # the game starts the following monday at 5pm
-    # gamestart = now - timedelta(days=now.weekday() - 7, hours=now.hour - 17,
-    #                             minutes=now.minute, seconds=now.second, microseconds=now.microsecond)
-
-    # db.add(Game(slug='game1',
-    #             name='Game 1',
-    #             start=gamestart,
-    #             active=False))
-    #
     db.add(Game(slug='game:0',
                 name='Game 0',
                 start=now - timedelta(days=now.weekday() + 7),
                 active=False))
 
-    make_source(db, 'usgs_nwis_gageheight', 'UGSS-NWIS-GageHeight',
-                'https://waterdata.usgs.gov/monitoring-location/{source_id:}/#parameterCode=00065'
-                '&period=P7D'
-                '&showMedian=true',
-                'https://waterservices.usgs.gov/nwis/iv/?'
-                'parameterCd=00065'
-                '&format=json')
+    make_source(db, USGSGageHeight)
+    make_source(db, USGSDepthToWater)
+    make_source(db, USGSRainGauge)
+    make_source(db, NWS)
+    make_source(db, COCORAHS)
 
-    make_source(db, 'usgs_nwis_depthtowater', 'UGSS-NWIS-DepthToWater',
-                'https://waterdata.usgs.gov/monitoring-location/'
-                '{source_id:}/#parameterCode=72019&period=P7D&showMedian=true',
-                'https://waterservices.usgs.gov/nwis/iv/?'
-                'parameterCd=72019'
-                '&format=json')
-    make_source(db, 'usgs_nwis_rain_gauge', 'UGSS-NWIS-RainGauge',
-                'https://waterdata.usgs.gov/monitoring-location/'
-                '{source_id:}/#parameterCode=00045&period=P7D&showMedian=true',
-                'https://waterservices.usgs.gov/nwis/iv/?'
-                'parameterCd=00045'
-                '&format=json')
-    make_source(db, 'nws', 'National Weather Service',
-                'https://api.weather.gov/stations/{source_id:}/observations',
-                'https://api.weather.gov/stations/{source_id:}/observations')
-
-    # make_source(db, 'synoptic_mesonet',
-    #             'Synoptic Mesonet',
-    #               '',
-    #               'https://api.synopticdata.com/v2/stations/timeseries?')
-    make_source(db, 'cocorahs', 'Cocorahs', 'https://dex.cocorahs.org',
-                'https://data.cocorahs.org/export/exportreports.aspx?'
-                'Format=json'
-                '&ResponseFields=all'
-                '&station={source_id:}'
-                '&ReportType=Daily'
-                '&StartDate={start:%m/%d/%Y}'
-                '&EndDate={end:%m/%d/%Y}')
     db.commit()
     db.flush()
 
@@ -366,7 +319,7 @@ async def setup_demo():
                ('ethan', 'Ethan', 'Melody Station Packers'),
                ('marissa', 'Marissa', 'Bevilacqua'),
                ('nels', 'Nels', 'Shedland Builders'),
-               # ('mattz', 'Mattz', 'PartyBoy Dancers'),
+               ('mattz', 'Mattz', 'PartyBoy Dancers'),
                ('rachel', 'Rachel', 'Socorro Managers'),
                ('chriscox', 'Chris Cox', 'Sandia Sonics'),
                ('crismorton', 'Cris Morton', 'South Valley Mechanics'),
