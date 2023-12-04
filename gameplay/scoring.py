@@ -19,30 +19,27 @@ import traceback
 
 import requests
 from numpy import array
-from apscheduler.schedulers.blocking import BlockingScheduler
-
-host = os.environ.get("API_HOST", "api")
-port = os.environ.get("API_PORT", "8080")
-HOST = f"http://{host}:{port}"
+from api_util import put_json, get_json
 
 
-def get_json(url, access_token=None):
-    print("getting", url)
-    headers = {}
-    if access_token:
-        headers = {"Authorization": f"Bearer {access_token}"}
+# def get_json(url, access_token=None):
+#     print("getting", url)
+#     headers = {}
+#     if access_token:
+#         headers = {"Authorization": f"Bearer {access_token}"}
+#
+#     resp = requests.get(url, headers=headers)
+#     if resp.ok:
+#         return resp.json()
 
-    resp = requests.get(url, headers=headers)
-    if resp.ok:
-        return resp.json()
 
-
-def update_score(asset_slug, score, game, access_token):
-    resp = requests.put(
-        f"{HOST}/api/v1/asset/{asset_slug}/score",
-        json={"score": score, "game_slug": game},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
+def update_score(asset_slug, score, game):
+    # resp = requests.put(
+    #     f"{settings.HOST}/api/v1/asset/{asset_slug}/score",
+    #     json={"score": score, "game_slug": game},
+    #     headers={"Authorization": f"Bearer {access_token}"},
+    # )
+    resp = put_json(f'asset/{asset_slug}/score', dict(score=score, game_slug=game))
     print("update score response", score, resp.status_code)
 
 
@@ -50,7 +47,7 @@ def calculate_asset_score(asset, url="scoring_url"):
     atype = asset["atype"]
     source = asset["source_slug"]
     # source_id = asset['source_identifier']
-    u = get_json(f"{HOST}/api/v1/asset/{asset['slug']}/data_url")
+    u = get_json(f"asset/{asset['slug']}/data_url")
     if u:
         # get data from source
         data = get_data(source, u[url])
@@ -131,67 +128,26 @@ def score_continuous_rain_gauge(data):
     return 10 * sum(vs)
 
 
-def update_roster_score(game_slug, roster_slug, score, access_token):
+def update_roster_score(game_slug, roster_slug, score):
     print("updating roster score", game_slug, roster_slug, score)
-    resp = requests.put(
-        f"{HOST}/api/v1/score/roster/{roster_slug}",
-        json={"game_slug": game_slug, "score": round(float(score), 2)},
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
+    # resp = requests.put(
+    #     f"{settings.HOST}/api/v1/score/roster/{roster_slug}",
+    #     json={"game_slug": game_slug, "score": round(float(score), 2)},
+    #     headers={"Authorization": f"Bearer {access_token}"},
+    # )
+    resp = put_json(f'score/roster/{roster_slug}',
+                    dict(game_slug=game_slug, score=round(float(score), 2)))
     if resp.status_code == 422:
+        print("update roster score response", resp.status_code)
         print(resp.json())
 
 
-sched = BlockingScheduler()
-
-
-@sched.scheduled_job("cron", minute=0)
-def calculate_scores():
-    access_token = get_access_token()
-
-    data = get_json(f"{HOST}/api/v1/players")
-    print("starting scoring")
-    st = time.time()
-    for player in data:
-        data = get_json(f'{HOST}/api/v1/roster/{player["slug"]}.main', access_token)
-        player_score = 0
-        for asset in data:
-            try:
-                score = calculate_asset_score(asset)
-            except Exception as e:
-                print("Exception calculating score for", asset["slug"])
-                continue
-
-            update_score(asset["slug"], score, "game:1", access_token)
-            if asset["active"]:
-                player_score += score or 0
-
-        update_roster_score(
-            "game:1", f"{player['slug']}.main", player_score, access_token
-        )
-
-    et = time.time() - st
-    print(f"scoring complete {et:0.3f}s")
-
-
-def get_access_token():
-    resp = requests.post(
-        f"{HOST}/auth/jwt/login",
-        data={"username": "jake@foo.com", "password": "foobar1234"},
-    )
-
-    access_token = resp.json()["access_token"]
-    return access_token
-
-
 def calculate_previous_scores():
-    access_token = get_access_token()
-
-    data = get_json(f"{HOST}/api/v1/players", access_token)
+    data = get_json("players")
     print("starting scoring")
     st = time.time()
     for player in data:
-        data = get_json(f'{HOST}/api/v1/roster/{player["slug"]}.main', access_token)
+        data = get_json('roster/{player["slug"]}.main')
         for asset in data:
             try:
                 score = calculate_asset_score(asset, url="prev_url")
@@ -200,22 +156,25 @@ def calculate_previous_scores():
                 traceback.print_exc()
                 continue
 
-            update_score(asset["slug"], score, "game:0", access_token)
+            update_score(asset["slug"], score, "game:0")
 
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")
 
 
-if __name__ == "__main__":
-    if os.environ.get("CALCULATE_SCORES", "0") == "0":
-        print(
-            "**** You must set the environment variable CALCULATE_SCORES=1 to run the scorer scheduler ****"
-        )
-        exit(0)
 
-    if os.environ.get("CALCULATE_PREVIOUS_SCORES", "0") == "1":
-        calculate_previous_scores()
+# if __name__ == "__main__":
+#     if os.environ.get("CALCULATE_SCORES", "0") == "0":
+#         print(
+#             "**** You must set the environment variable CALCULATE_SCORES=1 to run the scorer scheduler ****"
+#         )
+#         exit(0)
+#
+#     if os.environ.get("CALCULATE_PREVIOUS_SCORES", "0") == "1":
+#         calculate_previous_scores()
 
-    print("starting scorer schelduler")
-    calculate_scores()
-    sched.start()
+    # print("starting scorer schelduler")
+    # calculate_scores()
+    # sched.start()
+
+# ============= EOF =============================================

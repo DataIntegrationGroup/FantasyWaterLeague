@@ -23,158 +23,86 @@ from datetime import datetime, timedelta
 
 import requests
 from numpy import array
-from apscheduler.schedulers.blocking import BlockingScheduler
 
-host = os.environ.get("API_HOST", "api")
-port = os.environ.get("API_PORT", "8080")
+from api_util import patch_json, get_json
+from game_play import new_game, setup_demo, setup_matches
+from scoring import calculate_asset_score, update_score, update_roster_score, calculate_previous_scores
+from scheduler import scheduler
 
-HOST = f"http://{host}:{port}"
+# run every hour
+@scheduler.scheduled_job("cron", minute=0)
+def calculate_scores():
+    # access_token = get_access_token()
+    game = get_json("game")
+    if not game:
+        print('no active game')
+        return
 
-sched = BlockingScheduler()
+    data = get_json(f"players")
+    print("starting scoring")
+    st = time.time()
+    for player in data:
+        data = get_json(f'roster/{player["slug"]}.main')
+        player_score = 0
+        for asset in data:
+            try:
+                score = calculate_asset_score(asset)
+            except Exception as e:
+                print("Exception calculating score for", asset["slug"])
+                continue
 
+            update_score(asset["slug"], score, "game:1")
+            if asset["active"]:
+                player_score += score or 0
 
-def new_game(slug, name):
-    start = calc_game_start()
-    post_json(
-        "admin/game", dict(slug=slug, name=name, start=start.isoformat(), active=False)
-    )
-
-
-def calc_game_start():
-    now = datetime.now()
-
-    # the game starts the following monday at 5pm
-    gamestart = now - timedelta(
-        days=now.weekday() - 7,
-        hours=now.hour - 17,
-        minutes=now.minute,
-        seconds=now.second,
-        microseconds=now.microsecond,
-    )
-    return gamestart
-
-
-def setup_demo():
-    # create a game
-    new_game("game:1", "Game 1")
-    # gamestart = calc_game_start()
-    # post_json('admin/game', dict(
-    #     slug="game:1", name="Game 1", start=gamestart.isoformat(), active=False))
-
-
-def setup_matches():
-    # get random pairings
-    players = get_json("players")
-    pairs = list(itertools.combinations_with_replacement(players, 2))
-    random.shuffle(pairs)
-
-    playing = []
-    for i, (a, b) in enumerate(pairs):
-        if a["name"] == b["name"]:
-            continue
-        if a["name"] in playing or b["name"] in playing:
-            continue
-
-        playing.append(a["name"])
-        playing.append(b["name"])
-        print("setup match", a["name"], b["name"])
-        post_json(
-            "admin/match",
-            dict(
-                roster_a=f"{a['slug']}.main",
-                roster_b=f"{b['slug']}.main",
-                game_slug="game:1",
-            ),
+        update_roster_score(
+            game['slug'], f"{player['slug']}.main", player_score
         )
 
-
-ACCESS_TOKEN = None
-
-
-def get_access_token():
-    global ACCESS_TOKEN
-    user = os.environ.get("API_USER", "admin")
-    pwd = os.environ.get("API_PASSWORD", "admin")
-    if ACCESS_TOKEN is None:
-        resp = requests.post(
-            f"{HOST}/auth/jwt/login",
-            data={"username": user, "password": pwd},
-        )
-
-        ACCESS_TOKEN = resp.json()["access_token"]
-    return ACCESS_TOKEN
-
-
-def post_json(path, data):
-    return auth_request(path, data, "post")
-
-
-def get_json(path):
-    return auth_request(path)
-
-
-def patch_json(path, data):
-    return auth_request(path, data, "patch")
-
-
-def auth_request(path, data=None, method="get"):
-    func = getattr(requests, method)
-    resp = func(
-        make_url(path),
-        json=data,
-        headers={"Authorization": f"Bearer {get_access_token()}"},
-    )
-    if resp.ok:
-        return resp.json()
-    elif resp.status_code == 401:
-        global ACCESS_TOKEN
-        ACCESS_TOKEN = None
-
-        return auth_request(path, data, method)
-
-
-def make_url(path):
-    return f"{HOST}/api/v1/{path}"
+    et = time.time() - st
+    print(f"scoring complete {et:0.3f}s")
 
 
 # run every minute
-@sched.scheduled_job(
-    "cron", year="*", month="*", day="*", hour="*", minute="*", second="0"
+@scheduler.scheduled_job(
+    "cron", second="0"
 )
 def game_clock():
     print("game clock")
     # run every minute
     # get the active game
-
     game = get_json("game")
-    if game:
-        # if the game is active deactivate it
-        # if the current time is greater than the game end time
-        print("current game", game)
-        if game["active"]:
-            end = datetime.strptime(game["end"], "%Y-%m-%dT%H:%M:%S")
-            now = datetime.now()
+    if not game:
+        print('no active game')
+        return
 
-            for count in [30, 20, 10, 5, 2, 1]:
-                if now > end - timedelta(minutes=count):
-                    print(f"game ending in {count} minutes")
-                    break
+    # if the game is active deactivate it
+    # if the current time is greater than the game end time
+    print("current game", game)
+    if game["active"]:
+        end = datetime.strptime(game["end"], "%Y-%m-%dT%H:%M:%S")
+        now = datetime.now()
 
-            if now > end:
-                patch_json("admin/game_status", dict(active=False))
-                print("game over")
+        for count in [30, 20, 10, 5, 2, 1]:
+            if now > end - timedelta(minutes=count):
+                print(f"game ending in {count} minutes")
+                break
 
-                # create a new game
-                idx = int(game["slug"].split(":")[1]) + 1
-                slug = f"game:{idx}"
-                name = f"Game {idx}"
-                new_game(slug, name)
-        else:
-            # if the game is not active check if the current time is greater than the game start time
-            start = datetime.strptime(game["start"], "%Y-%m-%dT%H:%M:%S")
-            if datetime.now() > start:
-                patch_json("admin/game_status", dict(active=True))
-                print("game started")
+        if now > end:
+            patch_json("admin/game_status", dict(active=False))
+            print("game over")
+
+            # create a new game
+            idx = int(game["slug"].split(":")[1]) + 1
+            slug = f"game:{idx}"
+            name = f"Game {idx}"
+            new_game(slug, name)
+    else:
+        # if the game is not active check if the current time is greater than the game start time
+        start = datetime.strptime(game["start"], "%Y-%m-%dT%H:%M:%S")
+        if datetime.now() > start:
+            patch_json("admin/game_status", dict(active=True))
+            print("game started")
 
 
 def main():
@@ -193,7 +121,15 @@ def main():
         setup_matches()
         # setup_rosters()
 
-    sched.start()
+    if os.environ.get("CALCULATE_SCORES", "0") == "0":
+        print(
+            "**** You must set the environment variable CALCULATE_SCORES=1 to run the scorer scheduler ****"
+        )
+
+    if os.environ.get("CALCULATE_PREVIOUS_SCORES", "0") == "1":
+        calculate_previous_scores()
+
+    scheduler.start()
 
 
 if __name__ == "__main__":

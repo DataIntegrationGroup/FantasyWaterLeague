@@ -1,6 +1,4 @@
 import './App.css';
-// import Dashboard from './components/Dashboard/Dashboard';
-import Preferences from './components/Preferences/Preferences';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import React, {useState} from 'react';
 import Login from './components/Login/Login';
