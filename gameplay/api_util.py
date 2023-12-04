@@ -69,4 +69,6 @@ def auth_request(path, data=None, method="get"):
 
 def make_url(path):
     return f"{settings.HOST}/api/v1/{path}"
+
+
 # ============= EOF =============================================

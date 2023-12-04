@@ -39,7 +39,7 @@ def update_score(asset_slug, score, game):
     #     json={"score": score, "game_slug": game},
     #     headers={"Authorization": f"Bearer {access_token}"},
     # )
-    resp = put_json(f'asset/{asset_slug}/score', dict(score=score, game_slug=game))
+    resp = put_json(f"asset/{asset_slug}/score", dict(score=score, game_slug=game))
     print("update score response", score, resp.status_code)
 
 
@@ -135,8 +135,10 @@ def update_roster_score(game_slug, roster_slug, score):
     #     json={"game_slug": game_slug, "score": round(float(score), 2)},
     #     headers={"Authorization": f"Bearer {access_token}"},
     # )
-    resp = put_json(f'score/roster/{roster_slug}',
-                    dict(game_slug=game_slug, score=round(float(score), 2)))
+    resp = put_json(
+        f"score/roster/{roster_slug}",
+        dict(game_slug=game_slug, score=round(float(score), 2)),
+    )
     if resp.status_code == 422:
         print("update roster score response", resp.status_code)
         print(resp.json())
@@ -162,7 +164,6 @@ def calculate_previous_scores():
     print(f"scoring complete {et:0.3f}s")
 
 
-
 # if __name__ == "__main__":
 #     if os.environ.get("CALCULATE_SCORES", "0") == "0":
 #         print(
@@ -173,8 +174,8 @@ def calculate_previous_scores():
 #     if os.environ.get("CALCULATE_PREVIOUS_SCORES", "0") == "1":
 #         calculate_previous_scores()
 
-    # print("starting scorer schelduler")
-    # calculate_scores()
-    # sched.start()
+# print("starting scorer schelduler")
+# calculate_scores()
+# sched.start()
 
 # ============= EOF =============================================

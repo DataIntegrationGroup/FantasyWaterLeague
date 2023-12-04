@@ -26,8 +26,14 @@ from numpy import array
 
 from api_util import patch_json, get_json
 from game_play import new_game, setup_demo, setup_matches
-from scoring import calculate_asset_score, update_score, update_roster_score, calculate_previous_scores
+from scoring import (
+    calculate_asset_score,
+    update_score,
+    update_roster_score,
+    calculate_previous_scores,
+)
 from scheduler import scheduler
+
 
 # run every hour
 @scheduler.scheduled_job("cron", minute=0)
@@ -35,7 +41,7 @@ def calculate_scores():
     # access_token = get_access_token()
     game = get_json("game")
     if not game:
-        print('no active game')
+        print("no active game")
         return
 
     data = get_json(f"players")
@@ -55,25 +61,21 @@ def calculate_scores():
             if asset["active"]:
                 player_score += score or 0
 
-        update_roster_score(
-            game['slug'], f"{player['slug']}.main", player_score
-        )
+        update_roster_score(game["slug"], f"{player['slug']}.main", player_score)
 
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")
 
 
 # run every minute
-@scheduler.scheduled_job(
-    "cron", second="0"
-)
+@scheduler.scheduled_job("cron", second="0")
 def game_clock():
     print("game clock")
     # run every minute
     # get the active game
     game = get_json("game")
     if not game:
-        print('no active game')
+        print("no active game")
         return
 
     # if the game is active deactivate it
