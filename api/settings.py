@@ -35,8 +35,16 @@ class Settings:
     ALGORITHM: str = "HS256"
     SQLALCHEMY_DATABASE_URL: str
 
+    # FIEF ==================================================
+    FIEF_URL: str = "https://fief.newmexicowaterdata.org"
+    FIEF_CLIENT_ID: str
+    FIEF_CLIENT_SECRET: str
+
     def __init__(self):
         self.SECRET_KEY = os.getenv("SECRET_KEY")
+
+        self.FIEF_CLIENT_SECRET = os.getenv("FIEF_CLIENT_SECRET")
+        self.FIEF_CLIENT_ID = os.getenv("FIEF_CLIENT_ID")
 
         database_url = os.environ.get("DATABASE_URL")
         if database_url:
@@ -50,6 +58,7 @@ class Settings:
             self.SQLALCHEMY_DATABASE_URL = (
                 f"postgresql+psycopg://{user}:{password}@{host}:5432/{database}"
             )
+
 
 
 settings = Settings()

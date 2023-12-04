@@ -16,7 +16,6 @@
 
 from typing import Optional
 import uuid
-from fastapi_users import schemas
 
 from pydantic import BaseModel, Field
 from pydantic import BaseModel, create_model
@@ -64,16 +63,16 @@ class ActiveAsset(Asset):
     active: bool
 
 
-class UserRead(schemas.BaseUser[uuid.UUID]):
-    pass
-
-
-class UserCreate(schemas.BaseUserCreate):
-    pass
-
-
-class UserUpdate(schemas.BaseUserUpdate):
-    pass
+# class UserRead(schemas.BaseUser[uuid.UUID]):
+#     pass
+#
+#
+# class UserCreate(schemas.BaseUserCreate):
+#     pass
+#
+#
+# class UserUpdate(schemas.BaseUserUpdate):
+#     pass
 
 
 # ============= EOF =============================================

@@ -23,13 +23,12 @@ from models.players import Roster, Player, RosterAsset, RosterScore
 from models.assets import Asset, Score
 import requests
 
-from models.users import User
 
 
 def retrieve_player_by_user(db, username):
     q = db.query(Player)
-    q = q.join(User)
-    q = q.filter(User.email == username)
+    # q = q.join(User)
+    q = q.filter(Player.username == username)
     return q.one()
 
 

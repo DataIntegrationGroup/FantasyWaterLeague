@@ -26,10 +26,7 @@ from database import Base, get_db, reset_database, session_factory
 from models.assets import Asset, Source, AssetType
 from models.game import Game
 from models.players import Player, Roster, RosterAsset
-from models.users import User, get_user_db, get_async_session
-from rules import N_ASSETS_PER_TEAM, N_GROUNDWATER_ASSETS, N_STREAM_GAUGE_ASSETS
-from schemas import UserCreate
-from users import get_user_manager
+
 
 
 def make_gw_sites(db):
@@ -311,9 +308,9 @@ async def setup_demo():
     db.commit()
     db.flush()
 
-    get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
-    get_async_session_context = contextlib.asynccontextmanager(get_async_session)
-    get_user_db_context = contextlib.asynccontextmanager(get_user_db)
+    # get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
+    # get_async_session_context = contextlib.asynccontextmanager(get_async_session)
+    # get_user_db_context = contextlib.asynccontextmanager(get_user_db)
 
     players = (('jake', 'Jake Ross', 'Leroy Flyers'),
                ('ethan', 'Ethan', 'Melody Station Packers'),
@@ -326,16 +323,18 @@ async def setup_demo():
                ('danlavery', 'Dan Lavery', '3D Modelers'),
                )
     for slug, name, team in players:
-        async with get_async_session_context() as session:
-            async with get_user_db_context(session) as user_db:
-                async with get_user_manager_context(user_db) as user_manager:
-                    user = await user_manager.create(UserCreate(
-                        email=f'{slug}@foo.com',
-                        password='foobar1234',
-                        is_superuser=slug == 'jake'
-                    ))
+        # async with get_async_session_context() as session:
+        #     async with get_user_db_context(session) as user_db:
+        #         async with get_user_manager_context(user_db) as user_manager:
+        #             user = await user_manager.create(UserCreate(
+        #                 email=f'{slug}@foo.com',
+        #                 password='foobar1234',
+        #                 is_superuser=slug == 'jake'
+        #             ))
 
-            db.add(Player(slug=slug, name=name, team_name=team, user_id=user.id))
+        p = Player(slug=slug, name=name, team_name=team, username=f'{slug}@fwl.com')
+        db.add(p)
+
 
     db.commit()
     db.flush()

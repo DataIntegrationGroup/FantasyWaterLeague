@@ -21,12 +21,13 @@ from pydantic import BaseModel
 from crud import retrieve_game
 from database import get_db
 from models import Game
-from users import current_super_user
+from users import auth
+
 
 admin_router = APIRouter(
     prefix="/api/v1/admin",
     tags=["API V1 Admin"],
-    dependencies=[Depends(current_super_user)],
+    dependencies=[Depends(auth.authenticated())],
 )
 
 

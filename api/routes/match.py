@@ -15,13 +15,14 @@
 # ===============================================================================
 from fastapi import Depends, APIRouter
 from pydantic import BaseModel
+from sqlalchemy import insert, select
 
 from database import get_db
 from models.game import Match
-from users import current_active_user, current_super_user
+from users import auth
 
 admin_router = APIRouter(
-    prefix=f"/api/v1/admin", tags=["API V1"], dependencies=[Depends(current_super_user)]
+    prefix=f"/api/v1/admin", tags=["API V1"], dependencies=[Depends(auth.authenticated(permissions=["superuser"]))]
 )
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
 
@@ -35,22 +36,33 @@ class NewMatchPayload(BaseModel):
 
 @admin_router.post("/match")
 async def post_match(payload: NewMatchPayload, db=Depends(get_db)):
-    match = Match(
+    # match = Match(
+    #     roster_a=payload.roster_a,
+    #     roster_b=payload.roster_b,
+    #     game=payload.game_slug,
+    #     name=f"{payload.roster_a} vs {payload.roster_b}",
+    #     slug=f"{payload.roster_a}-{payload.roster_b}-{payload.game_slug}",
+    # )
+    # db.add(match)
+    # db.commit()
+    stmt = insert(Match).values(
         roster_a=payload.roster_a,
         roster_b=payload.roster_b,
         game=payload.game_slug,
         name=f"{payload.roster_a} vs {payload.roster_b}",
         slug=f"{payload.roster_a}-{payload.roster_b}-{payload.game_slug}",
     )
-    db.add(match)
+    db.execute(stmt)
     db.commit()
+
     return {"status": "ok"}
 
 
 # get ===============================================================================
 @router.get("/matches")
 async def get_match(db=Depends(get_db)):
-    return db.query(Match).all()
+    stmt = select(Match)
+    return db.execute(stmt).all()
 
 
 # ============= EOF =============================================

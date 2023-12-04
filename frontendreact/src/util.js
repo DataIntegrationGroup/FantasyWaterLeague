@@ -18,9 +18,9 @@ export async function loginUser(credentials) {
 
 async function inteceptorError(error) {
     const originalRequest = error.config;
-    console.log('interceptor error:', error.response.status === 401 && !originalRequest._retry)
+    // console.log('interceptor error:', error.response.status === 401 && !originalRequest._retry)
 
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
         const credentials = JSON.parse(sessionStorage.getItem('credentials'));
         const access_token = await loginUser(credentials);
@@ -48,8 +48,18 @@ export async function api_getJson(url, token = null, root=null) {
     // let token = null
     const headers = makeHeaders(token)
 
-    const response = await api.get(root+url, {headers: headers});
-    return response.data;
+    // const response = await api.get(root+url, {headers: headers}).catch(e=>{
+    //     console.log('api_getJson error:', e)
+    // });
+    // if (response!==undefined){
+    //     return response.data;
+    // }
+    return api.get(root+url, {headers: headers})
+        .then(response => {return response.data})
+        .catch(e=>{console.log('api_getJson error:', e)}
+        )
+
+
 }
 
 function makeHeaders(token=null) {
@@ -57,7 +67,7 @@ function makeHeaders(token=null) {
         try {
             token = JSON.parse(sessionStorage.getItem('token'));
         } catch (e) {
-            console.log('api_getJson error:', e)
+            console.log('makeHeaders error:', e)
         }
     }
 
@@ -70,8 +80,9 @@ function makeHeaders(token=null) {
 
 export async function api_PatchJson(url, data, token = null) {
     const headers = makeHeaders(token)
-    const response = await api.patch(url, data, {headers: headers});
-    return response.data;
+    return await api.patch(url, data, {headers: headers})
+        .then(response => {return response.data})
+        .catch(e => {console.log('api_PatchJson error:', e)})
 }
 
 export async function getJson(url) {

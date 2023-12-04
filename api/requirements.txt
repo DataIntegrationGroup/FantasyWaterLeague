@@ -1,5 +1,4 @@
 fastapi
-fastapi-users[sqlalchemy]
 sqlalchemy
 geoalchemy2[shapely]
 gunicorn
@@ -11,6 +10,7 @@ jinja2
 requests
 numpy
 python-jose[cryptography]
+fief-client[fastapi]
 # pandas
 # openpyxl
 # uncertainties

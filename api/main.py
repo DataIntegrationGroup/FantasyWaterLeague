@@ -17,17 +17,16 @@ import os
 
 from fastapi import FastAPI, Depends
 from starlette.middleware.cors import CORSMiddleware
-from starlette.staticfiles import StaticFiles
 
-from models.players import Player
 from routes import v1, match, game
-from schemas import UserRead, UserCreate, UserUpdate
-from users import (
-    current_active_user,
-    fastapi_users,
-    bearer_auth_backend,
-    cookie_auth_backend,
-)
+
+# from schemas import UserRead, UserCreate, UserUpdate
+# from users import (
+#     current_active_user,
+#     fastapi_users,
+#     bearer_auth_backend,
+#     cookie_auth_backend,
+# )
 
 app = FastAPI()
 # app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -47,38 +46,38 @@ from demo import setup_demo
 # ===============================================================================
 # API Endpoints
 # ===============================================================================
-
-app.include_router(
-    fastapi_users.get_auth_router(bearer_auth_backend),
-    prefix="/auth/jwt",
-    tags=["auth"],
-)
+#
 # app.include_router(
-#     fastapi_users.get_auth_router(cookie_auth_backend),
-#     prefix="/auth/cookie",
+#     fastapi_users.get_auth_router(bearer_auth_backend),
+#     prefix="/auth/jwt",
 #     tags=["auth"],
 # )
-
-app.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/register",
-    tags=["register"],
-)
+# # app.include_router(
+# #     fastapi_users.get_auth_router(cookie_auth_backend),
+# #     prefix="/auth/cookie",
+# #     tags=["auth"],
+# # )
+#
 # app.include_router(
-#     fastapi_users.get_reset_password_router(),
-#     prefix="/auth",
-#     tags=["auth"],
+#     fastapi_users.get_register_router(UserRead, UserCreate),
+#     prefix="/register",
+#     tags=["register"],
 # )
+# # app.include_router(
+# #     fastapi_users.get_reset_password_router(),
+# #     prefix="/auth",
+# #     tags=["auth"],
+# # )
+# # app.include_router(
+# #     fastapi_users.get_verify_router(UserRead),
+# #     prefix="/auth/verify",
+# #     tags=["auth"],
+# # )
 # app.include_router(
-#     fastapi_users.get_verify_router(UserRead),
-#     prefix="/auth/verify",
-#     tags=["auth"],
+#     fastapi_users.get_users_router(UserRead, UserUpdate),
+#     prefix="/users",
+#     tags=["users"],
 # )
-app.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix="/users",
-    tags=["users"],
-)
 
 
 # @app.get("/authenticated-route")

@@ -45,16 +45,17 @@ from rules import (
     validate_stream_gauge,
     validate_rain_gauge,
 )
-from users import current_active_user, current_super_user
+# from users import current_active_user, current_super_user
+from users import auth
 
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
 auth_router = APIRouter(
-    prefix=f"/api/v1", tags=["API V1"], dependencies=[Depends(current_active_user)]
+    prefix=f"/api/v1", tags=["API V1"], dependencies=[Depends(auth.authenticated())]
 )
 admin_router = APIRouter(
     prefix="/api/v1/admin",
     tags=["API V1 Admin"],
-    dependencies=[Depends(current_super_user)],
+    dependencies=[Depends(auth.authenticated(permissions=["superuser"]))],
 )
 
 
