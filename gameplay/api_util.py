@@ -22,13 +22,12 @@ ACCESS_TOKEN = None
 
 
 def get_access_token():
-
     # use api_key to get access token
     global ACCESS_TOKEN
-    url = 'http://fief.newmexicowaterdata.org/admin/api'
+    url = "http://fief.newmexicowaterdata.org/admin/api"
     token = get_json(url)
     if ACCESS_TOKEN is None:
-        ACCESS_TOKEN = token['access_token']
+        ACCESS_TOKEN = token["access_token"]
 
     return ACCESS_TOKEN
 
