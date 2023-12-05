@@ -3,7 +3,7 @@ import {settings} from "../../settings";
 import axios from "axios";
 
 
-export default function Admin({auth}) {
+export default function Admin() {
     const handleGameStart = () => {
         console.log('Game Start')
         toggleGameStatus('true')

@@ -16,6 +16,7 @@ import InputGroup from "react-bootstrap/InputGroup";
 import {ButtonGroup, ButtonToolbar} from "react-bootstrap";
 import Download from "../Download/Download";
 import LocationsTable from "./LocationsTable";
+import {useFiefTokenInfo, useFiefUserinfo} from "@fief/fief/react";
 
 function LayerControl({name, label, color, handleVisibilityChange, checked}) {
     return (
@@ -98,7 +99,7 @@ function SearchPanel({onClick}) {
     )
 }
 
-export default function Analytics({auth}){
+export default function Analytics(){
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [lng, setLng] = useState(-106.5);
@@ -116,6 +117,13 @@ export default function Analytics({auth}){
         'st2_manual': true,
         'st2_pressure': true,
         'st2_acoustic': true, 'search': false})
+
+    const tokenInfo = useFiefTokenInfo();
+    const userinfo = useFiefUserinfo();
+
+    const w_api_getJson = (url) => {
+        return api_getJson(url, tokenInfo?.access_token)
+    }
 
     function add_popup(tag, ds_name=null){
         const popup = new mapboxgl.Popup({
@@ -249,7 +257,7 @@ export default function Analytics({auth}){
         // }
     }
     const setupMap = () => {
-        api_getJson('/mapboxtoken')
+        w_api_getJson('/mapboxtoken', )
             .then(data=> {
                 mapboxgl.accessToken = data.token
                 if (map.current) return; // initialize map only once
@@ -284,7 +292,7 @@ export default function Analytics({auth}){
                     // add county layer
                     add_county_layer(map)
                     // add the roster assets
-                    add_roster_to_map(map, auth)
+                    // add_roster_to_map(map, )
 
                     map.current.addSource('mapbox-dem', {
                         'type': 'raster-dem',

@@ -16,7 +16,9 @@
 import os
 
 from fastapi import FastAPI, Depends
+from starlette import status
 from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import RedirectResponse
 
 from routes import v1, match, game
 
@@ -46,7 +48,12 @@ from demo import setup_demo
 # ===============================================================================
 # API Endpoints
 # ===============================================================================
-#
+@app.get("/")
+async def root():
+    return RedirectResponse(
+        '/docs',
+        status_code=status.HTTP_302_FOUND)
+
 # app.include_router(
 #     fastapi_users.get_auth_router(bearer_auth_backend),
 #     prefix="/auth/jwt",

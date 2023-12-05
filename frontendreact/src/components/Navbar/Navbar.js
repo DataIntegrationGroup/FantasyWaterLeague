@@ -1,18 +1,13 @@
 import { useFiefAuth, useFiefIsAuthenticated, useFiefUserinfo } from '@fief/fief/react';
 import React, { useCallback } from 'react';
-import { Link } from 'react-router-dom';
 
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-// import nmwdi_logo from '../../img/nmwdi_logo.png'
+
 import nmwdi_logo from '../../img/nmwdi_logo11-23.png'
+import user_logo  from '../../img/icon/user.png'
 
 function AppNavbar() {
     const fiefAuth = useFiefAuth();
@@ -132,6 +127,7 @@ function AppNavbar() {
                 {!isAuthenticated && <Button type="button" onClick={() => login()}>Login</Button>}
                 {isAuthenticated && userinfo && (
                     <div>
+                        <img src={user_logo} style={{"width": "50px", "height": "50px"}}/>
                         <span style={{"padding": "10px"}}>{userinfo.email}</span>
                         <Button type="button" onClick={() => logout()}>Logout</Button>
                     </div>

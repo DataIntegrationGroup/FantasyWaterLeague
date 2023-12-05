@@ -19,9 +19,7 @@ import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 import NWSLegend from "./NWSLegend";
 import ControlPanel from "./ControlPanel";
-// import Match from "../Match/Match";
 import add_roster_to_map, {make_fc} from "../../mapping";
-import Login from "../Login/Login";
 import {useFiefTokenInfo, useFiefUserinfo} from "@fief/fief/react";
 
 
@@ -313,7 +311,7 @@ function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore
 export default function Dashboard() {
     const tokenInfo = useFiefTokenInfo();
     const userinfo = useFiefUserinfo();
-    console.log('userinfo', userinfo)
+    // console.log('userinfo', userinfo)
     const [active_slug, setActiveSlug] = useState(userinfo?.fields.username)
 
     const [roster_data, setRosterData] = React.useState([])

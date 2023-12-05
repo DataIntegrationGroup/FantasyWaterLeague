@@ -57,7 +57,7 @@ class Settings:
             database = os.environ.get("POSTGRES_DB")
 
             self.SQLALCHEMY_DATABASE_URL = (
-                f"postgresql+psycopg://{user}:{password}@{host}:5432/{database}"
+                f"postgresql+pg8000://{user}:{password}@{host}:5432/{database}"
             )
 
 
