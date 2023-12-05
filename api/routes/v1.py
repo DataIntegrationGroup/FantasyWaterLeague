@@ -242,6 +242,10 @@ async def get_asset_data(asset_slug, db=Depends(get_db)):
                 base_url = base_url.format(source_id=source_id)
                 prev_url = f"{base_url}?start={prev_start_dt}&end={start_dt}"
                 scoring_url = f"{base_url}?start={start_dt}"
+        else:
+            base_url = base_url.format(source_id=source_id)
+            prev_url = f"{base_url}?start={prev_start_dt}&end={start_dt}"
+            scoring_url = f"{base_url}?start={start_dt}"
 
         request_url = base_url
         # scoring_url = (
@@ -331,22 +335,23 @@ async def put_player_score(roster_slug: str, payload: ScorePayload, db=Depends(g
 
     # update match score
     match = retrieve_match(db, roster_slug)
-    print(
-        "fffffff",
-        roster_slug == match.roster_a,
-        match,
-        roster_slug,
-        payload.score,
-        match.roster_a,
-        match.roster_b,
-    )
-    if roster_slug == match.roster_a:
-        match.score_a = payload.score
-    else:
-        match.score_b = payload.score
+    if match:
+        print(
+            "fffffff",
+            roster_slug == match.roster_a,
+            match,
+            roster_slug,
+            payload.score,
+            match.roster_a,
+            match.roster_b,
+        )
+        if roster_slug == match.roster_a:
+            match.score_a = payload.score
+        else:
+            match.score_b = payload.score
 
-    db.add(match)
-    db.commit()
+        db.add(match)
+        db.commit()
 
     return {"slug": roster_slug, "score": payload.score, "game_slug": payload.game_slug}
 

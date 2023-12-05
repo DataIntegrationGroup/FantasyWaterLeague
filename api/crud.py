@@ -116,7 +116,7 @@ def retrieve_match(db, roster_slug):
     q = db.query(Match)
     q = q.filter(or_(Match.roster_a == roster_slug, Match.roster_b == roster_slug))
     print("retrieve match", roster_slug, q)
-    return q.one()
+    return q.first()
 
 
 # update ===============================================================================

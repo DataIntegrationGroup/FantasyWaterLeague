@@ -40,7 +40,7 @@ def update_score(asset_slug, score, game):
     #     headers={"Authorization": f"Bearer {access_token}"},
     # )
     resp = put_json(f"asset/{asset_slug}/score", dict(score=score, game_slug=game))
-    print("update score response", score, resp)
+    print(f"update score response score={score}, status_code={resp.status_code}")
 
 
 def calculate_asset_score(asset, url="scoring_url"):
@@ -130,18 +130,11 @@ def score_continuous_rain_gauge(data):
 
 def update_roster_score(game_slug, roster_slug, score):
     print("updating roster score", game_slug, roster_slug, score)
-    # resp = requests.put(
-    #     f"{settings.HOST}/api/v1/score/roster/{roster_slug}",
-    #     json={"game_slug": game_slug, "score": round(float(score), 2)},
-    #     headers={"Authorization": f"Bearer {access_token}"},
-    # )
     resp = put_json(
         f"score/roster/{roster_slug}",
         dict(game_slug=game_slug, score=round(float(score), 2)),
     )
-    if resp.status_code == 422:
-        print("update roster score response", resp.status_code)
-        print(resp.json())
+    print(f"update roster score {game_slug}, {roster_slug}, {score}, {resp.status_code}")
 
 
 def calculate_previous_scores():
@@ -149,7 +142,7 @@ def calculate_previous_scores():
     print("starting scoring")
     st = time.time()
     for player in data:
-        data = get_json('roster/{player["slug"]}.main')
+        data = get_json(f'roster/{player["slug"]}.main')
         for asset in data:
             try:
                 score = calculate_asset_score(asset, url="prev_url")

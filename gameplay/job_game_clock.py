@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
-from api_util import get_json, patch_json, post_json
+print('fffffffasdfdsadssdsd')
+from api_util import get_json, patch_json, post_json, parse_datetime
 from datetime import datetime, timedelta
-
+print('asfdsfdasdfasdfsadf')
 
 def new_game(slug, name):
     start = calc_game_start()
@@ -51,7 +52,8 @@ def main():
     # if the current time is greater than the game end time
     print("current game", game)
     if game["active"]:
-        end = datetime.strptime(game["end"], "%Y-%m-%dT%H:%M:%S.%f")
+        end = parse_datetime(game["end"])
+
         now = datetime.now()
 
         for count in [30, 20, 10, 5, 2, 1]:
@@ -70,7 +72,7 @@ def main():
             new_game(slug, name)
     else:
         # if the game is not active check if the current time is greater than the game start time
-        start = datetime.strptime(game["start"], "%Y-%m-%dT%H:%M:%S.%f")
+        start = parse_datetime(game["start"])
         if datetime.now() > start:
             patch_json("admin/game_status", dict(active=True))
             print("game started")

@@ -1,1 +1,1 @@
-web: python3 job_game_clock.py
+web: python3 job_calculate_scores.py

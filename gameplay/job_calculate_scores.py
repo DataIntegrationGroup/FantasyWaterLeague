@@ -20,13 +20,13 @@ import time
 
 
 def main():
-    # access_token = get_access_token()
+
     game = get_json("game")
     if not game:
         print("no active game")
         return
     print("game", game)
-    game["slug"] = "game:0"
+
     data = get_json(f"players")
     print("starting scoring")
     st = time.time()

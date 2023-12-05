@@ -268,7 +268,9 @@ async def setup_demo():
     # if os.environ.get('SETUP_DEMO', '0') == '0':
     #     return
     print("setting up db")
-    reset_database()
+    if os.environ.get("RESET_DB", "0") == "1":
+        print("resetting db")
+        reset_database()
 
     print('setting up demo')
     db = session_factory()

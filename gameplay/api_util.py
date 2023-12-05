@@ -14,11 +14,19 @@
 # limitations under the License.
 # ===============================================================================
 import os
-
+from datetime import datetime
 import requests
 import settings
 
 ACCESS_TOKEN = None
+
+
+def parse_datetime(s):
+    for fmt in ("%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return datetime.strptime(s, fmt)
+        except ValueError:
+            pass
 
 
 def get_access_token():
@@ -46,7 +54,9 @@ def post_json(path, data):
 
 
 def get_json(path):
-    return auth_request(path)
+    resp = auth_request(path)
+    if resp.ok:
+        return resp.json()
 
 
 def patch_json(path, data):
@@ -70,16 +80,13 @@ def auth_request(path, data=None, method="get"):
         headers={"Authorization": f"Bearer {get_access_token()}"},
     )
     print("auth request", url, resp.status_code)
-    if resp.ok:
-        return resp.json()
-    elif resp.status_code == 401:
+
+    if resp.status_code == 401:
         global ACCESS_TOKEN
         ACCESS_TOKEN = None
 
         return auth_request(path, data, method)
-    else:
-        print(resp.text)
-        return resp
+    return resp
 
 
 def make_url(path):
