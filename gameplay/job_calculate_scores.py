@@ -26,7 +26,7 @@ def main():
         print("no active game")
         return
     print("game", game)
-    game["slug"] = 'game:0'
+    game["slug"] = "game:0"
     data = get_json(f"players")
     print("starting scoring")
     st = time.time()
@@ -49,7 +49,8 @@ def main():
     et = time.time() - st
     print(f"scoring complete {et:0.3f}s")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
 
 # ============= EOF =============================================
