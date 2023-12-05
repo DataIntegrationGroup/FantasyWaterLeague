@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fief/fief": "^0.14.1",
     "@mapbox/mapbox-gl-geocoder": "^5.0.1",
     "@tanstack/react-table": "^8.9.8",
     "@testing-library/jest-dom": "^5.17.0",
@@ -52,8 +53,8 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
     "datatables.net": "^1.13.6",
-    "jquery": "^3.7.1",
-    "@babel/plugin-proposal-private-property-in-object": "^7.16.7"
+    "jquery": "^3.7.1"
   }
 }

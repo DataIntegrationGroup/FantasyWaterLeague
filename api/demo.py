@@ -331,8 +331,12 @@ async def setup_demo():
         #                 password='foobar1234',
         #                 is_superuser=slug == 'jake'
         #             ))
+        # if slug == 'jake':
+        #     username = 'jirhiker@gmail.com'
+        # else:
+        #     username = f"{slug}@fwl.com"
 
-        p = Player(slug=slug, name=name, team_name=team, username=f'{slug}@fwl.com')
+        p = Player(slug=slug, name=name, team_name=team)
         db.add(p)
 
 

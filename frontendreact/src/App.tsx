@@ -2,15 +2,18 @@ import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import React, {useState} from 'react';
 import Login from './components/Login/Login';
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 import Dashboard from "./components/Dashboard/Dashboard";
 import AppNavbar from "./components/Navbar/Navbar";
-import useAuth from "./components/App/useAuth";
+// import useAuth from "./components/App/useAuth";
 import Admin from "./components/Admin/Admin";
 import Documentation from "./components/App/Documentation.js";
 import Analytics from "./components/Analytics/Analytics.js";
 import Matches from "./components/Match/Matches";
 import riochama from "./img/riochama.png"
+import {FiefAuthProvider} from "@fief/fief/react";
+import {Callback, RequireAuth} from "./fief.tsx";
 
 
 function Home(){
@@ -54,28 +57,37 @@ function Footer(){
 
 function App() {
 
-    const {auth, setAuth} = useAuth();
+    // const {auth, setAuth} = useAuth();
     // console.log('App auth:', auth)
     // if(!auth?.token) {
     //     return <Login setAuth={setAuth}/>
     // }
 
     return (
+        <FiefAuthProvider
+            baseURL="https://fief.newmexicowaterdata.org"
+            // clientId="Ox90B_hPV-TQar4jEocovtc7Q1Gp1S6uqXjaUFyQBW4"
+            // clientId="F1KM8eJ_gqC9Jr-bGY1J6eDZBx47lSk-_IQ1TKaHRcM"
+            clientId='u4Zib08CVZ15BfsmO-ytahxtJt0WchLCDYwLAkRvBAE'
+        >
         <div className="wrapper">
-            <AppNavbar auth={auth} setToken={setAuth}/>
+            <AppNavbar />
                 <BrowserRouter>
                     <Routes>
                         <Route path="/" element={<Home />}/>
-                        <Route path="/login" element={<Login setAuth={setAuth} />}/>
-                        <Route path="/dashboard" element={<Dashboard auth={auth} setAuth={setAuth}/>}/>
-                        <Route path="/admin" element={<Admin auth={auth}/>}/>
-                        <Route path="/documentation" element={<Documentation />}/>
-                        <Route path="/analytics" element={<Analytics auth={auth}/>}/>
-                        <Route path="/matches" element={<Matches />}/>
+                        <Route path="/callback" element={<Callback />} />
+                        {/*<Route path="/" element={<Home />}/>*/}
+                        {/*<Route path="/login" element={<Login setAuth={setAuth} />}/>*/}
+                        <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>}/>
+                        {/*<Route path="/admin" element={<Admin auth={auth}/>}/>*/}
+                        {/*<Route path="/documentation" element={<Documentation />}/>*/}
+                        {/*<Route path="/analytics" element={<Analytics auth={auth}/>}/>*/}
+                        {/*<Route path="/matches" element={<Matches />}/>*/}
                     </Routes>
                 </BrowserRouter>
             <Footer />
-      </div>
+        </div>
+        </FiefAuthProvider>
   );
 }
 

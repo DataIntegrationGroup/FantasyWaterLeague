@@ -1,3 +1,6 @@
+import { useFiefAuth, useFiefIsAuthenticated, useFiefUserinfo } from '@fief/fief/react';
+import React, { useCallback } from 'react';
+import { Link } from 'react-router-dom';
 
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
@@ -11,52 +14,63 @@ import Col from 'react-bootstrap/Col';
 // import nmwdi_logo from '../../img/nmwdi_logo.png'
 import nmwdi_logo from '../../img/nmwdi_logo11-23.png'
 
-function AppNavbar({auth, setToken}) {
+function AppNavbar() {
+    const fiefAuth = useFiefAuth();
+    const isAuthenticated = useFiefIsAuthenticated();
+    const userinfo = useFiefUserinfo();
 
-    const handleLogin = () => {
+    const login = useCallback(() => {
+        fiefAuth.redirectToLogin(`${window.location.protocol}//${window.location.host}/callback`);
+    }, [fiefAuth]);
 
-    }
-    const handleLogout = () => {
+    const logout = useCallback(() => {
+        fiefAuth.logout(`${window.location.protocol}//${window.location.host}`);
+    }, [fiefAuth]);
 
-        sessionStorage.removeItem('token')
-        sessionStorage.removeItem('user')
-        setToken(null)
-
-    }
-
-    let adminbutton;
-    console.log('AppNavbar:', auth.user)
-    if (auth.user?.is_superuser) {
-        adminbutton =<Nav>
-            <Nav.Link href="admin">Admin</Nav.Link>
-        </Nav>
-    }else{
-        adminbutton = null
-    }
-    let loginout;
-
-    if (auth.user){
-        loginout = <Form inline="true">
-            <Row>
-                <Col xs="auto">
-                    <Button type="submit"
-                            style={{backgroundColor: "#2b2b2b",
-                                margin: '0px 10px 0px 10px',
-                                borderColor: "#2b2b2b"}}
-                            onClick={handleLogout}>Logout</Button>
-                </Col>
-            </Row>
-        </Form>
-    }else{
-        loginout = <Nav>
-            <Form inline="true">
-                <Nav.Item>
-                    <Nav.Link href="login">Login</Nav.Link>
-                </Nav.Item>
-            </Form>
-        </Nav>
-
-    }
+    // const handleLogin = () => {
+    //
+    // }
+    // const handleLogout = () => {
+    //
+    //     sessionStorage.removeItem('token')
+    //     sessionStorage.removeItem('user')
+    //     setToken(null)
+    //
+    // }
+    //
+    // let adminbutton;
+    // console.log('AppNavbar:', auth.user)
+    // if (auth.user?.is_superuser) {
+    //     adminbutton =<Nav>
+    //         <Nav.Link href="admin">Admin</Nav.Link>
+    //     </Nav>
+    // }else{
+    //     adminbutton = null
+    // }
+    // let loginout;
+    //
+    // if (auth.user){
+    //     loginout = <Form inline="true">
+    //         <Row>
+    //             <Col xs="auto">
+    //                 <Button type="submit"
+    //                         style={{backgroundColor: "#2b2b2b",
+    //                             margin: '0px 10px 0px 10px',
+    //                             borderColor: "#2b2b2b"}}
+    //                         onClick={handleLogout}>Logout</Button>
+    //             </Col>
+    //         </Row>
+    //     </Form>
+    // }else{
+    //     loginout = <Nav>
+    //         <Form inline="true">
+    //             <Nav.Item>
+    //                 <Nav.Link href="login">Login</Nav.Link>
+    //             </Nav.Item>
+    //         </Form>
+    //     </Nav>
+    //
+    // }
 
     return (
         <Navbar>
@@ -114,10 +128,15 @@ function AppNavbar({auth, setToken}) {
                     </Nav.Item>
                 </Nav>
             </Container>
-
-            {adminbutton}
-            {loginout}
-
+            <Container style={{"justifyContent": "right"}}>
+                {!isAuthenticated && <Button type="button" onClick={() => login()}>Login</Button>}
+                {isAuthenticated && userinfo && (
+                    <div>
+                        <span style={{"padding": "10px"}}>{userinfo.email}</span>
+                        <Button type="button" onClick={() => logout()}>Logout</Button>
+                    </div>
+                )}
+            </Container>
 
         </Navbar>
     );

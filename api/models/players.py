@@ -31,7 +31,7 @@ from database import Base, Slugged
 
 class Player(Base, Slugged):
     team_name = Column(String(128), nullable=False)
-    username = Column(String(128), nullable=False)
+    # username = Column(String(128), nullable=False)
     # user_id = Column(UUID, ForeignKey("user.id"), nullable=False)
     #
     # user = relationship("User", backref="player", uselist=False)

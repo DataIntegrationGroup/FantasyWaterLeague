@@ -102,7 +102,7 @@ export function add_county_layer(map, tag='counties'){
 }
 
 
-export default function add_roster_to_map(map, auth, setHoverActive=null){
+export default function add_roster_to_map(map, active_slug, setHoverActive=null){
 
     const paint = {
         'circle-radius': 5,
@@ -120,7 +120,7 @@ export default function add_roster_to_map(map, auth, setHoverActive=null){
         'icon-offset': [0, -200],
     }
 
-    api_getJson('/roster/'+auth.slug+'.main/geojson')
+    api_getJson('/roster/'+active_slug+'.main/geojson')
         .then(data=> {
             console.log('geojson', data)
             let items =[[settings.STREAM_GAUGE, streamgauge_image],

@@ -41,6 +41,7 @@ class Settings:
     FIEF_CLIENT_SECRET: str
 
     def __init__(self):
+        self.IS_LOCAL = os.getenv("IS_LOCAL", True)
         self.SECRET_KEY = os.getenv("SECRET_KEY")
 
         self.FIEF_CLIENT_SECRET = os.getenv("FIEF_CLIENT_SECRET")

@@ -15,14 +15,34 @@
 # ===============================================================================
 import os
 
+from google.cloud.sql.connector import Connector
 from sqlalchemy import create_engine, Column, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, declared_attr
 from settings import settings
 
-print("SQLALCHEMY_DATABASE_URL", settings.SQLALCHEMY_DATABASE_URL)
+print("settings.IS_LOCAL", settings.IS_LOCAL, type(settings.IS_LOCAL))
+if int(settings.IS_LOCAL):
+    print("SQLALCHEMY_DATABASE_URL", settings.SQLALCHEMY_DATABASE_URL)
+    engine = create_engine(settings.SQLALCHEMY_DATABASE_URL)
+else:
+    print("INSTANCE_CONNECTION_NAME", os.environ['INSTANCE_CONNECTION_NAME'])
+    connector = Connector()
+    def getconn():
+        conn = connector.connect(
+            os.environ['INSTANCE_CONNECTION_NAME'],
+            'pg8000',
+            user=os.environ["DB_USER"],
+            password=os.environ["DB_PASS"],
+            db=os.environ["DB_NAME"],
+        )
+        return conn
 
-engine = create_engine(settings.SQLALCHEMY_DATABASE_URL)
+
+    engine = create_engine(
+        'postgresql+pg8000://',
+        creator=getconn
+    )
 session_factory = sessionmaker(
     autocommit=False,
     autoflush=False,

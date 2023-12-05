@@ -4,16 +4,16 @@ import axios from "axios";
 const api = axios.create();
 
 export async function loginUser(credentials) {
-    const formData = new FormData()
-    formData.set('username', credentials.username)
-    formData.set('password', credentials.password)
-
-    return axios.post(settings.AUTH_URL+'/login', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        }
-    )
+    // const formData = new FormData()
+    // formData.set('username', credentials.username)
+    // formData.set('password', credentials.password)
+    //
+    // return axios.post(settings.AUTH_URL+'/login', formData, {
+    //         headers: {
+    //             'Content-Type': 'multipart/form-data'
+    //         }
+    //     }
+    // )
 }
 
 async function inteceptorError(error) {
@@ -54,6 +54,7 @@ export async function api_getJson(url, token = null, root=null) {
     // if (response!==undefined){
     //     return response.data;
     // }
+
     return api.get(root+url, {headers: headers})
         .then(response => {return response.data})
         .catch(e=>{console.log('api_getJson error:', e)}
@@ -63,17 +64,18 @@ export async function api_getJson(url, token = null, root=null) {
 }
 
 function makeHeaders(token=null) {
-    if (token===null){
-        try {
-            token = JSON.parse(sessionStorage.getItem('token'));
-        } catch (e) {
-            console.log('makeHeaders error:', e)
-        }
-    }
+    // if (token===null){
+    //     try {
+    //         token = JSON.parse(sessionStorage.getItem('token'));
+    //
+    //     } catch (e) {
+    //         console.log('makeHeaders error:', e)
+    //     }
+    // }
 
     let headers = {}
     if (token !== null) {
-        headers['Authorization'] = `Bearer ` + token.access_token
+        headers['Authorization'] = `Bearer ` + token
     }
     return headers
 }

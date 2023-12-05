@@ -3,7 +3,7 @@ sqlalchemy
 geoalchemy2[shapely]
 gunicorn
 uvicorn
-psycopg
+pg8000
 # scikit-learn
 # pyproj
 jinja2
@@ -11,6 +11,7 @@ requests
 numpy
 python-jose[cryptography]
 fief-client[fastapi]
+cloud-sql-python-connector[pg8000]
 # pandas
 # openpyxl
 # uncertainties

@@ -77,7 +77,10 @@ def retrieve_roster_asset(db, roster_slug, asset_slug):
 def retrieve_roster_assets(db, roster_slug, active_game=None, prev_game=None):
     q = db.query(Roster)
     q = q.filter(Roster.slug == roster_slug)
-    roster = q.one()
+    roster = q.first()
+    if not roster:
+        return []
+
     ret = []
     for a in roster.assets:
         aa = a.asset

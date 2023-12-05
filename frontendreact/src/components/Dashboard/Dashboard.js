@@ -22,11 +22,13 @@ import ControlPanel from "./ControlPanel";
 // import Match from "../Match/Match";
 import add_roster_to_map, {make_fc} from "../../mapping";
 import Login from "../Login/Login";
+import {useFiefTokenInfo, useFiefUserinfo} from "@fief/fief/react";
 
 
 function GraphButton({row, setSelectedAsset,
                          setPlotLayout,
-                         setPlotData, auth}){
+                         setPlotData}){
+    const tokenInfo = useFiefTokenInfo();
 
     const extractData = (source, data) => {
         let x = [];
@@ -124,10 +126,12 @@ function GraphButton({row, setSelectedAsset,
             type: 'scatter'}
         return [timeseries, baseline, scorebar, scorelabel, extralayout]
     }
-
+    const w_api_getJson = (url) => {
+        return api_getJson(url, tokenInfo?.access_token)
+    }
     const handleClick = () => {
         console.log('graph', row)
-        api_getJson('/asset/'+row.original.slug+'/data_url')
+        w_api_getJson('/asset/'+row.original.slug+'/data_url')
         .then(asset_data=> {
             getJson(asset_data.prev_url)
             .then(data =>{
@@ -306,7 +310,12 @@ function toggleActive(roster_slug, slug, state, updateTable, setLineup, setScore
 
 
 
-export default function Dashboard({auth, setAuth}) {
+export default function Dashboard() {
+    const tokenInfo = useFiefTokenInfo();
+    const userinfo = useFiefUserinfo();
+    console.log('userinfo', userinfo)
+    const [active_slug, setActiveSlug] = useState(userinfo?.fields.username)
+
     const [roster_data, setRosterData] = React.useState([])
 
     const [score, setScore] = useState(0);
@@ -330,6 +339,10 @@ export default function Dashboard({auth, setAuth}) {
         (state, newState) => ({...state, ...newState}),
         {})
     const [displayPlayer, setDisplayPlayer] = useState(null)
+
+    const w_api_getJson = (url) => {
+        return api_getJson(url, tokenInfo?.access_token)
+    }
 
     const setDisplayPlayerManual = (slug) => {
         setDisplayPlayer(slug)
@@ -427,8 +440,8 @@ export default function Dashboard({auth, setAuth}) {
                 width: 400
             },
             cell: ({cell}) => (<div><ActiveRowButton props={cell.row}
-                                                     enabled={displayPlayer === auth.slug || displayPlayer === null}
-                                                     roster_slug={auth.slug+'.main'}
+                                                     enabled={displayPlayer === active_slug || displayPlayer === null}
+                                                     roster_slug={active_slug+'.main'}
                                                      updateTable={fetchRosterData}
                                                      setLineup={setLineup}
                                                      gameData={gameData}
@@ -439,7 +452,7 @@ export default function Dashboard({auth, setAuth}) {
                                                     setSelectedAsset={setSelectedAsset}
                                                     setPlotLayout={setPlotLayout}
                                                     setPlotData={setPlotData}
-                                                    auth={auth}>Graph</GraphButton>
+                                                    >Graph</GraphButton>
                                     <MapButton map={map} row={cell.row}>Map</MapButton>
                                     <SourceButton row={cell.row} >Source</SourceButton>
             </div>
@@ -467,27 +480,27 @@ export default function Dashboard({auth, setAuth}) {
     const fetchRosterData = (displayPlayer=null) => {
         console.log('fetching roster data', displayPlayer)
         if (displayPlayer !== null){
-            api_getJson('/roster/'+displayPlayer+'.main/')
+            w_api_getJson('/roster/'+displayPlayer+'.main/')
                 .then(data=> {
                     console.log('player data', data)
                     setRosterData(data)
                 })
         }
-        else if (auth.slug !== undefined){
-            console.log('fetching roster data for', auth.slug)
-            api_getJson('/roster/'+auth.slug+'.main')
+        else if (active_slug !== undefined){
+            console.log('fetching roster data for', active_slug)
+            w_api_getJson('/roster/'+active_slug+'.main')
                 .then(data=> setRosterData(data))
         }
 
     }
     const setUpGame = () =>{
-        api_getJson('/game', {}).then(data =>{
+        w_api_getJson('/game', {}).then(data =>{
             console.log('game', data)
             setGameData(data)
         })
     }
     const updateMap = (displayPlayer) => {
-        let slug = auth.slug;
+        let slug = active_slug;
         if (displayPlayer !== null){
             slug = displayPlayer
         }
@@ -495,8 +508,8 @@ export default function Dashboard({auth, setAuth}) {
         if (slug === undefined || slug === null){
             return;
         }
-        console.log('setting up map for', slug)
-        api_getJson('/roster/'+slug+'.main/geojson')
+        console.log('updating map for', slug)
+        w_api_getJson('/roster/'+slug+'.main/geojson')
             .then(data=> {
                 [settings.STREAM_GAUGE,
                     settings.CONTINUOUS_GROUNDWATER, settings.CONTINUOUS_RAIN_GAUGE].forEach((tag)=>{
@@ -510,7 +523,7 @@ export default function Dashboard({auth, setAuth}) {
 
 
     const setUpMap = () => {
-        if (auth.slug === undefined){
+        if (active_slug === undefined){
             return;
         }
 
@@ -525,10 +538,14 @@ export default function Dashboard({auth, setAuth}) {
                     setQPF7Legend(data.layers[9].legend)
                 }
             )
-
-        api_getJson('/mapboxtoken', auth)
+        w_api_getJson('/mapboxtoken')
             .then(data=> {
-                mapboxgl.accessToken = data.token
+                if (data===undefined){
+                    console.log('failed getting mapbox token')
+                    return
+                }
+
+                mapboxgl.accessToken = data?.token
                 if (map.current) return; // initialize map only once
                 map.current = new mapboxgl.Map({
                     container: mapContainer.current,
@@ -636,7 +653,7 @@ export default function Dashboard({auth, setAuth}) {
                         }
                     })
 
-                    add_roster_to_map(map, auth, setHoverActive)
+                    add_roster_to_map(map, active_slug, setHoverActive)
 
                 })
             })
@@ -646,14 +663,14 @@ export default function Dashboard({auth, setAuth}) {
         setUpGame()
         setUpMap()
         fetchRosterData()
-        updateScore(auth.slug+'.main', setLineup, setScore)
+        updateScore(active_slug+'.main', setLineup, setScore)
 
     }, [])
 
-    console.log('App auth:', auth)
-    if(!auth?.token) {
-        return <Login setAuth={setAuth}/>
-    }
+    // console.log('App auth:', auth)
+    // if(!auth?.token) {
+    //     return <Login setAuth={setAuth}/>
+    // }
 
     return(
         <div className='container-fluid'>
@@ -670,7 +687,7 @@ export default function Dashboard({auth, setAuth}) {
                 </div>
                 <div className={'col-lg-6'}>
                     <div className={'pane'}>
-                        <Scoreboard roster_slug={auth.slug+'.main'}
+                        <Scoreboard roster_slug={active_slug+'.main'}
                                     lineup={lineup}
                                     score={score}
                                     gameData={gameData}
@@ -703,7 +720,7 @@ export default function Dashboard({auth, setAuth}) {
                 <div className='col-6 '>
                     <div className={'pane'}>
                         <div className={'card card-dashboard'}>
-                            <h4>Roster: {displayPlayer===null ? auth.slug: displayPlayer}</h4>
+                            <h4>Roster: {displayPlayer===null ? active_slug: displayPlayer}</h4>
                         </div>
                         <div id={'graphContainer'}>
                                 <button id={'graphbutton'} onClick={(event) =>
