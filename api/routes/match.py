@@ -22,7 +22,9 @@ from models.game import Match
 from users import auth
 
 admin_router = APIRouter(
-    prefix=f"/api/v1/admin", tags=["API V1"], dependencies=[Depends(auth.authenticated(permissions=["superuser"]))]
+    prefix=f"/api/v1/admin",
+    tags=["API V1"],
+    dependencies=[Depends(auth.authenticated(permissions=["superuser"]))],
 )
 router = APIRouter(prefix=f"/api/v1", tags=["API V1"])
 

@@ -24,12 +24,12 @@ scheme = OAuth2AuthorizationCodeBearer(
     authorizationUrl=f"{settings.FIEF_URL}/authorize",
     tokenUrl=f"{settings.FIEF_URL}/api/token",
     scopes={"openid": "openid", "offline_access": "offline_access"},
-    auto_error=False
+    auto_error=False,
 )
 
-fief = FiefAsync(settings.FIEF_URL,
-                 settings.FIEF_CLIENT_ID,
-                 settings.FIEF_CLIENT_SECRET)
+fief = FiefAsync(
+    settings.FIEF_URL, settings.FIEF_CLIENT_ID, settings.FIEF_CLIENT_SECRET
+)
 auth = FiefAuth(fief, scheme)
 #
 # class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):

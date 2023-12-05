@@ -24,7 +24,6 @@ from models.assets import Asset, Score
 import requests
 
 
-
 def retrieve_player_by_user(db, username):
     q = db.query(Player)
     # q = q.join(User)

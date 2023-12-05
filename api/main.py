@@ -45,14 +45,14 @@ app.add_middleware(
 
 from demo import setup_demo
 
+
 # ===============================================================================
 # API Endpoints
 # ===============================================================================
 @app.get("/")
 async def root():
-    return RedirectResponse(
-        '/docs',
-        status_code=status.HTTP_302_FOUND)
+    return RedirectResponse("/docs", status_code=status.HTTP_302_FOUND)
+
 
 # app.include_router(
 #     fastapi_users.get_auth_router(bearer_auth_backend),

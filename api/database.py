@@ -26,23 +26,20 @@ if int(settings.IS_LOCAL):
     print("SQLALCHEMY_DATABASE_URL", settings.SQLALCHEMY_DATABASE_URL)
     engine = create_engine(settings.SQLALCHEMY_DATABASE_URL)
 else:
-    print("INSTANCE_CONNECTION_NAME", os.environ['INSTANCE_CONNECTION_NAME'])
+    print("INSTANCE_CONNECTION_NAME", os.environ["INSTANCE_CONNECTION_NAME"])
     connector = Connector()
+
     def getconn():
         conn = connector.connect(
-            os.environ['INSTANCE_CONNECTION_NAME'],
-            'pg8000',
+            os.environ["INSTANCE_CONNECTION_NAME"],
+            "pg8000",
             user=os.environ["DB_USER"],
             password=os.environ["DB_PASS"],
             db=os.environ["DB_NAME"],
         )
         return conn
 
-
-    engine = create_engine(
-        'postgresql+pg8000://',
-        creator=getconn
-    )
+    engine = create_engine("postgresql+pg8000://", creator=getconn)
 session_factory = sessionmaker(
     autocommit=False,
     autoflush=False,
