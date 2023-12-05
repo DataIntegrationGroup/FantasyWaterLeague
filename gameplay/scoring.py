@@ -134,7 +134,9 @@ def update_roster_score(game_slug, roster_slug, score):
         f"score/roster/{roster_slug}",
         dict(game_slug=game_slug, score=round(float(score), 2)),
     )
-    print(f"update roster score {game_slug}, {roster_slug}, {score}, {resp.status_code}")
+    print(
+        f"update roster score {game_slug}, {roster_slug}, {score}, {resp.status_code}"
+    )
 
 
 def calculate_previous_scores():

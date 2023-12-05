@@ -20,7 +20,6 @@ import time
 
 
 def main():
-
     game = get_json("game")
     if not game:
         print("no active game")

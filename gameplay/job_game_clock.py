@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
-print('fffffffasdfdsadssdsd')
+print("fffffffasdfdsadssdsd")
 from api_util import get_json, patch_json, post_json, parse_datetime
 from datetime import datetime, timedelta
-print('asfdsfdasdfasdfsadf')
+
+print("asfdsfdasdfasdfsadf")
+
 
 def new_game(slug, name):
     start = calc_game_start()
