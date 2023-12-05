@@ -1,7 +1,6 @@
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import React, {useState} from 'react';
-import Login from './components/Login/Login';
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 import Dashboard from "./components/Dashboard/Dashboard";

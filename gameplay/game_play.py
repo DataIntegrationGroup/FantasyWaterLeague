@@ -20,25 +20,25 @@ from datetime import datetime, timedelta
 from api_util import post_json, get_json
 
 
-def new_game(slug, name):
-    start = calc_game_start()
-    post_json(
-        "admin/game", dict(slug=slug, name=name, start=start.isoformat(), active=False)
-    )
-
-
-def calc_game_start():
-    now = datetime.now()
-
-    # the game starts the following monday at 5pm
-    gamestart = now - timedelta(
-        days=now.weekday() - 7,
-        hours=now.hour - 17,
-        minutes=now.minute,
-        seconds=now.second,
-        microseconds=now.microsecond,
-    )
-    return gamestart
+# def new_game(slug, name):
+#     start = calc_game_start()
+#     post_json(
+#         "admin/game", dict(slug=slug, name=name, start=start.isoformat(), active=False)
+#     )
+#
+#
+# def calc_game_start():
+#     now = datetime.now()
+#
+#     # the game starts the following monday at 5pm
+#     gamestart = now - timedelta(
+#         days=now.weekday() - 7,
+#         hours=now.hour - 17,
+#         minutes=now.minute,
+#         seconds=now.second,
+#         microseconds=now.microsecond,
+#     )
+#     return gamestart
 
 
 def setup_demo():

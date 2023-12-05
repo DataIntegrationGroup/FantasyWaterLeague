@@ -16,9 +16,10 @@
 #
 import os
 
-host = os.environ.get("API_HOST", "api")
-port = os.environ.get("API_PORT", "8080")
+# host = os.environ.get("API_HOST", "api")
+# port = os.environ.get("API_PORT", "8080")
+#
+# HOST = f"http://{host}:{port}"
 
-HOST = f"http://{host}:{port}"
-
+API_URL = os.environ.get("API_URL", "http://api:8080")
 # ============= EOF =============================================

@@ -40,7 +40,7 @@ def update_score(asset_slug, score, game):
     #     headers={"Authorization": f"Bearer {access_token}"},
     # )
     resp = put_json(f"asset/{asset_slug}/score", dict(score=score, game_slug=game))
-    print("update score response", score, resp.status_code)
+    print("update score response", score, resp)
 
 
 def calculate_asset_score(asset, url="scoring_url"):
